@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import com.oncelabs.template.navigation.Navigation
 import com.oncelabs.template.permission.PermissionType
+import com.oncelabs.template.screen.MainScreenView
 import com.oncelabs.template.ui.theme.TemplateTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TemplateTheme {
-                Navigation()
+                MainScreenView()
                 /**TODO: Request needed permissions*/
                 //RequestAllPermissions(
                 //    navigateToSettingsScreen = {
