@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.oncelabs.template.ui.theme.bottomNavBackground
 import com.oncelabs.template.ui.theme.iconSelected
 
 @Composable
@@ -26,7 +27,7 @@ fun BottomNav(navController: NavController) {
     )
 
     BottomNavigation(
-        backgroundColor = Color.Black,
+        backgroundColor = bottomNavBackground,
         contentColor = Color.White,
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()

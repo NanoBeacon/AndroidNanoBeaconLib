@@ -2,9 +2,18 @@ package com.oncelabs.template.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.oncelabs.template.R
+
+
+val helveticaNeue = FontFamily(
+    Font(R.font.helvetica_neue)
+)
+
+
 
 // Set of Material typography styles to start with
 val Typography = Typography(
