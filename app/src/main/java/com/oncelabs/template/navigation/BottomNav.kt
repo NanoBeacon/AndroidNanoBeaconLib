@@ -1,7 +1,6 @@
 package com.oncelabs.template.navigation
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
@@ -27,6 +26,7 @@ fun BottomNav(navController: NavController) {
     )
 
     BottomNavigation(
+        modifier = Modifier.height(75.dp),
         backgroundColor = bottomNavBackground,
         contentColor = Color.White,
     ) {
@@ -34,26 +34,28 @@ fun BottomNav(navController: NavController) {
         val currentRoute = navBackStackEntry?.destination?.route
 
         items.forEach { item ->
-            BottomNavigationItem(
-                selected = currentRoute == item.route,
-                onClick = {
-                    navController.navigate(item.route) {
-                        navController.graph.startDestinationRoute?.let { screen_route ->
-                            popUpTo(screen_route) {
-                                saveState = true
+                BottomNavigationItem(
+                    modifier = Modifier.offset(y = (-5).dp),
+                    selected = currentRoute == item.route,
+                    onClick = {
+                        navController.navigate(item.route) {
+                            navController.graph.startDestinationRoute?.let { screen_route ->
+                                popUpTo(screen_route) {
+                                    saveState = true
+                                }
                             }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                icon = { Icon(item.icon, "navIcon", modifier = Modifier.size(30.dp)) },
-                label = { Text(text = item.title, fontSize = 12.sp) },
-                selectedContentColor = iconSelected,
-                unselectedContentColor = Color.White,
-                alwaysShowLabel = true,
-            )
-        }
+                    },
+                    icon = { Icon(item.icon, "navIcon", modifier = Modifier.size(35.dp)) },
+                    label = { Text(text = item.title, fontSize = 14.sp) },
+                    selectedContentColor = iconSelected,
+                    unselectedContentColor = Color.White,
+                    alwaysShowLabel = true,
+                )
+            }
+
 
     }
 }
