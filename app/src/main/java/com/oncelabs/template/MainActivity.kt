@@ -9,8 +9,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.oncelabs.template.navigation.Navigation
 import com.oncelabs.template.permission.PermissionType
+import com.oncelabs.template.permission.RequestAllPermissions
 import com.oncelabs.template.screen.MainScreenView
 import com.oncelabs.template.ui.theme.TemplateTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,20 +23,23 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             TemplateTheme {
+//                Navigation()
                 MainScreenView()
                 /**TODO: Request needed permissions*/
-                //RequestAllPermissions(
-                //    navigateToSettingsScreen = {
-                //        PermissionType.navigateToSettings(context = this)
-                //    },
-                //    onAllGranted = {
-                //        /*TODO: */
-                //    }
-                //)
+                RequestAllPermissions(
+                    navigateToSettingsScreen = {
+                        PermissionType.navigateToSettings(context = this)
+                    },
+                    onAllGranted = {
+                        //MainScreenView()
+                        /*TODO: */
+                    }
+                )
             }
         }
     }
