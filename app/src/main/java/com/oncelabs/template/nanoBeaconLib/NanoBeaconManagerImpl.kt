@@ -1,19 +1,27 @@
 package com.oncelabs.template.nanoBeaconLib
 
+import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanSettings
+import android.bluetooth.le.*
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.ParcelUuid
+import android.util.Log
+import android.util.SparseArray
+import androidx.core.app.ActivityCompat
+import com.oncelabs.template.nanoBeaconLib.enums.ScanState
 
 class NanoBeaconManagerImpl(val context: Context): NanoBeaconManager {
 
     private val TAG = NanoBeaconManagerImpl::class.simpleName
     private val REQUEST_ENABLE_BT = 3
+
+    private var scanState = ScanState.IDLE
 
     private val bluetoothManager = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
 
@@ -56,4 +64,148 @@ class NanoBeaconManagerImpl(val context: Context): NanoBeaconManager {
             (context as Activity).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
         }
     }
+
+    override fun startScanning(){
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+
+        bluetoothLeScanner
+            .startScan(
+                scanFilters,
+                scanSettings,
+                this.leScanCallback)
+    }
+
+    override fun stopScanning() {
+        TODO("Not yet implemented")
+    }
+
+    private fun setupBluetoothAdapterStateHandler() {
+
+        val bluetoothAdapterStateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+
+            override fun onReceive(context: Context, intent: Intent) {
+                // Verify the action matches what we are looking for
+                if (intent.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+
+                    val previousState = intent.getIntExtra(
+                        BluetoothAdapter.EXTRA_PREVIOUS_STATE,
+                        BluetoothAdapter.ERROR
+                    )
+
+                    val currentState = intent.getIntExtra(
+                        BluetoothAdapter.EXTRA_STATE,
+                        BluetoothAdapter.ERROR
+                    )
+
+                    when (currentState) {
+                        BluetoothAdapter.STATE_OFF ->
+                            Log.d(TAG, "BluetoothAdapter State: Off")
+                        BluetoothAdapter.STATE_TURNING_OFF ->
+                            Log.d(TAG, "BluetoothAdapter State: Turning off")
+                        BluetoothAdapter.STATE_ON -> {
+                            Log.d(TAG, "BluetoothAdapter State: On")
+                        }
+                        BluetoothAdapter.STATE_TURNING_ON ->
+                            Log.d(TAG, "BluetoothAdapter State: Turning on")
+                    }
+                }
+            }
+        }
+
+        val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        (context as Activity).registerReceiver(bluetoothAdapterStateReceiver, filter)
+    }
+
+    private val leScanCallback: ScanCallback by lazy {
+        object : ScanCallback() {
+
+            override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                super.onScanResult(callbackType, result)
+                val record = result?.scanRecord
+
+                result?.device?.address?.let {
+                    if (it == "06:05:04:03:02:01"){
+                        Log.d(TAG, """
+                        BLE ScanResult
+                        Periodic Advertising Interval: ${result?.periodicAdvertisingInterval}
+                        Primary Phy: ${result?.primaryPhy}
+                        RSSI: ${result?.rssi}
+                        Secondary PHY: ${result?.secondaryPhy}
+                        Timestamp: ${result?.timestampNanos}
+                        TX Power: ${if (result?.txPower == ScanResult.TX_POWER_NOT_PRESENT) "NOT PRESENT" else result?.txPower}
+                        Connectable: ${result?.isConnectable}
+                        Legacy: ${result?.isLegacy}
+                        Device Address: ${result?.device?.address}
+                        """.trimIndent())
+
+                        var rawAdvBytes: String = ""
+                        record?.bytes?.let { bytes ->
+                            for (b in bytes){
+                                rawAdvBytes += String.format("%02x", b)
+                            }
+                        }
+
+                        var manufactureDataBytes: String = ""
+                        toString(record?.manufacturerSpecificData)?.let {
+                            manufactureDataBytes = it
+                        }
+
+                        Log.d(TAG, """
+                        BLE ScanRecord
+                        Advertisement Raw Bytes: $rawAdvBytes
+                        Advertisement Flags: ${record?.advertiseFlags}
+                        Device Name: ${record?.deviceName}
+                        Manufacturer Specific Data: $manufactureDataBytes
+                        Service Data: ${record?.serviceData}
+                        Service Solicitation UUIDs: ${record?.serviceSolicitationUuids}
+                        Service UUIDs: ${record?.serviceUuids}
+                        """.trimIndent())
+                    }
+                }
+            }
+
+            override fun onScanFailed(errorCode: Int) {
+                super.onScanFailed(errorCode)
+                Log.d(TAG, "BLE Scan Failed with ErrorCode: $errorCode")
+            }
+        }
+    }
+
+    private fun toString(array: SparseArray<ByteArray?>?): String? {
+        if (array == null) {
+            return "null"
+        }
+        if (array.size() == 0) {
+            return ""
+        }
+        val buffer = StringBuilder()
+
+        Log.d(TAG, "Manufacturer Sparse Count ${array.size()}")
+        for (i in 0 until array.size()) {
+            buffer.append( String.format("%02x", array.keyAt(i)))
+            val a = array.valueAt(i)
+            a?.let {
+                it.forEach { byte ->
+                    buffer.append(String.format("%02x", byte))
+                }
+            }
+        }
+        return buffer.toString()
+    }
+
+
+
 }

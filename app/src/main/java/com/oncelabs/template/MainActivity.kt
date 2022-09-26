@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.oncelabs.template.nanoBeaconLib.NanoBeaconManagerImpl
 import com.oncelabs.template.navigation.Navigation
 import com.oncelabs.template.permission.PermissionType
 import com.oncelabs.template.permission.RequestAllPermissions
@@ -26,6 +27,8 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val btm = NanoBeaconManagerImpl(this)
+        btm.startScanning()
         setContent {
             TemplateTheme {
 //                Navigation()
