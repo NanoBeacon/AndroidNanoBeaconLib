@@ -19,7 +19,14 @@ import com.oncelabs.template.ui.theme.*
 
 
 @Composable
-fun LiveDataCard(name: String) {
+fun LiveDataCard(
+    name: String,
+    rssi: List<Pair<Float, Float>>,
+    temp: List<Pair<Float, Float>>,
+    x: List<Pair<Float, Float>>,
+    y: List<Pair<Float, Float>>,
+    z: List<Pair<Float, Float>>
+) {
 
     Column(
         Modifier
@@ -68,12 +75,7 @@ fun LiveDataCard(name: String) {
                         .height(100.dp)
                 ) {
                     LineChartView(
-                        chartData = listOf(
-                            Pair(20f, 40f),
-                            Pair(50f, 50f),
-                            Pair(80f, 70f),
-                            Pair(90f, 40f)
-                        )
+                        chartData = rssi
                     )
                 }
 
@@ -94,12 +96,7 @@ fun LiveDataCard(name: String) {
                         .height(100.dp)
                 ) {
                     LineChartView(
-                        chartData = listOf(
-                            Pair(20f, 40f),
-                            Pair(50f, 50f),
-                            Pair(80f, 70f),
-                            Pair(90f, 40f)
-                        )
+                        chartData = temp
                     )
                 }
 
@@ -121,29 +118,7 @@ fun LiveDataCard(name: String) {
                 ) {
                     MultipleLinesChartView(
                         chartData = listOf(
-                            listOf(
-                                Pair(2f, -1f),
-                                Pair(4f, 1f),
-                                Pair(6f, 2f),
-                                Pair(8f, 3f),
-                                Pair(10f, 4f),
-                                Pair(12f, 5f),
-                            ), listOf(
-                                Pair(2f, -10f),
-                                Pair(4f, 10f),
-                                Pair(6f, 20f),
-                                Pair(8f, 30f),
-                                Pair(10f, 40f),
-                                Pair(12f, 50f),
-                            ),
-                            listOf(
-                                Pair(2f, -6f),
-                                Pair( 4f, 4f),
-                                Pair(6f, 8f),
-                                Pair(8f, 11f),
-                                Pair(10f, 14f),
-                                Pair(12f, 20f),
-                            )
+                            x, y, z
                         )
                     )
                 }

@@ -1,4 +1,4 @@
-package com.oncelabs.template.nanoBeaconLib
+package com.oncelabs.template.nanoBeaconLib.manager
 
 import android.Manifest
 import android.app.Activity
@@ -10,19 +10,39 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.os.ParcelUuid
 import android.util.Log
 import android.util.SparseArray
 import androidx.core.app.ActivityCompat
+import com.oncelabs.onceble.core.gatt.OBGatt
+import com.oncelabs.onceble.core.peripheral.OBPeripheral
 import com.oncelabs.template.nanoBeaconLib.enums.ScanState
+import com.oncelabs.template.nanoBeaconLib.interfaces.NanoBeaconManagerInterface
+import com.oncelabs.template.nanoBeaconLib.model.NanoBeacon
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
-class NanoBeaconManagerImpl(val context: Context): NanoBeaconManager {
+data class ADXLData(
+    var xAccel: Float,
+    var yAccel: Float,
+    var zAccel: Float,
+    var temp: Float,
+    var rssi: Int
+)
 
-    private val TAG = NanoBeaconManagerImpl::class.simpleName
+class NanoBeaconManager(val context: Context): NanoBeaconManagerInterface {
+
+    private var _adxlData = MutableStateFlow<ADXLData>(ADXLData(0f,0f,0f,0f, 0))
+    public var adxlData = _adxlData.asStateFlow()
+
+    private val TAG = NanoBeaconManager::class.simpleName
     private val REQUEST_ENABLE_BT = 3
 
     private var scanState = ScanState.IDLE
-
+    private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
     private val bluetoothManager = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
 
     private val bluetoothAdapter: BluetoothAdapter by lazy {
@@ -80,7 +100,6 @@ class NanoBeaconManagerImpl(val context: Context): NanoBeaconManager {
             // for ActivityCompat#requestPermissions for more details.
             return
         }
-
         bluetoothLeScanner
             .startScan(
                 scanFilters,
@@ -89,7 +108,21 @@ class NanoBeaconManagerImpl(val context: Context): NanoBeaconManager {
     }
 
     override fun stopScanning() {
-        TODO("Not yet implemented")
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        bluetoothLeScanner.stopScan(leScanCallback)
     }
 
     private fun setupBluetoothAdapterStateHandler() {
@@ -137,19 +170,36 @@ class NanoBeaconManagerImpl(val context: Context): NanoBeaconManager {
                 val record = result?.scanRecord
 
                 result?.device?.address?.let {
+//                    if (!leDeviceMap.containsKey(it)){
+//                        toByteArrat(record?.manufacturerSpecificData)?.let {
+//                            Log.d(TAG, "$it")
+//                        }
+//                    }
+
                     if (it == "06:05:04:03:02:01"){
-                        Log.d(TAG, """
-                        BLE ScanResult
-                        Periodic Advertising Interval: ${result?.periodicAdvertisingInterval}
-                        Primary Phy: ${result?.primaryPhy}
-                        RSSI: ${result?.rssi}
-                        Secondary PHY: ${result?.secondaryPhy}
-                        Timestamp: ${result?.timestampNanos}
-                        TX Power: ${if (result?.txPower == ScanResult.TX_POWER_NOT_PRESENT) "NOT PRESENT" else result?.txPower}
-                        Connectable: ${result?.isConnectable}
-                        Legacy: ${result?.isLegacy}
-                        Device Address: ${result?.device?.address}
-                        """.trimIndent())
+                        toByteArrat(record?.manufacturerSpecificData)?.let {
+                            Log.d(TAG, "$it")
+                            val x = (it.toShort(1).toFloat()*(245166f/1000000000f)*0.25)
+                            val y = it.toShort(3).toFloat()*(245166f/1000000000f)*0.25
+                            val z = it.toShort(5).toFloat()*(245166f/1000000000f)*0.25
+                            val rssi = result.rssi
+                            val temp = (it.toShort(7) + 1185) * 18518518
+                            Log.d(TAG, "X: $x, Y: $y, Z: $z, TEMP: $temp")
+                            _adxlData.value = ADXLData(x.toFloat(), y.toFloat(), z.toFloat(), 0f, rssi)
+                        }
+
+//                        Log.d(TAG, """
+//                        BLE ScanResult
+//                        Periodic Advertising Interval: ${result?.periodicAdvertisingInterval}
+//                        Primary Phy: ${result?.primaryPhy}
+//                        RSSI: ${result?.rssi}
+//                        Secondary PHY: ${result?.secondaryPhy}
+//                        Timestamp: ${result?.timestampNanos}
+//                        TX Power: ${if (result?.txPower == ScanResult.TX_POWER_NOT_PRESENT) "NOT PRESENT" else result?.txPower}
+//                        Connectable: ${result?.isConnectable}
+//                        Legacy: ${result?.isLegacy}
+//                        Device Address: ${result?.device?.address}
+//                        """.trimIndent())
 
                         var rawAdvBytes: String = ""
                         record?.bytes?.let { bytes ->
@@ -163,16 +213,16 @@ class NanoBeaconManagerImpl(val context: Context): NanoBeaconManager {
                             manufactureDataBytes = it
                         }
 
-                        Log.d(TAG, """
-                        BLE ScanRecord
-                        Advertisement Raw Bytes: $rawAdvBytes
-                        Advertisement Flags: ${record?.advertiseFlags}
-                        Device Name: ${record?.deviceName}
-                        Manufacturer Specific Data: $manufactureDataBytes
-                        Service Data: ${record?.serviceData}
-                        Service Solicitation UUIDs: ${record?.serviceSolicitationUuids}
-                        Service UUIDs: ${record?.serviceUuids}
-                        """.trimIndent())
+//                        Log.d(TAG, """
+//                        BLE ScanRecord
+//                        Advertisement Raw Bytes: $rawAdvBytes
+//                        Advertisement Flags: ${record?.advertiseFlags}
+//                        Device Name: ${record?.deviceName}
+//                        Manufacturer Specific Data: $manufactureDataBytes
+//                        Service Data: ${record?.serviceData}
+//                        Service Solicitation UUIDs: ${record?.serviceSolicitationUuids}
+//                        Service UUIDs: ${record?.serviceUuids}
+//                        """.trimIndent())
                     }
                 }
             }
@@ -206,6 +256,30 @@ class NanoBeaconManagerImpl(val context: Context): NanoBeaconManager {
         return buffer.toString()
     }
 
+    private fun toByteArrat(array: SparseArray<ByteArray?>?): ByteArray? {
+        if (array == null) {
+            return null
+        }
+        if (array.size() == 0) {
+            return null
+        }
+        var buffer = byteArrayOf()
 
+        Log.d(TAG, "Manufacturer Sparse Count ${array.size()}")
+        for (i in 0 until array.size()) {
+            //buffer += array.keyAt(i)
+            val a = array.valueAt(i)
+            a?.let {
+                it.forEach { byte ->
+                    buffer +=  byte
+                }
+            }
+        }
+        return buffer
+    }
+}
 
+fun ByteArray.toShort(start: Int = 0, endian: ByteOrder = ByteOrder.BIG_ENDIAN): Short {
+    this.size.takeIf { it >= 2 } ?: return 0
+    return ByteBuffer.wrap(this.copyOfRange(start, start + 2)).order(endian).short
 }

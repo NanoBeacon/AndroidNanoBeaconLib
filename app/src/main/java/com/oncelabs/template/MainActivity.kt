@@ -5,13 +5,9 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.oncelabs.template.nanoBeaconLib.NanoBeaconManagerImpl
-import com.oncelabs.template.navigation.Navigation
+import com.oncelabs.template.nanoBeaconLib.manager.NanoBeaconManager
 import com.oncelabs.template.permission.PermissionType
 import com.oncelabs.template.permission.RequestAllPermissions
 import com.oncelabs.template.screen.MainScreenView
@@ -22,13 +18,13 @@ import dagger.hilt.android.AndroidEntryPoint
  * This is a Single Activity application,
  * try and keep this file as clean as possible
  */
+var beaconManager: NanoBeaconManager? = null
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val btm = NanoBeaconManagerImpl(this)
-        btm.startScanning()
+        beaconManager = NanoBeaconManager(this)
         setContent {
             TemplateTheme {
 //                Navigation()
