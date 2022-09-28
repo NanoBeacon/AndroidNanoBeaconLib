@@ -2,7 +2,6 @@ package com.oncelabs.template.viewModel
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.oncelabs.template.beaconManager
 import com.oncelabs.template.nanoBeaconLib.manager.ADXLData
 import com.oncelabs.template.nanoBeaconLib.manager.NanoBeaconManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,9 +31,9 @@ class LiveDataViewModel @Inject constructor(
     private var index = 0
 
     init {
-        beaconManager?.startScanning()
+        NanoBeaconManager.startScanning()
         viewModelScope.launch {
-            beaconManager?.adxlData?.collect{
+            NanoBeaconManager.adxlData.collect{
 
                 val t = _temp.value?.toMutableList()
                 t?.add(Pair(index.toFloat(), it.temp))

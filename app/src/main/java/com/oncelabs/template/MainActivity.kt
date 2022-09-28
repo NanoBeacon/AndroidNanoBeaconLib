@@ -7,6 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.oncelabs.template.device.ADXL367
+import com.oncelabs.template.nanoBeaconLib.manager.ADXLData
 import com.oncelabs.template.nanoBeaconLib.manager.NanoBeaconManager
 import com.oncelabs.template.permission.PermissionType
 import com.oncelabs.template.permission.RequestAllPermissions
@@ -18,13 +20,15 @@ import dagger.hilt.android.AndroidEntryPoint
  * This is a Single Activity application,
  * try and keep this file as clean as possible
  */
-var beaconManager: NanoBeaconManager? = null
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        beaconManager = NanoBeaconManager(this)
+        NanoBeaconManager.init {
+            this
+        }
+        NanoBeaconManager.register(ADXL367())
         setContent {
             TemplateTheme {
 //                Navigation()

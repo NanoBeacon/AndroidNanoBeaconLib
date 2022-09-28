@@ -13,13 +13,19 @@ import android.content.pm.PackageManager
 import android.util.Log
 import android.util.SparseArray
 import androidx.core.app.ActivityCompat
-import com.oncelabs.onceble.core.gatt.OBGatt
-import com.oncelabs.onceble.core.peripheral.OBPeripheral
+import com.oncelabs.template.nanoBeaconLib.enums.BleState
+
+import com.oncelabs.template.nanoBeaconLib.enums.NanoBeaconEvent
 import com.oncelabs.template.nanoBeaconLib.enums.ScanState
 import com.oncelabs.template.nanoBeaconLib.interfaces.NanoBeaconManagerInterface
+import com.oncelabs.template.nanoBeaconLib.interfaces.CustomBeaconInterface
+import com.oncelabs.template.nanoBeaconLib.interfaces.NanoBeaconDelegate
 import com.oncelabs.template.nanoBeaconLib.model.NanoBeacon
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.oncelabs.template.nanoBeaconLib.model.NanoBeaconData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentHashMap
@@ -33,24 +39,61 @@ data class ADXLData(
     var rssi: Int
 )
 
-class NanoBeaconManager(val context: Context): NanoBeaconManagerInterface {
+object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
+
+    private var registeredTypeFlow = MutableSharedFlow<NanoBeacon?>()
+    private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon?>()
+    private var bleStateFlow = MutableSharedFlow<BleState?>()
 
     private var _adxlData = MutableStateFlow<ADXLData>(ADXLData(0f,0f,0f,0f, 0))
     public var adxlData = _adxlData.asStateFlow()
 
     private val TAG = NanoBeaconManager::class.simpleName
+    private val beaconScope = CoroutineScope(Dispatchers.IO)
     private val REQUEST_ENABLE_BT = 3
 
     private var scanState = ScanState.IDLE
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
-    private val bluetoothManager = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
+    private var registeredBeaconTypes: MutableList<CustomBeaconInterface> = mutableListOf()
 
-    private val bluetoothAdapter: BluetoothAdapter by lazy {
-        bluetoothManager.adapter
+    private lateinit var getContext: (() -> Context)
+    private lateinit var bluetoothManager: BluetoothManager
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private lateinit var bluetoothLeScanner: BluetoothLeScanner
+
+    fun init(getContext: () -> Context) {
+        this.getContext = getContext
+        bluetoothManager = (getContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
+        bluetoothAdapter = bluetoothManager.adapter
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+
+        setupBluetoothAdapterStateHandler()
+        if (!bluetoothAdapter.isEnabled){
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            NanoBeaconManager.getContext.let {
+                (it() as Activity).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            }
+        }
+
+        on(NanoBeaconEvent.BeaconDidTimeout(flow = beaconTimeoutFlow))
+        on(NanoBeaconEvent.DiscoveredRegisteredType(flow = registeredTypeFlow))
+        on(NanoBeaconEvent.BleStateChange(flow = bleStateFlow))
+
     }
 
-    private val bluetoothLeScanner: BluetoothLeScanner by lazy {
-        bluetoothAdapter.bluetoothLeScanner
+    fun on(event: NanoBeaconEvent) {
+
+        when (event) {
+            is NanoBeaconEvent.DiscoveredRegisteredType -> {
+                registeredTypeFlow = event.flow
+            }
+            is NanoBeaconEvent.BeaconDidTimeout -> {
+                beaconTimeoutFlow = event.flow
+            }
+            is NanoBeaconEvent.BleStateChange -> {
+                bleStateFlow = event.flow
+            }
+        }
     }
 
     private val scanSettings: ScanSettings by lazy {
@@ -77,29 +120,28 @@ class NanoBeaconManager(val context: Context): NanoBeaconManagerInterface {
         _scanFilters
     }
 
-    init {
-        setupBluetoothAdapterStateHandler()
-        if (!bluetoothAdapter.isEnabled){
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            (context as Activity).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-        }
+    override fun register(customBeacon: CustomBeaconInterface) {
+        registeredBeaconTypes.add(customBeacon)
     }
 
     override fun startScanning(){
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
+        getContext.let {
+            if (ActivityCompat.checkSelfPermission(
+                    it(),
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
         }
+
         bluetoothLeScanner
             .startScan(
                 scanFilters,
@@ -108,19 +150,21 @@ class NanoBeaconManager(val context: Context): NanoBeaconManagerInterface {
     }
 
     override fun stopScanning() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
+        getContext.let {
+            if (ActivityCompat.checkSelfPermission(
+                    it(),
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
         }
         bluetoothLeScanner.stopScan(leScanCallback)
     }
@@ -159,7 +203,9 @@ class NanoBeaconManager(val context: Context): NanoBeaconManagerInterface {
         }
 
         val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
-        (context as Activity).registerReceiver(bluetoothAdapterStateReceiver, filter)
+        getContext.let {
+            (it() as Activity).registerReceiver(bluetoothAdapterStateReceiver, filter)
+        }
     }
 
     private val leScanCallback: ScanCallback by lazy {
@@ -167,62 +213,22 @@ class NanoBeaconManager(val context: Context): NanoBeaconManagerInterface {
 
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
-                val record = result?.scanRecord
-
-                result?.device?.address?.let {
-//                    if (!leDeviceMap.containsKey(it)){
-//                        toByteArrat(record?.manufacturerSpecificData)?.let {
-//                            Log.d(TAG, "$it")
-//                        }
-//                    }
-
-                    if (it == "06:05:04:03:02:01"){
-                        toByteArrat(record?.manufacturerSpecificData)?.let {
-                            Log.d(TAG, "$it")
-                            val x = (it.toShort(1).toFloat()*(245166f/1000000000f)*0.25)
-                            val y = it.toShort(3).toFloat()*(245166f/1000000000f)*0.25
-                            val z = it.toShort(5).toFloat()*(245166f/1000000000f)*0.25
-                            val rssi = result.rssi
-                            val temp = (it.toShort(7) + 1185) * 18518518
-                            Log.d(TAG, "X: $x, Y: $y, Z: $z, TEMP: $temp")
-                            _adxlData.value = ADXLData(x.toFloat(), y.toFloat(), z.toFloat(), 0f, rssi)
-                        }
-
-//                        Log.d(TAG, """
-//                        BLE ScanResult
-//                        Periodic Advertising Interval: ${result?.periodicAdvertisingInterval}
-//                        Primary Phy: ${result?.primaryPhy}
-//                        RSSI: ${result?.rssi}
-//                        Secondary PHY: ${result?.secondaryPhy}
-//                        Timestamp: ${result?.timestampNanos}
-//                        TX Power: ${if (result?.txPower == ScanResult.TX_POWER_NOT_PRESENT) "NOT PRESENT" else result?.txPower}
-//                        Connectable: ${result?.isConnectable}
-//                        Legacy: ${result?.isLegacy}
-//                        Device Address: ${result?.device?.address}
-//                        """.trimIndent())
-
-                        var rawAdvBytes: String = ""
-                        record?.bytes?.let { bytes ->
-                            for (b in bytes){
-                                rawAdvBytes += String.format("%02x", b)
+                getContext.let {
+                    result?.device?.address?.let { deviceAddress ->
+                        if (!leDeviceMap.containsKey(deviceAddress)){
+                            val beaconData = NanoBeaconData(scanResult = result)
+                            val nanoBeacon = NanoBeacon(beaconData, it(), this@NanoBeaconManager)
+                            for (beaconType in registeredBeaconTypes){
+                                if (beaconType.isTypeMatchFor(beaconData)){
+                                    beaconScope.launch {
+                                        registeredTypeFlow.emit(nanoBeacon)
+                                    }
+                                }
                             }
-                        }
+                            leDeviceMap[deviceAddress] = nanoBeacon
+                        } else {
 
-                        var manufactureDataBytes: String = ""
-                        toString(record?.manufacturerSpecificData)?.let {
-                            manufactureDataBytes = it
                         }
-
-//                        Log.d(TAG, """
-//                        BLE ScanRecord
-//                        Advertisement Raw Bytes: $rawAdvBytes
-//                        Advertisement Flags: ${record?.advertiseFlags}
-//                        Device Name: ${record?.deviceName}
-//                        Manufacturer Specific Data: $manufactureDataBytes
-//                        Service Data: ${record?.serviceData}
-//                        Service Solicitation UUIDs: ${record?.serviceSolicitationUuids}
-//                        Service UUIDs: ${record?.serviceUuids}
-//                        """.trimIndent())
                     }
                 }
             }
@@ -268,6 +274,7 @@ class NanoBeaconManager(val context: Context): NanoBeaconManagerInterface {
         Log.d(TAG, "Manufacturer Sparse Count ${array.size()}")
         for (i in 0 until array.size()) {
             //buffer += array.keyAt(i)
+            val manufacturerId = array.keyAt(i)
             val a = array.valueAt(i)
             a?.let {
                 it.forEach { byte ->
@@ -283,3 +290,53 @@ fun ByteArray.toShort(start: Int = 0, endian: ByteOrder = ByteOrder.BIG_ENDIAN):
     this.size.takeIf { it >= 2 } ?: return 0
     return ByteBuffer.wrap(this.copyOfRange(start, start + 2)).order(endian).short
 }
+
+
+//                    if (it == "06:05:04:03:02:01"){
+//                        toByteArrat(record?.manufacturerSpecificData)?.let {
+//                            Log.d(TAG, "$it")
+//                            val x = (it.toShort(1).toFloat()*(245166f/1000000000f)*0.25)
+//                            val y = it.toShort(3).toFloat()*(245166f/1000000000f)*0.25
+//                            val z = it.toShort(5).toFloat()*(245166f/1000000000f)*0.25
+//                            val rssi = result.rssi
+//                            val temp = (it.toShort(7) + 1185) * 18518518
+//                            Log.d(TAG, "X: $x, Y: $y, Z: $z, TEMP: $temp")
+//                            _adxlData.value = ADXLData(x.toFloat(), y.toFloat(), z.toFloat(), 0f, rssi)
+//                        }
+
+//                        Log.d(TAG, """
+//                        BLE ScanResult
+//                        Periodic Advertising Interval: ${result?.periodicAdvertisingInterval}
+//                        Primary Phy: ${result?.primaryPhy}
+//                        RSSI: ${result?.rssi}
+//                        Secondary PHY: ${result?.secondaryPhy}
+//                        Timestamp: ${result?.timestampNanos}
+//                        TX Power: ${if (result?.txPower == ScanResult.TX_POWER_NOT_PRESENT) "NOT PRESENT" else result?.txPower}
+//                        Connectable: ${result?.isConnectable}
+//                        Legacy: ${result?.isLegacy}
+//                        Device Address: ${result?.device?.address}
+//                        """.trimIndent())
+
+//                        var rawAdvBytes: String = ""
+//                        record?.bytes?.let { bytes ->
+//                            for (b in bytes){
+//                                rawAdvBytes += String.format("%02x", b)
+//                            }
+//                        }
+//
+//                        var manufactureDataBytes: String = ""
+//                        toString(record?.manufacturerSpecificData)?.let {
+//                            manufactureDataBytes = it
+//                        }
+
+//                        Log.d(TAG, """
+//                        BLE ScanRecord
+//                        Advertisement Raw Bytes: $rawAdvBytes
+//                        Advertisement Flags: ${record?.advertiseFlags}
+//                        Device Name: ${record?.deviceName}
+//                        Manufacturer Specific Data: $manufactureDataBytes
+//                        Service Data: ${record?.serviceData}
+//                        Service Solicitation UUIDs: ${record?.serviceSolicitationUuids}
+//                        Service UUIDs: ${record?.serviceUuids}
+//                        """.trimIndent())
+//   }
