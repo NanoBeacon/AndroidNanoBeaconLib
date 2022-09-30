@@ -22,7 +22,6 @@ import com.oncelabs.template.components.LiveDataSheet
 import com.oncelabs.template.components.LogAdvertisementCard
 import com.oncelabs.template.device.ADXL367
 import com.oncelabs.template.model.ADXL367Data
-import com.oncelabs.template.viewModel.BeaconChartData
 import com.oncelabs.template.viewModel.LiveDataViewModel
 import java.util.*
 
