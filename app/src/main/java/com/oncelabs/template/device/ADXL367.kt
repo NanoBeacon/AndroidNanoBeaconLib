@@ -96,7 +96,7 @@ class ADXL367(
                                     ))
                                 }
                             }
-                            val reversed = relativeHistoricalData.reversed()
+                            val reversed = relativeHistoricalData//.reversed()
                             Log.d(TAG, "Data Processed")
                             reversed.forEach {
                                 Log.d(TAG, "${it.first}, ${it.second}")

@@ -100,7 +100,7 @@ private fun updateGraphWithData(
     val lineDataSet = LineDataSet(data, "")
 
     lineDataSet.colors = listOf(lineColor.hashCode())
-    lineDataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
+    lineDataSet.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
     lineDataSet.lineWidth = 2.0f
     lineDataSet.setDrawCircles(false)
     lineDataSet.setDrawValues(false)

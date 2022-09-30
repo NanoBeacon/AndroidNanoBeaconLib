@@ -64,7 +64,6 @@ private fun initializeGraph(
     lineChart.axisRight.isEnabled = false
     lineChart.description.isEnabled = false
 
-
     lineChart.axisLeft.axisLineColor = axisColor.hashCode()
 
     lineChart.axisLeft.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART)
@@ -115,7 +114,7 @@ private fun updateGraphWithData(
 
     val set1 = LineDataSet(unProcessedData1, "Z: +1 [g]")
     set1.colors = listOf(zLineColor.hashCode())
-    set1.mode = LineDataSet.Mode.CUBIC_BEZIER
+    set1.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
     set1.lineWidth = 2.0f
     set1.setDrawCircles(false)
     set1.setDrawValues(false)
@@ -124,7 +123,7 @@ private fun updateGraphWithData(
 
     val set2 = LineDataSet(unProcessedData2, "X: -1 [g]")
     set2.colors = listOf(xLineColor.hashCode())
-    set2.mode = LineDataSet.Mode.CUBIC_BEZIER
+    set2.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
     set2.lineWidth = 2.0f
     set2.setDrawCircles(false)
     set2.setDrawValues(false)
@@ -132,7 +131,7 @@ private fun updateGraphWithData(
 
     val set3 = LineDataSet(unProcessedData3, "Y: -1 [g]")
     set3.colors = listOf(yLineColor.hashCode())
-    set3.mode = LineDataSet.Mode.CUBIC_BEZIER
+    set3.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
     set3.lineWidth = 2.0f
     set3.setDrawCircles(false)
     set3.setDrawValues(false)
