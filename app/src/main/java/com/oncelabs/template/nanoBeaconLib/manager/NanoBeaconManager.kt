@@ -31,22 +31,12 @@ import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-data class ADXLData(
-    var xAccel: Float,
-    var yAccel: Float,
-    var zAccel: Float,
-    var temp: Float,
-    var rssi: Int
-)
 
 object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     private var registeredTypeFlow = MutableSharedFlow<NanoBeacon?>()
     private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon?>()
     private var bleStateFlow = MutableSharedFlow<BleState?>()
-
-    private var _adxlData = MutableStateFlow<ADXLData>(ADXLData(0f,0f,0f,0f, 0))
-    public var adxlData = _adxlData.asStateFlow()
 
     private val TAG = NanoBeaconManager::class.simpleName
     private val beaconScope = CoroutineScope(Dispatchers.IO)
@@ -74,11 +64,6 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 (it() as Activity).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
         }
-
-        on(NanoBeaconEvent.BeaconDidTimeout(flow = beaconTimeoutFlow))
-        on(NanoBeaconEvent.DiscoveredRegisteredType(flow = registeredTypeFlow))
-        on(NanoBeaconEvent.BleStateChange(flow = bleStateFlow))
-
     }
 
     fun on(event: NanoBeaconEvent) {
@@ -215,19 +200,24 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 super.onScanResult(callbackType, result)
                 getContext.let {
                     result?.device?.address?.let { deviceAddress ->
+                        val beaconData = NanoBeaconData(scanResult = result)
                         if (!leDeviceMap.containsKey(deviceAddress)){
-                            val beaconData = NanoBeaconData(scanResult = result)
-                            val nanoBeacon = NanoBeacon(beaconData, it(), this@NanoBeaconManager)
+                            var nanoBeacon: NanoBeacon? = null
                             for (beaconType in registeredBeaconTypes){
-                                if (beaconType.isTypeMatchFor(beaconData)){
+                                beaconType.isTypeMatchFor(beaconData, getContext(), this@NanoBeaconManager)?.let { customBeacon ->
                                     beaconScope.launch {
+                                        nanoBeacon = customBeacon
                                         registeredTypeFlow.emit(nanoBeacon)
+                                        leDeviceMap[deviceAddress] = nanoBeacon
                                     }
                                 }
                             }
-                            leDeviceMap[deviceAddress] = nanoBeacon
-                        } else {
-
+                            //nanoBeacon = nanoBeacon ?: NanoBeacon(beaconData, it(), this@NanoBeaconManager)
+                            //leDeviceMap[deviceAddress] = nanoBeacon
+                        } else { // Device already present
+                            leDeviceMap[deviceAddress]?.let {
+                                it.newBeaconData(beaconData = beaconData)
+                            }
                         }
                     }
                 }
@@ -262,7 +252,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         return buffer.toString()
     }
 
-    private fun toByteArrat(array: SparseArray<ByteArray?>?): ByteArray? {
+    private fun toByteArray(array: SparseArray<ByteArray?>?): ByteArray? {
         if (array == null) {
             return null
         }

@@ -5,6 +5,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,8 +18,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.oncelabs.template.components.InplayTopBar
 import com.oncelabs.template.components.LiveDataCard
+import com.oncelabs.template.components.LiveDataSheet
 import com.oncelabs.template.components.LogAdvertisementCard
-import com.oncelabs.template.nanoBeaconLib.manager.ADXLData
+import com.oncelabs.template.device.ADXL367
+import com.oncelabs.template.model.ADXL367Data
+import com.oncelabs.template.viewModel.BeaconChartData
 import com.oncelabs.template.viewModel.LiveDataViewModel
 import java.util.*
 
@@ -34,30 +39,14 @@ fun LiveDataContent(
     val context = LocalContext.current
     var list = listOf("ADXL367_Temp")
 
-    val rssi = remember { mutableStateOf(liveDataViewModel.rssi.value) }
-    liveDataViewModel.rssi.observe(context as LifecycleOwner){
-        rssi.value = it
+    var test = remember {
+        mutableStateOf(false)
     }
 
-    val temp = remember { mutableStateOf(liveDataViewModel.temp.value) }
-    liveDataViewModel.temp.observe(context as LifecycleOwner){
-        temp.value = it
-    }
-
-    val x = remember { mutableStateOf(liveDataViewModel.x.value)}
-    liveDataViewModel.x.observe(context as LifecycleOwner){
-        x.value = it
-    }
-
-    val y = remember { mutableStateOf(liveDataViewModel.y.value) }
-    liveDataViewModel.y.observe(context as LifecycleOwner){
-        y.value = it
-    }
-
-    var name = remember { "TEST" }
-    val z = remember { mutableStateOf(liveDataViewModel.z.value) }
-    liveDataViewModel.z.observe(context as LifecycleOwner){
-        z.value = it
+    val activeBeacons = remember { mutableStateListOf<Pair<String,List<Pair<Long, ADXL367Data>>>>() }//SnapshotStateList<BeaconChartData>() }
+    liveDataViewModel.beacons.observe(context as LifecycleOwner){
+        activeBeacons.clear()
+        activeBeacons.addAll(it)
     }
 
     InplayTopBar(title = "Live Data")
@@ -65,24 +54,15 @@ fun LiveDataContent(
         .padding(bottom = 80.dp, top = 80.dp)
         .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
-        items(list) { it->
+        items(activeBeacons) { it->
             Row(Modifier.fillMaxWidth()) {
                 Spacer(Modifier.weight(0.02f))
                 Column(Modifier.weight(0.96f)) {
-                    LiveDataCard(
-                        name = it,
-                        rssi = rssi.value ?: listOf(),
-                        temp = temp.value ?: listOf(),
-                        x = x.value ?: listOf(),
-                        y = y.value ?: listOf(),
-                        z = z.value ?: listOf(),
-                    )
+                    LiveDataSheet(name = it.first, data = it.second)
                 }
                 Spacer(Modifier.weight(0.02f))
             }
-
             Spacer(Modifier.height(20.dp))
-
         }
 
     }
