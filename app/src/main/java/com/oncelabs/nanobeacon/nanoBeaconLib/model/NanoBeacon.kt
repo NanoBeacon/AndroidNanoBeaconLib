@@ -26,5 +26,6 @@ open class NanoBeacon(
 
     override fun newBeaconData(beaconData: NanoBeaconData) {
         _beaconDataFlow.value = beaconData
+        _rssiFlow.value = beaconData.rssi
     }
 }

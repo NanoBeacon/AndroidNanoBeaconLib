@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.experimental.and
 import kotlin.math.roundToInt
 
 class ADXL367(
@@ -29,6 +30,9 @@ class ADXL367(
     private val TAG = ADXL367::class.simpleName
     private val scope = CoroutineScope(Dispatchers.IO)
     private val HISTORICAL_DATA_SIZE = 15
+
+    private val _adxlAwake = MutableStateFlow<Boolean>(false)
+    val adxAwake = _adxlAwake.asStateFlow()
 
     private val _adxlData = MutableStateFlow<ADXL367Data?>(null)
     val adxlData = _adxlData.asStateFlow()
@@ -79,15 +83,14 @@ class ADXL367(
                                 Pair(System.currentTimeMillis(), processedData)
                             )
                         }
-                        //Update timestamps to be relative to first sample
+                        // Update timestamps to be relative to first sample
                         val relativeHistoricalData: MutableList<Pair<Long, ADXL367Data>> = mutableListOf()
-
                         if (localHistoricalADXL367Data.count() > 2){
-                            localHistoricalADXL367Data.reversed().indices.forEach { index ->
-                                Log.d(TAG, "Index: ${index}")
+                            localHistoricalADXL367Data.indices.forEach { index ->
+                                //Log.d(TAG, "Index: ${index}")
                                 if (index < localHistoricalADXL367Data.count() - 1){
                                     relativeHistoricalData.add( Pair(
-                                        localHistoricalADXL367Data.last().first - localHistoricalADXL367Data[index].first,
+                                        localHistoricalADXL367Data.first().first - localHistoricalADXL367Data[index].first,
                                         localHistoricalADXL367Data[index].second
                                     ))
                                 } else if (index == localHistoricalADXL367Data.count() - 1) {
@@ -96,11 +99,6 @@ class ADXL367(
                                         localHistoricalADXL367Data[index].second
                                     ))
                                 }
-                            }
-                            val reversed = relativeHistoricalData//.reversed()
-                            Log.d(TAG, "Data Processed")
-                            reversed.forEach {
-                                Log.d(TAG, "${it.first}, ${it.second}")
                             }
                             _historicalAdxlData.value = relativeHistoricalData.reversed().toList()
                         }
@@ -111,10 +109,43 @@ class ADXL367(
     }
 
     private fun processRawData(byteArray: ByteArray): ADXL367Data {
+        val status = byteArray[0]
+        val awake = status and 0b01000000
+        val inactive = status and 0b00100000
+        val active = status and 0b00010000
+        val dataRead = status and 0b00000001
         val x = byteArray.toShort(1).toFloat()*(245166f/1000000000f)*0.25f
         val y = byteArray.toShort(3).toFloat()*(245166f/1000000000f)*0.25f
         val z = byteArray.toShort(5).toFloat()*(245166f/1000000000f)*0.25f
-        val temp = ((byteArray.toShort(7) + 1185) * (18518518f / 1000000000f) + 80).roundToInt()
+        val tRaw = byteArray.toShort(7)
+        val temp = ((((tRaw and 0b1111111111111100.toShort()).toInt() shr 2).toInt() + 1185) * (185_185_18f / 1_000_000_000f))
+        Log.d(TAG, "Awake: $awake, Inactive: $inactive, Active: $tRaw, Temp: $temp, Data Ready: ${byteArray.toHex()}")
         return ADXL367Data(x, y, z, temp.toFloat(), rssi = 0)
     }
 }
+
+fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
+
+// Status:
+
+// Bit 7: ERR_USER_REGS
+/* SEU Error Detect. A 1 indicates one of two conditions: either an SEU event, such as an alpha
+particle of a power glitch, has disturbed a user register setting or the ADXL367 is not configured. This
+bit is high on both startup and soft reset, and resets as soon as any register write commands are
+performed.*/
+
+// Bit 6: AWAKE
+/* Indicates whether the accelerometer is in an active (AWAKE = 1) or inactive (AWAKE = 0) state, based
+on the activity and inactivity functionality. To enable autosleep, activity and inactivity detection must
+be in linked mode or loop mode (LINKLOOP bits in the ACT_INACT_CTL register). Otherwise, this bit
+defaults to 1 and must be ignored.
+0x1 R
+0: device is inactive.
+1: device is active (reset state).*/
+
+// Bit 5: INACT
+/* Inactivity. A 1 indicates that the inactivity detection function has detected an inactivity or a free fall
+condition.*/
+
+// Bit 4: ACT
+/*Activity. A 1 indicates that the activity detection function has detected an overthreshold condition. */
