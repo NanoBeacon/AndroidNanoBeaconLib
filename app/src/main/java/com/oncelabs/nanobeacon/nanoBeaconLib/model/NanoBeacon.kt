@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.nanoBeaconLib.model
 
 import android.content.Context
+import android.util.Log
 import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,6 +62,8 @@ open class NanoBeacon(
 
             // Update adv interval estimate flow
             _estimatedAdvIntervalFlow.value = advIntervalAvg.toInt()
+
+            Log.d(TAG, "Estimated Adv Interval: $advIntervalAvg")
         }
     }
 }
