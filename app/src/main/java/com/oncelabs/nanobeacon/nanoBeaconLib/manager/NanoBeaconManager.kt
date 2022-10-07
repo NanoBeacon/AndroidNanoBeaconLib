@@ -26,14 +26,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 
 object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
+    private var newBeaconDataFlow = MutableSharedFlow<NanoBeaconData>()
     private var registeredTypeFlow = MutableSharedFlow<NanoBeacon?>()
     private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon?>()
     private var bleStateFlow = MutableSharedFlow<BleState?>()
@@ -42,7 +41,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private val beaconScope = CoroutineScope(Dispatchers.IO)
     private val REQUEST_ENABLE_BT = 3
 
-    private var scanState = ScanState.IDLE
+    private val _scanState = MutableStateFlow<ScanState>(ScanState.UNKNOWN)
+    private var scanState: StateFlow<ScanState> = _scanState.asStateFlow()
+
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
     private var registeredBeaconTypes: MutableList<CustomBeaconInterface> = mutableListOf()
 
@@ -77,6 +78,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
             }
             is NanoBeaconEvent.BleStateChange -> {
                 bleStateFlow = event.flow
+            }
+            is NanoBeaconEvent.NewBeaconData -> {
+                newBeaconDataFlow = event.flow
             }
         }
     }
@@ -132,6 +136,8 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 scanFilters,
                 scanSettings,
                 this.leScanCallback)
+
+        _scanState.value = ScanState.SCANNING
     }
 
     override fun stopScanning() {
@@ -152,6 +158,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
             }
         }
         bluetoothLeScanner.stopScan(leScanCallback)
+        _scanState.value = ScanState.STOPPED
     }
 
     private fun setupBluetoothAdapterStateHandler() {
@@ -200,23 +207,31 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 super.onScanResult(callbackType, result)
                 getContext.let {
                     result?.device?.address?.let { deviceAddress ->
+                        // Parse scan result
                         val beaconData = NanoBeaconData(scanResult = result)
+
+                        // Check for exisiting entry
                         if (!leDeviceMap.containsKey(deviceAddress)){
                             var nanoBeacon: NanoBeacon? = null
+                            // Check if match for one of the registered types
                             for (beaconType in registeredBeaconTypes){
                                 beaconType.isTypeMatchFor(beaconData, getContext(), this@NanoBeaconManager)?.let { customBeacon ->
                                     beaconScope.launch {
                                         nanoBeacon = customBeacon
                                         registeredTypeFlow.emit(nanoBeacon)
                                         leDeviceMap[deviceAddress] = nanoBeacon
+                                        newBeaconDataFlow.emit(beaconData)
                                     }
                                 }
                             }
-                            //nanoBeacon = nanoBeacon ?: NanoBeacon(beaconData, it(), this@NanoBeaconManager)
-                            //leDeviceMap[deviceAddress] = nanoBeacon
-                        } else { // Device already present
+                        // Device already present
+                        } else {
+
                             leDeviceMap[deviceAddress]?.let {
                                 it.newBeaconData(beaconData = beaconData)
+                                beaconScope.launch {
+                                    newBeaconDataFlow.emit(beaconData)
+                                }
                             }
                         }
                     }
@@ -226,107 +241,8 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
             override fun onScanFailed(errorCode: Int) {
                 super.onScanFailed(errorCode)
                 Log.d(TAG, "BLE Scan Failed with ErrorCode: $errorCode")
+                _scanState.value = ScanState.FAILED
             }
         }
-    }
-
-    private fun toString(array: SparseArray<ByteArray?>?): String? {
-        if (array == null) {
-            return "null"
-        }
-        if (array.size() == 0) {
-            return ""
-        }
-        val buffer = StringBuilder()
-
-        Log.d(TAG, "Manufacturer Sparse Count ${array.size()}")
-        for (i in 0 until array.size()) {
-            buffer.append( String.format("%02x", array.keyAt(i)))
-            val a = array.valueAt(i)
-            a?.let {
-                it.forEach { byte ->
-                    buffer.append(String.format("%02x", byte))
-                }
-            }
-        }
-        return buffer.toString()
-    }
-
-    private fun toByteArray(array: SparseArray<ByteArray?>?): ByteArray? {
-        if (array == null) {
-            return null
-        }
-        if (array.size() == 0) {
-            return null
-        }
-        var buffer = byteArrayOf()
-
-        Log.d(TAG, "Manufacturer Sparse Count ${array.size()}")
-        for (i in 0 until array.size()) {
-            //buffer += array.keyAt(i)
-            val manufacturerId = array.keyAt(i)
-            val a = array.valueAt(i)
-            a?.let {
-                it.forEach { byte ->
-                    buffer +=  byte
-                }
-            }
-        }
-        return buffer
     }
 }
-
-fun ByteArray.toShort(start: Int = 0, endian: ByteOrder = ByteOrder.BIG_ENDIAN): Short {
-    this.size.takeIf { it >= 2 } ?: return 0
-    return ByteBuffer.wrap(this.copyOfRange(start, start + 2)).order(endian).short
-}
-
-
-//                    if (it == "06:05:04:03:02:01"){
-//                        toByteArrat(record?.manufacturerSpecificData)?.let {
-//                            Log.d(TAG, "$it")
-//                            val x = (it.toShort(1).toFloat()*(245166f/1000000000f)*0.25)
-//                            val y = it.toShort(3).toFloat()*(245166f/1000000000f)*0.25
-//                            val z = it.toShort(5).toFloat()*(245166f/1000000000f)*0.25
-//                            val rssi = result.rssi
-//                            val temp = (it.toShort(7) + 1185) * 18518518
-//                            Log.d(TAG, "X: $x, Y: $y, Z: $z, TEMP: $temp")
-//                            _adxlData.value = ADXLData(x.toFloat(), y.toFloat(), z.toFloat(), 0f, rssi)
-//                        }
-
-//                        Log.d(TAG, """
-//                        BLE ScanResult
-//                        Periodic Advertising Interval: ${result?.periodicAdvertisingInterval}
-//                        Primary Phy: ${result?.primaryPhy}
-//                        RSSI: ${result?.rssi}
-//                        Secondary PHY: ${result?.secondaryPhy}
-//                        Timestamp: ${result?.timestampNanos}
-//                        TX Power: ${if (result?.txPower == ScanResult.TX_POWER_NOT_PRESENT) "NOT PRESENT" else result?.txPower}
-//                        Connectable: ${result?.isConnectable}
-//                        Legacy: ${result?.isLegacy}
-//                        Device Address: ${result?.device?.address}
-//                        """.trimIndent())
-
-//                        var rawAdvBytes: String = ""
-//                        record?.bytes?.let { bytes ->
-//                            for (b in bytes){
-//                                rawAdvBytes += String.format("%02x", b)
-//                            }
-//                        }
-//
-//                        var manufactureDataBytes: String = ""
-//                        toString(record?.manufacturerSpecificData)?.let {
-//                            manufactureDataBytes = it
-//                        }
-
-//                        Log.d(TAG, """
-//                        BLE ScanRecord
-//                        Advertisement Raw Bytes: $rawAdvBytes
-//                        Advertisement Flags: ${record?.advertiseFlags}
-//                        Device Name: ${record?.deviceName}
-//                        Manufacturer Specific Data: $manufactureDataBytes
-//                        Service Data: ${record?.serviceData}
-//                        Service Solicitation UUIDs: ${record?.serviceSolicitationUuids}
-//                        Service UUIDs: ${record?.serviceUuids}
-//                        """.trimIndent())
-//   }
