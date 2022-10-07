@@ -3,9 +3,10 @@ package com.oncelabs.nanobeacon.device
 import android.content.Context
 import android.util.Log
 import com.oncelabs.nanobeacon.model.ADXL367Data
+import com.oncelabs.nanobeacon.nanoBeaconLib.extension.toHexString
+import com.oncelabs.nanobeacon.nanoBeaconLib.extension.toShort
 import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.CustomBeaconInterface
-import com.oncelabs.nanobeacon.nanoBeaconLib.manager.toShort
 import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeacon
 import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeaconData
 import kotlinx.coroutines.CoroutineScope
@@ -15,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.experimental.and
-import kotlin.math.roundToInt
 
 class ADXL367(
     data: NanoBeaconData? = null,
@@ -29,6 +29,7 @@ class ADXL367(
 
     private val TAG = ADXL367::class.simpleName
     private val scope = CoroutineScope(Dispatchers.IO)
+
     private val HISTORICAL_DATA_SIZE = 15
 
     private val _adxlAwake = MutableStateFlow<Boolean>(false)
@@ -119,12 +120,10 @@ class ADXL367(
         val z = byteArray.toShort(5).toFloat()*(245166f/1000000000f)*0.25f
         val tRaw = byteArray.toShort(7)
         val temp = ((((tRaw and 0b1111111111111100.toShort()).toInt() shr 2).toInt() + 1185) * (185_185_18f / 1_000_000_000f))
-        Log.d(TAG, "Awake: $awake, Inactive: $inactive, Active: $tRaw, Temp: $temp, Data Ready: ${byteArray.toHex()}")
-        return ADXL367Data(x, y, z, temp.toFloat(), rssi = 0)
+        Log.d(TAG, "Awake: $awake, Inactive: $inactive, Active: $tRaw, Temp: $temp, Data Ready: ${byteArray.toHexString()}")
+        return ADXL367Data(x, y, z, temp, rssi = 0)
     }
 }
-
-fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 
 // Status:
 

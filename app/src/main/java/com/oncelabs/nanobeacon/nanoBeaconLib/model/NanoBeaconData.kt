@@ -2,8 +2,11 @@ package com.oncelabs.nanobeacon.nanoBeaconLib.model
 
 import android.bluetooth.le.ScanResult
 import android.os.Build
+import android.os.SystemClock
 import android.util.SparseArray
 import androidx.core.util.forEach
+import java.text.SimpleDateFormat
+import java.util.*
 
 data class NanoBeaconData(
     val scanResult: ScanResult
@@ -15,8 +18,14 @@ data class NanoBeaconData(
     var advInterval = scanResult.periodicAdvertisingInterval
     var connectable = scanResult.isConnectable
     var manufacturerData = parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).first
-    var manufacturerId = parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).second
+    var manufacturerId = parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).second.toShort()
     var timeStamp = scanResult.timestampNanos
+    val timeStampFormatted: String
+        get() {
+            val timeStampMillis = System.currentTimeMillis() - SystemClock.elapsedRealtime() + scanResult.timestampNanos / 1000000
+            val rxDate = Date(timeStampMillis)
+            return SimpleDateFormat("HH:mm:ss.sss", Locale.US).format(rxDate)
+        }
     var name = scanResult.scanRecord?.deviceName
     var flags = scanResult.scanRecord?.advertiseFlags
     var serviceUuids = scanResult.scanRecord?.serviceUuids
