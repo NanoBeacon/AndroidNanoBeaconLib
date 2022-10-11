@@ -58,9 +58,5 @@ object BeaconManager: BeaconManagerInterface {
                 }
             }
         }
-
-        scope.launch {
-
-        }
     }
 }
