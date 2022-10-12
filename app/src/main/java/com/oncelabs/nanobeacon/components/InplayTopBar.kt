@@ -33,7 +33,7 @@ fun InplayTopBar(title: String) {
                         painter = painterResource(id = com.oncelabs.nanobeacon.R.drawable.nanobeacon_logo_white_s),
                         contentDescription = "Company logo",
                         contentScale = ContentScale.Fit,
-                        modifier = Modifier.padding(end = 5.dp).size(45.dp)
+                        modifier = Modifier.padding(end = 5.dp).size(85.dp)
                     )
                 }
             }
