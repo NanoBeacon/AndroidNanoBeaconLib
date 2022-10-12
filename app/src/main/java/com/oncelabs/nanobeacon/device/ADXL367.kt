@@ -44,7 +44,7 @@ class ADXL367(
     private var localHistoricalADXL367Data: MutableList<Pair<Long, ADXL367Data>> = mutableListOf()
 
     override fun isTypeMatchFor(beaconData: NanoBeaconData, context: Context, delegate: NanoBeaconDelegate): NanoBeacon? {
-        if (beaconData.name == b){
+        if (beaconData.name == "ADXL367_Temp"){
             return ADXL367(beaconData, context, delegate)
         }
         return null

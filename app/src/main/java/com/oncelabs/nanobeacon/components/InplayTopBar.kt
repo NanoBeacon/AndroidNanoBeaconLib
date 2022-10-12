@@ -30,7 +30,7 @@ fun InplayTopBar(title: String) {
                 }
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
                     Image(
-                        painter = painterResource(id = com.oncelabs.nanobeacon.R.drawable.inplay_logo),
+                        painter = painterResource(id = com.oncelabs.nanobeacon.R.drawable.nanobeacon_logo_white_s),
                         contentDescription = "Company logo",
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.padding(end = 5.dp).size(45.dp)
