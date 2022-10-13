@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.experimental.and
+import kotlin.experimental.or
 
 class ADXL367(
     data: NanoBeaconData? = null,
@@ -44,7 +45,7 @@ class ADXL367(
     private var localHistoricalADXL367Data: MutableList<Pair<Long, ADXL367Data>> = mutableListOf()
 
     override fun isTypeMatchFor(beaconData: NanoBeaconData, context: Context, delegate: NanoBeaconDelegate): NanoBeacon? {
-        if (beaconData.name == b){
+        if (beaconData.name == "ADXL367_Temp"){
             return ADXL367(beaconData, context, delegate)
         }
         return null
@@ -112,16 +113,16 @@ class ADXL367(
     private fun processRawData(byteArray: ByteArray): ADXL367Data {
         val status = byteArray[0]
         val awake = status and 0b01000000
-        _adxlAwake.value = awake.toInt() == 1
+        //_adxlAwake.value = awake.toInt() == 1
         val inactive = status and 0b00100000
         val active = status and 0b00010000
         val dataRead = status and 0b00000001
         val x = byteArray.toShort(1).toFloat()*(245166f/1000000000f)*0.25f
         val y = byteArray.toShort(3).toFloat()*(245166f/1000000000f)*0.25f
         val z = byteArray.toShort(5).toFloat()*(245166f/1000000000f)*0.25f
-        val tRaw = byteArray.toShort(7)
-        val temp = ((((tRaw and 0b1111111111111100.toShort()).toInt() shr 2).toInt() + 1185) * (185_185_18f / 1_000_000_000f))
-        Log.d(TAG, "Awake: $awake, Inactive: $inactive, Active: $tRaw, Temp: $temp, Data Ready: ${byteArray.toHexString()}")
+        val tempRawShort = byteArray.toShort(7).toInt()/4
+        val temp = (((tempRawShort + 1185) * (185_185_18f / 1_000_000_000f) * 2)*100).toInt().toFloat()/100
+        Log.d(TAG, "Awake: $awake, Inactive: $inactive, Active: $active, Data Read: $dataRead, Temp: $temp, Data Ready: ${byteArray.toHexString()}")
         return ADXL367Data(x, y, z, temp, rssi = 0)
     }
 }
