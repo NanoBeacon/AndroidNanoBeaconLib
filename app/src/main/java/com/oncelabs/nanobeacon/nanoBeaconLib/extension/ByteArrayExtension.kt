@@ -12,3 +12,8 @@ fun ByteArray.toInt(start: Int = 0, endian: ByteOrder = ByteOrder.BIG_ENDIAN): I
     this.size.takeIf { it >= 4 } ?: return 0
     return ByteBuffer.wrap(this.copyOfRange(start, start + 4)).order(endian).int
 }
+
+fun ByteArray.toHexString(): String = joinToString(separator = "") {
+        eachByte -> "%02x".format(eachByte)
+}
+

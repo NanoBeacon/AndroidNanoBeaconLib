@@ -6,10 +6,12 @@ import com.oncelabs.nanobeacon.interfaces.BeaconManagerInterface
 import com.oncelabs.nanobeacon.nanoBeaconLib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeacon.nanoBeaconLib.manager.NanoBeaconManager
 import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeacon
+import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeaconData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -19,6 +21,9 @@ object BeaconManager: BeaconManagerInterface {
 
     private val _discoveredAdxlBeacons = MutableStateFlow<List<ADXL367>>(listOf())
     val discoveredAdxlBeacons = _discoveredAdxlBeacons.asStateFlow()
+
+    private val _newBeaconDataFlow = MutableSharedFlow<NanoBeaconData>()
+    val newBeaconDataFlow = _newBeaconDataFlow.asSharedFlow()
 
     private val discoveredRegisteredTypeFlow = MutableSharedFlow<NanoBeacon?>()
 
@@ -40,6 +45,7 @@ object BeaconManager: BeaconManagerInterface {
 
     private fun addObservers(){
         NanoBeaconManager.on(NanoBeaconEvent.DiscoveredRegisteredType(flow = discoveredRegisteredTypeFlow))
+        NanoBeaconManager.on(NanoBeaconEvent.NewBeaconData(flow = _newBeaconDataFlow))
 
         scope.launch {
             discoveredRegisteredTypeFlow.collect{

@@ -8,17 +8,22 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.components.InplayTopBar
 import com.oncelabs.nanobeacon.components.LogAdvertisementCard
 import com.oncelabs.nanobeacon.components.ProjectConfigurationModal
 import com.oncelabs.nanobeacon.model.Advertisement
 import com.oncelabs.nanobeacon.ui.theme.logFloatingButtonColor
+import com.oncelabs.nanobeacon.viewModel.LiveDataViewModel
+import com.oncelabs.nanobeacon.viewModel.LogViewModel
 
 @Composable
 fun LogScreen(){
@@ -27,7 +32,12 @@ fun LogScreen(){
 }
 
 @Composable
-fun LogScreenContent() {
+fun LogScreenContent(
+    logDataViewModel: LogViewModel = hiltViewModel()
+) {
+
+    val beaconDataLog by logDataViewModel.beaconDataLog.observeAsState()
+
     val advertisement: Advertisement =
         Advertisement(
             "10:44:10.76",
@@ -67,11 +77,11 @@ fun LogScreenContent() {
     LazyColumn(modifier = Modifier
         .padding(bottom = 80.dp, top = 80.dp)
         .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        items(holderList) { it ->
+        items(beaconDataLog ?: listOf()) { it ->
             Row(Modifier.fillMaxWidth()) {
                 Spacer(Modifier.weight(0.1f))
                 Column(Modifier.weight(0.8f)) {
-                    LogAdvertisementCard(advertisement = it)
+                    LogAdvertisementCard(beaconData = it)
                 }
                 Spacer(Modifier.weight(0.1f))
             }
