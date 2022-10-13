@@ -55,10 +55,11 @@ open class NanoBeacon(
 
             advTimestamps.indices.forEach { index ->
                 if (index < advTimestamps.count() - 1 ){
-                    deltaTimestamps.add((advTimestamps[index + 1] - advTimestamps[index]))
+                    val delta = (advTimestamps[index + 1] - advTimestamps[index])
+                    deltaTimestamps.add(delta)
                 }
             }
-            val advIntervalAvg = (deltaTimestamps.sum())/deltaTimestamps.count()
+            val advIntervalAvg = ((deltaTimestamps.sum().toFloat())/deltaTimestamps.count().toFloat())/1000000f
 
             // Update adv interval estimate flow
             _estimatedAdvIntervalFlow.value = advIntervalAvg.toInt()

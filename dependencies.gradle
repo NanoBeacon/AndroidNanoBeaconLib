@@ -31,8 +31,6 @@ ext.libraries = [
 
         icons               : "androidx.compose.material:material-icons-extended:$compose_version",             // Icons
         accompanist         : "com.google.accompanist:accompanist-systemuicontroller:$versions.accompanist",    // Status bar theming
-        onceBLE             : "com.github.onceLabs:onceBLE-Android:$versions.onceBLE",                          // BLE
-
         // Dagger + Hilt
         hilt                : "com.google.dagger:hilt-android:$hilt_version",
         hiltCompiler        : "com.google.dagger:hilt-android-compiler:$hilt_version",

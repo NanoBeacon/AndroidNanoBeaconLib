@@ -26,6 +26,7 @@ fun LogAdvertisementCard(beaconData: NanoBeaconData) {
         Spacer(Modifier.height(10.dp))
         Text("BLE Address: ${beaconData.bluetoothAddress}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text("RSSI: ${beaconData.rssi}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text("Estimated Adv Interval: ${beaconData.estimatedAdvInterval}ms", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text("Manufacturer Data: ${beaconData.manufacturerData.toHexString().uppercase()}", style = logTextFont, maxLines = 2, overflow = TextOverflow.Visible)
         Text("Manufacturer ID: ${beaconData.manufacturerId.toHexString()}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text("Transmit Power Level: ${beaconData.txPowerClaimed}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)

@@ -10,7 +10,7 @@
         android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"
         android:maxSdkVersion="28"/>
-
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 <!--    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />-->
 <!--    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />-->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
@@ -35,6 +35,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".manager.NotificationService" android:stopWithTask="true"/>
     </application>
 
 </manifest>
