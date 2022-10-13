@@ -76,7 +76,6 @@ dependencies {
     implementation libraries.kotlinReflection
     implementation libraries.icons
     implementation libraries.accompanist
-    implementation libraries.onceBLE
     implementation libraries.hilt
     kapt libraries.hiltCompiler
     implementation libraries.hiltNavigation

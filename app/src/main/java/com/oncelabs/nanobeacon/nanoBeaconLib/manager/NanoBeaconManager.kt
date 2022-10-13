@@ -17,6 +17,7 @@ import com.oncelabs.nanobeacon.nanoBeaconLib.enums.BleState
 
 import com.oncelabs.nanobeacon.nanoBeaconLib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeacon.nanoBeaconLib.enums.ScanState
+import com.oncelabs.nanobeacon.nanoBeaconLib.extension.toHexString
 import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.NanoBeaconManagerInterface
 import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.CustomBeaconInterface
 import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.NanoBeaconDelegate
@@ -202,16 +203,15 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     private val leScanCallback: ScanCallback by lazy {
         object : ScanCallback() {
-
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
                 getContext.let {
                     result?.device?.address?.let { deviceAddress ->
-                        // Parse scan result
-                        val beaconData = NanoBeaconData(scanResult = result)
 
                         // Check for exisiting entry
                         if (!leDeviceMap.containsKey(deviceAddress)){
+                            // Parse scan result
+                            val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
                             var nanoBeacon: NanoBeacon? = null
                             // Check if match for one of the registered types
                             for (beaconType in registeredBeaconTypes){
@@ -226,7 +226,8 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                             }
                         // Device already present
                         } else {
-
+                            // Parse scan result
+                            val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
                             leDeviceMap[deviceAddress]?.let {
                                 it.newBeaconData(beaconData = beaconData)
                                 beaconScope.launch {
