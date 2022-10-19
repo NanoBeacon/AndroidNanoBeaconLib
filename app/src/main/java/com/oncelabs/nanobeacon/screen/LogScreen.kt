@@ -2,6 +2,7 @@ package com.oncelabs.nanobeacon.screen
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -12,14 +13,18 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
@@ -53,14 +58,33 @@ private fun LogScreenContent(
 ) {
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(false)}
-    val autoScrollEnabled by remember { mutableStateOf(true) }
+    var autoScrollEnabled by remember { mutableStateOf(true) }
 
-    InplayTopBar("Log")
+    // listen for scroll events so we can disable auto-scroll
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                // On scroll ended detection
+                autoScrollEnabled = false
+                return super.onPostFling(consumed, available)
+            }
+        }
+    }
+
+    InplayTopBar(
+        title = "Log",
+        primaryButtonIcon = if(!autoScrollEnabled) Icons.Filled.ArrowDownward else null,
+        primaryButtonAction = {
+            autoScrollEnabled = true
+        }
+    )
+
     LazyColumn(
         modifier = Modifier
             .padding(bottom = 80.dp, top = 80.dp)
             .fillMaxSize()
-            .background(MaterialTheme.colors.background),
+            .background(MaterialTheme.colors.background)
+            .nestedScroll(nestedScrollConnection),
         horizontalAlignment = Alignment.CenterHorizontally,
         state = listState
     ) {
