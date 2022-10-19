@@ -15,6 +15,14 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "Template"
-include ':app'
+
+ext {
+    IS_JITPACK = 'true' == System.env.JITPACK
+}
+
+if (!IS_JITPACK) {
+    rootProject.name = "Template"
+    include ':app'
+}
+
 include ':nanobeaconlib'
