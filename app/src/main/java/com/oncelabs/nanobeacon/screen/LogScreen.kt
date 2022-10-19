@@ -73,10 +73,6 @@ private fun LogScreenContent(
 
     InplayTopBar(
         title = "Log",
-        primaryButtonIcon = if(!autoScrollEnabled) Icons.Filled.ArrowDownward else null,
-        primaryButtonAction = {
-            autoScrollEnabled = true
-        }
     )
 
     LazyColumn(
@@ -108,9 +104,31 @@ private fun LogScreenContent(
     }
 
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 100.dp, end = 20.dp), verticalArrangement = Arrangement.Bottom, horizontalAlignment = Alignment.End) {
+            .padding(bottom = 100.dp, end = 20.dp),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End
+    ) {
+
+        /**Scroll enable*/
+        if(!autoScrollEnabled) {
+            FloatingActionButton(
+                onClick = { autoScrollEnabled = true },
+                backgroundColor = logFloatingButtonColor,
+                contentColor = Color.White
+            ) {
+                Icon(
+                    Icons.Default.ArrowDownward,
+                    "Enable auto-scroll",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        /** Filter options*/
         FloatingActionButton(onClick = { modalIsOpen.value = true }, backgroundColor = logFloatingButtonColor, contentColor = Color.White) {
             Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
         }

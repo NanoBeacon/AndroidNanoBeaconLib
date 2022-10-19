@@ -20,8 +20,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun InplayTopBar(
     title: String,
-    primaryButtonIcon: ImageVector? = null,
-    primaryButtonAction: () -> Unit = {}
 ) {
     TopAppBar(
         modifier = Modifier.height(75.dp),
@@ -36,18 +34,6 @@ fun InplayTopBar(
                     )
                 }
                 Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-                    /** Primary button (optional) */
-                    if (primaryButtonIcon != null) {
-                        IconButton(onClick = primaryButtonAction) {
-                            Icon(
-                                primaryButtonIcon,
-                                "",
-                                Modifier.size(35.dp),
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                    }
-
                     Image(
                         painter = painterResource(id = com.oncelabs.nanobeacon.R.drawable.nanobeacon_logo_white_s),
                         contentDescription = "Company logo",
