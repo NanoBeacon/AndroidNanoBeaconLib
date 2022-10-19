@@ -132,7 +132,7 @@ private fun PreviewLineChart() {
             chartData.forEach { Log.d("Preview", "Chart value -> $it") }
         }
     }
-    TemplateTheme {
+    InplayTheme {
         LineChartView(
             chartData = chartData,
         )
