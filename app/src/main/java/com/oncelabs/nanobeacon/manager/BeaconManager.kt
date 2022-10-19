@@ -2,6 +2,7 @@ package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
 import com.oncelabs.nanobeacon.device.ADXL367
+import com.oncelabs.nanobeacon.device.ICM20600
 import com.oncelabs.nanobeacon.interfaces.BeaconManagerInterface
 import com.oncelabs.nanobeacon.nanoBeaconLib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeacon.nanoBeaconLib.manager.NanoBeaconManager
@@ -32,6 +33,7 @@ object BeaconManager: BeaconManagerInterface {
             context
         }
         NanoBeaconManager.register(ADXL367())
+
         addObservers()
     }
 

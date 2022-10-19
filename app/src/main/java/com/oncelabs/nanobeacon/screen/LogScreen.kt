@@ -54,22 +54,6 @@ fun LogScreenContent(
             "Disabled"
         )
 
-    val advertisementTwo: Advertisement =
-        Advertisement(
-            "10:44:10.76",
-            "00:01:02:03:04:05",
-            "-76",
-            "false",
-            "0F-03-0A",
-            "6",
-            "ADXL367_Temp",
-            "1000ms",
-            "Single Trigger",
-            "Low Trigger 1",
-            "GPIO2",
-            "Disabled"
-        )
-    val holderList : List<Advertisement> = listOf(advertisement, advertisementTwo, advertisement)
     val modalIsOpen = remember { mutableStateOf(false)}
 
     InplayTopBar("Log")

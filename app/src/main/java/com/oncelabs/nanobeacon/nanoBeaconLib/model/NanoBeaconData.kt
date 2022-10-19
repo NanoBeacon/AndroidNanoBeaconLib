@@ -9,7 +9,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 data class NanoBeaconData(
-    val scanResult: ScanResult
+    val scanResult: ScanResult,
+    private val estAdvInterval: Int,
 ){
     var bluetoothDevice = scanResult.device
     var bluetoothAddress = scanResult.device.address
@@ -34,6 +35,7 @@ data class NanoBeaconData(
     var txPowerClaimed = scanResult.scanRecord?.txPowerLevel
     var rssi = scanResult.rssi
     var serviceSolicitationUuids = if (Build.VERSION.SDK_INT >= 29) scanResult.scanRecord?.serviceSolicitationUuids else null
+    var estimatedAdvInterval = estAdvInterval
 
     private fun parseManufacturerData(data: SparseArray<ByteArray>?): Pair<ByteArray, Int> {
         var byteArray = byteArrayOf()
