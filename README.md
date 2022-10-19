@@ -17,5 +17,4 @@
 - [Google Material Icons](https://fonts.google.com/icons)
 - [Kotest](https://github.com/kotest/kotest)
 - [Mockk](https://github.com/mockk/mockk)
-- [onceBLE](https://github.com/onceLabs/onceBLE-Android)
 - [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)

@@ -2,6 +2,8 @@ package com.oncelabs.nanobeacon.components
 
 import android.bluetooth.le.ScanResult
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,32 +16,90 @@ import com.oncelabs.nanobeacon.model.Advertisement
 import com.oncelabs.nanobeacon.nanoBeaconLib.extension.toHexString
 import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeaconData
 import com.oncelabs.nanobeacon.ui.theme.logTextFont
+import java.util.*
+import kotlin.math.log
+import kotlin.math.max
+import kotlin.random.Random
 
 @Composable
-fun LogAdvertisementCard(beaconData: NanoBeaconData) {
+fun LogAdvertisementCard(data: BeaconDataEntry) {
     Column(
         Modifier
             .fillMaxWidth()
             .height(250.dp)) {
         Text("<-----------Advertisement------------->", style = logTextFont, maxLines = 1)
-        Text(beaconData.timeStampFormatted, style = logTextFont, maxLines = 1)
+
+        //Text(beaconData.timeStampFormatted, style = logTextFont, maxLines = 1)
+        DataLine(title = "", data = data.timestamp, maxLines = 1)
         Spacer(Modifier.height(10.dp))
-        Text("BLE Address: ${beaconData.bluetoothAddress}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("RSSI: ${beaconData.rssi}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("Estimated Adv Interval: ${beaconData.estimatedAdvInterval}ms", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("Manufacturer Data: ${beaconData.manufacturerData.toHexString().uppercase()}", style = logTextFont, maxLines = 2, overflow = TextOverflow.Visible)
-        Text("Manufacturer ID: ${beaconData.manufacturerId.toHexString()}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("Transmit Power Level: ${beaconData.txPowerClaimed}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("Local Name: ${beaconData.name}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("Flags: ${beaconData.flags}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("TX Power Observed: ${beaconData.transmitPowerObserved}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("Primary Phy: ${beaconData.primaryPhy}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text("Secondary Phy: ${beaconData.secondaryPhy}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        DataLine(title = "BLE Address", data = data.address, maxLines = 1)
+        DataLine(title = "RSSI", data = data.rssi, maxLines = 1)
+        DataLine(title = "Estimated Adv Interval", data = "${data.advInterval}ms", maxLines = 1)
+        DataLine(title = "Manufacturer Data", data = data.manufacturerData, maxLines = 2)
+        DataLine(title = "Manufacturer ID", data = data.manufacturerId, maxLines = 1)
+        DataLine(title = "Transmit Power Level", data = data.txPower, maxLines = 1)
+        DataLine(title = "Local Name", data = data.localName, maxLines = 1)
+        DataLine(title = "Flags", data = data.flags, maxLines = 1)
+        DataLine(title = "TX Power Observed", data = data.txPowerObserved, maxLines = 1)
+        DataLine(title = "Primary Phy", data = data.primaryPhy, maxLines = 1)
+        DataLine(title = "Secondary Phy", data = data.secondaryPhy, maxLines = 1)
+
+        // TODO: Not used?
         //Text("Sensor Trigger Source: ${advertisement.sensorTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
         //Text("GPIO Trigger Source: ${advertisement.gpioTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
         //Text("Data Encryption: ${advertisement.dataEncryption}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
+}
 
+@Composable
+fun DataLine(
+    title: String,
+    data: String,
+    maxLines: Int,
+) {
+    Text(
+        "${if(title.isNotEmpty()) "$title: " else ""}$data",
+        style = logTextFont,
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+/**
+ * Testable model for BeaconData so we can use Previews
+ */
+data class BeaconDataEntry(
+    val address: String,
+    val timestamp: String,
+    val rssi: String,
+    val advInterval: String,
+    val manufacturerData: String,
+    val manufacturerId: String,
+    val txPower: String,
+    val localName: String,
+    val flags: String,
+    val txPowerObserved: String,
+    val primaryPhy: String,
+    val secondaryPhy: String,
+) {
+    companion object {
+        fun getRandomBeaconDataEntry(): BeaconDataEntry {
+            return BeaconDataEntry(
+                address = "${Random.nextDouble(1000.0, 9999.0)}",
+                timestamp = Date().time.toString(),
+                rssi = "${Random.nextInt(200)}",
+                advInterval = "${Random.nextInt(200)}",
+                manufacturerData = "${Random.nextInt(200)}",
+                manufacturerId = "${Random.nextInt(200)}",
+                txPower = "${Random.nextInt(200)}",
+                localName = "${Random.nextInt(200)}",
+                flags = "${Random.nextInt(200)}",
+                txPowerObserved = "${Random.nextInt(200)}",
+                primaryPhy = "${Random.nextInt(200)}",
+                secondaryPhy = "${Random.nextInt(200)}",
+            )
+        }
+    }
 }
 
 @Preview
@@ -51,11 +111,7 @@ fun LogAdvertisementCard(beaconData: NanoBeaconData) {
 @Preview(name = "PIXEL_4_XL", device = Devices.PIXEL_4_XL)
 @Composable
 fun LogAdvertisementCardPreview() {
-//    val advertisement: NanoBeaconData = NanoBeaconData(
-//        ScanResult(
-//
-//        )
-//    )
-
-    //LogAdvertisementCard(advertisement)
+    Column {
+        LogAdvertisementCard(BeaconDataEntry.getRandomBeaconDataEntry())
+    }
 }
