@@ -7,8 +7,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.oncelabs.nanobeacon.components.BeaconDataEntry
 import com.oncelabs.nanobeacon.manager.BeaconManager
-import com.oncelabs.nanobeacon.nanoBeaconLib.extension.toHexString
-import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.extension.toHexString
+import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,7 +40,7 @@ class LogViewModel @Inject constructor(
      * @param nanoBeaconData the incoming beacon
      * @return [BeaconDataEntry] formatted for view
      */
-    private fun formatToEntry(nanoBeaconData: NanoBeaconData): BeaconDataEntry {
+    private fun formatToEntry(nanoBeaconData: com.oncelabs.nanobeaconlib.model.NanoBeaconData): BeaconDataEntry {
         return BeaconDataEntry(
             address = nanoBeaconData.bluetoothAddress,
             timestamp = nanoBeaconData.timeStampFormatted,

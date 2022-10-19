@@ -13,8 +13,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.model.Advertisement
-import com.oncelabs.nanobeacon.nanoBeaconLib.extension.toHexString
-import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.extension.toHexString
+import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import com.oncelabs.nanobeacon.ui.theme.logTextFont
 import java.util.*
 import kotlin.math.log
