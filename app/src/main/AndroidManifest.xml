@@ -22,7 +22,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Template"
-        android:name="com.oncelabs.nanobeacon.TemplateApp">
+        android:name="com.oncelabs.nanobeacon.InplayApp">
         <activity
             android:name="com.oncelabs.nanobeacon.MainActivity"
             android:exported="true"

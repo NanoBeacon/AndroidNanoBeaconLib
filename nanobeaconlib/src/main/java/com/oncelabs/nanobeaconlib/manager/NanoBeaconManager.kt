@@ -213,7 +213,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                         if (!leDeviceMap.containsKey(deviceAddress)){
                             // Parse scan result
                             val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
-                            var nanoBeacon: NanoBeacon? = null
+                            var nanoBeacon: NanoBeacon?
                             // Check if match for one of the registered types
                             for (beaconType in registeredBeaconTypes){
                                 beaconType.isTypeMatchFor(beaconData, getContext(), this@NanoBeaconManager)?.let { customBeacon ->
