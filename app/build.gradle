@@ -9,7 +9,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.oncelabs.template"
+        applicationId "com.oncelabs.nanobeacon"
         minSdk 27
         targetSdk 32
         versionCode 1

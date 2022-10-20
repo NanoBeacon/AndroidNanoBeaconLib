@@ -21,7 +21,7 @@ ext {
 }
 
 if (!IS_JITPACK) {
-    rootProject.name = "Template"
+    rootProject.name = "Inplay"
     include ':app'
 }
 

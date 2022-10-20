@@ -42,7 +42,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private val beaconScope = CoroutineScope(Dispatchers.IO)
     private val REQUEST_ENABLE_BT = 3
 
-    private val _scanState = MutableStateFlow<ScanState>(ScanState.UNKNOWN)
+    private val _scanState = MutableStateFlow(ScanState.UNKNOWN)
     private var scanState: StateFlow<ScanState> = _scanState.asStateFlow()
 
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
