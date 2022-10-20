@@ -7,10 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.FilterAlt
@@ -54,6 +51,7 @@ private fun LogScreenContent(
     val modalIsOpen = remember { mutableStateOf(false)}
     var autoScrollEnabled by remember { mutableStateOf(true) }
     val searchText = remember { mutableStateOf(TextFieldValue("")) }
+    var filterMenuExpanded by remember { mutableStateOf(false) }
 
     // listen for scroll events so we can disable auto-scroll
     val nestedScrollConnection = remember {
@@ -85,7 +83,14 @@ private fun LogScreenContent(
 
             /**Filter results drop down*/
             FilterButton {
-                // TODO: toggle filter view
+                filterMenuExpanded = !filterMenuExpanded
+            }
+        }
+
+        ExpandableCard(expanded = filterMenuExpanded) {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Spacer(Modifier.height(32.dp))
+                Text(text = "Put filters here!")
             }
         }
 
