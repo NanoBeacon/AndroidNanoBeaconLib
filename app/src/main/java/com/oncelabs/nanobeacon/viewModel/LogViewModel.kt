@@ -7,6 +7,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.oncelabs.nanobeacon.components.BeaconDataEntry
 import com.oncelabs.nanobeacon.manager.BeaconManager
+import com.oncelabs.nanobeacon.model.FilterOption
+import com.oncelabs.nanobeacon.model.FilterType
 import com.oncelabs.nanobeaconlib.extension.toHexString
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +21,10 @@ class LogViewModel @Inject constructor(
 ): AndroidViewModel(application) {
 
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
+    private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
+
     val beaconDataEntries: LiveData<List<BeaconDataEntry>> = _beaconDataEntries
+    val filters: LiveData<List<FilterOption>> = _filters
 
     init {
         addObservers()
@@ -40,7 +45,7 @@ class LogViewModel @Inject constructor(
      * @param nanoBeaconData the incoming beacon
      * @return [BeaconDataEntry] formatted for view
      */
-    private fun formatToEntry(nanoBeaconData: com.oncelabs.nanobeaconlib.model.NanoBeaconData): BeaconDataEntry {
+    private fun formatToEntry(nanoBeaconData: NanoBeaconData): BeaconDataEntry {
         return BeaconDataEntry(
             address = nanoBeaconData.bluetoothAddress,
             timestamp = nanoBeaconData.timeStampFormatted,
@@ -55,5 +60,19 @@ class LogViewModel @Inject constructor(
             primaryPhy = "${nanoBeaconData.primaryPhy}",
             secondaryPhy = "${nanoBeaconData.secondaryPhy}"
         )
+    }
+
+    /**
+     * Mutate a specified [type] filter value
+     */
+    fun setFilter(type: FilterType, value: Any?, enabled: Boolean) {
+        val index = _filters.value?.indexOfFirst { it.filterType == type }
+        if(index != -1 && index != null) {
+            val filterCopy = _filters.value?.toMutableList()
+            _filters.value?.get(index)?.value = value
+            _filters.value?.get(index)?.enabled = enabled
+            _filters.value = listOf()
+            _filters.value = filterCopy
+        }
     }
 }

@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.components.*
+import com.oncelabs.nanobeacon.model.FilterInputType
+import com.oncelabs.nanobeacon.model.FilterOption
+import com.oncelabs.nanobeacon.model.FilterType
 import com.oncelabs.nanobeacon.ui.theme.InplayTheme
 import com.oncelabs.nanobeacon.ui.theme.logFloatingButtonColor
 import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
@@ -38,14 +41,22 @@ fun LogScreen(
 ) {
     val listState = rememberLazyListState()
     val beaconDataLog by logDataViewModel.beaconDataEntries.observeAsState(initial = listOf())
+    val filters by logDataViewModel.filters.observeAsState(initial = listOf())
 
-    LogScreenContent(beaconDataLog = beaconDataLog, listState = listState)
+    LogScreenContent(
+        beaconDataLog = beaconDataLog,
+        listState = listState,
+        filters = filters,
+        onFilterChange = logDataViewModel::setFilter
+    )
 }
 
 @Composable
 private fun LogScreenContent(
     beaconDataLog: List<BeaconDataEntry>,
     listState: LazyListState,
+    filters: List<FilterOption>,
+    onFilterChange: (FilterType, Any?, Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(false)}
@@ -87,11 +98,12 @@ private fun LogScreenContent(
             }
         }
 
+        /**Filter view*/
         ExpandableCard(expanded = filterMenuExpanded) {
-            Column(modifier = Modifier.padding(8.dp)) {
-                Spacer(Modifier.height(32.dp))
-                Text(text = "Put filters here!")
-            }
+            FilterView(
+                filters = filters,
+                onFilterChange = onFilterChange
+            )
         }
 
         LazyColumn(
@@ -199,6 +211,76 @@ fun FilterButton(
 }
 
 @Composable
+private fun FilterView(
+    filters: List<FilterOption>,
+    onFilterChange: (FilterType, Any?, Boolean) -> Unit
+) {
+    Column(Modifier.padding(8.dp)) {
+        filters.forEach {
+            FilterCard(filter = it, onFilterChange = onFilterChange)
+        }
+    }
+}
+
+@Composable
+private fun FilterCard(
+    filter: FilterOption,
+    onFilterChange: (FilterType, Any?, Boolean) -> Unit
+) {
+    when(filter.filterType.getInputType()) {
+        FilterInputType.BINARY -> {/**Probably a toggle button*/}
+        FilterInputType.SLIDER -> SliderFilterCard(
+            filter = filter,
+            onChange = {
+                onFilterChange(filter.filterType, it, false)
+            }
+        )
+    }
+}
+
+/**
+ * Filter cards to be used with Slider filters
+ */
+@Composable
+private fun SliderFilterCard(
+    filter: FilterOption,
+    onChange: (Float) -> Unit
+) {
+    check(filter.filterType.getInputType() == FilterInputType.SLIDER)
+    val lower: Float = filter.filterType.getRange()?.first?.toFloat() ?: 0f
+    val upper: Float = filter.filterType.getRange()?.second?.toFloat() ?: 100f
+    val range = lower..upper
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            filter.filterType.getName(),
+            modifier = Modifier
+                .weight(1f)
+        )
+        Slider(
+            value = filter.value as? Float ?: 0f,
+            onValueChange = {
+                onChange(it)
+            },
+            valueRange = (
+                range
+            ),
+            modifier = Modifier
+                .weight(2f)
+        )
+        Spacer(modifier = Modifier.weight(.25f))
+        Text(
+            (filter.value as? Float)?.toInt().toString(),
+            modifier = Modifier
+                .weight(.5f)
+        )
+        Spacer(modifier = Modifier.weight(.25f))
+    }
+}
+
+@Composable
 @Preview
 fun PreviewLogScreen() {
     InplayTheme {
@@ -217,6 +299,13 @@ fun PreviewLogScreen() {
             }
         }
 
-        LogScreenContent(beaconDataLog = logs, listState = state)
+        LogScreenContent(
+            beaconDataLog = logs,
+            listState = state,
+            filters = listOf(),
+            onFilterChange = { _, _, _ ->
+
+            }
+        )
     }
 }
