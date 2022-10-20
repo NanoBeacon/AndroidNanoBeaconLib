@@ -9,10 +9,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -28,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.components.*
 import com.oncelabs.nanobeacon.ui.theme.InplayTheme
 import com.oncelabs.nanobeacon.ui.theme.logFloatingButtonColor
+import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
 import com.oncelabs.nanobeacon.viewModel.LogViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -63,11 +66,28 @@ private fun LogScreenContent(
         }
     }
     Column {
+        /**Top bar*/
         InplayTopBar(title = "Log")
-        SearchView(
-            state = searchText,
-            placeholder = "Placeholder Text"
-        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            /**Search results*/
+            SearchView(
+                modifier = Modifier
+                    .weight(1f),
+                state = searchText,
+                placeholder = "Placeholder Text"
+            )
+
+            /**Filter results drop down*/
+            FilterButton {
+                // TODO: toggle filter view
+            }
+        }
 
         LazyColumn(
             modifier = Modifier
@@ -146,6 +166,24 @@ private fun LogScreenContent(
                 "wef",
                 "Wef"
             )
+        )
+    }
+}
+
+@Composable
+fun FilterButton(
+    onClick: () -> Unit
+) {
+    IconButton(
+        modifier = Modifier
+            .background(logModalItemBackgroundColor)
+            .fillMaxHeight(),
+        onClick = onClick
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Tune,
+            contentDescription = "Tune",
+            tint = Color.White
         )
     }
 }

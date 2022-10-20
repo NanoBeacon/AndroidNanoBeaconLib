@@ -1,6 +1,5 @@
 package com.oncelabs.nanobeacon.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
@@ -23,6 +22,7 @@ import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
 
 @Composable
 fun SearchView(
+    modifier: Modifier = Modifier,
     state: MutableState<TextFieldValue>,
     placeholder: String,
 ) {
@@ -34,8 +34,7 @@ fun SearchView(
         placeholder = {
             Text(placeholder)
         },
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = modifier,
         textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
         leadingIcon = {
             Icon(
@@ -84,7 +83,7 @@ fun SearchView(
 fun SearchViewPreview() {
     val textState = remember { mutableStateOf(TextFieldValue("")) }
     SearchView(
-        textState,
-        "placeholder"
+        state = textState,
+        placeholder = "placeholder"
     )
 }
