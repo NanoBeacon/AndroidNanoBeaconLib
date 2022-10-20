@@ -40,7 +40,7 @@ fun LogScreen(
     logDataViewModel: LogViewModel = hiltViewModel()
 ) {
     val listState = rememberLazyListState()
-    val beaconDataLog by logDataViewModel.beaconDataEntries.observeAsState(initial = listOf())
+    val beaconDataLog by logDataViewModel.filteredBeaconDataEntries.observeAsState(initial = listOf())
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
 
     LogScreenContent(

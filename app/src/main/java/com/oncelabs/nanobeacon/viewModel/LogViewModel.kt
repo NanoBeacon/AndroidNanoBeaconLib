@@ -13,21 +13,28 @@ import com.oncelabs.nanobeaconlib.extension.toHexString
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
+import kotlin.concurrent.scheduleAtFixedRate
 
 @HiltViewModel
 class LogViewModel @Inject constructor(
     application: Application
 ): AndroidViewModel(application) {
 
+    private var filterTimer: TimerTask? = null
+
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
+    private val _filteredBeaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
 
     val beaconDataEntries: LiveData<List<BeaconDataEntry>> = _beaconDataEntries
+    val filteredBeaconDataEntries: LiveData<List<BeaconDataEntry>> =_filteredBeaconDataEntries
     val filters: LiveData<List<FilterOption>> = _filters
 
     init {
         addObservers()
+        startFilterTimer()
     }
 
     private fun addObservers(){
@@ -37,6 +44,16 @@ class LogViewModel @Inject constructor(
                 beaconEntriesCopy.add(formatToEntry(nanoBeaconData = it))
                 _beaconDataEntries.postValue(beaconEntriesCopy)
             }
+        }
+    }
+
+    /**
+     * Filter all results on timer
+     */
+    private fun startFilterTimer() {
+        filterTimer?.cancel()
+        filterTimer = Timer().scheduleAtFixedRate(0, 1000) {
+            _filteredBeaconDataEntries.postValue(filterResults(unfilteredBeacons = _beaconDataEntries.value ?: listOf()))
         }
     }
 
@@ -60,6 +77,23 @@ class LogViewModel @Inject constructor(
             primaryPhy = "${nanoBeaconData.primaryPhy}",
             secondaryPhy = "${nanoBeaconData.secondaryPhy}"
         )
+    }
+
+    private fun filterResults(unfilteredBeacons: List<BeaconDataEntry>): List<BeaconDataEntry> {
+        var filteredList = unfilteredBeacons
+
+        _filters.value?.let { filters ->
+            for(filter in filters) {
+                when(filter.filterType) {
+                    FilterType.RSSI -> {
+                        filteredList = filteredList.filter {
+                            (it.rssi.toIntOrNull() ?: 0) > (filter.value as? Int ?: 0)
+                        }
+                    }
+                }
+            }
+        }
+        return filteredList
     }
 
     /**
