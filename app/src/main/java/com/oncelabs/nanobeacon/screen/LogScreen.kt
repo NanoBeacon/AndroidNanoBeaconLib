@@ -98,7 +98,12 @@ private fun LogScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             state = listState
         ) {
-            items(beaconDataLog) {
+            items(
+                if(searchText.value.text.isNotEmpty()) {
+                    beaconDataLog.filter { it.localName.contains(searchText.value.text) }
+                } else {
+                    beaconDataLog
+                }) {
                 Row(Modifier.fillMaxWidth()) {
                     Spacer(Modifier.weight(0.1f))
                     Column(Modifier.weight(0.8f)) {
