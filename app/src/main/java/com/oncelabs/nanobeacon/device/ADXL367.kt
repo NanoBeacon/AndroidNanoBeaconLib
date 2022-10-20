@@ -4,12 +4,12 @@ import android.content.Context
 import android.util.Log
 import com.oncelabs.nanobeacon.manager.NotificationService
 import com.oncelabs.nanobeacon.model.ADXL367Data
-import com.oncelabs.nanobeacon.nanoBeaconLib.extension.toHexString
-import com.oncelabs.nanobeacon.nanoBeaconLib.extension.toShort
-import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.NanoBeaconDelegate
-import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.CustomBeaconInterface
-import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeacon
-import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.extension.toHexString
+import com.oncelabs.nanobeaconlib.extension.toShort
+import com.oncelabs.nanobeaconlib.interfaces.CustomBeaconInterface
+import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
+import com.oncelabs.nanobeaconlib.model.NanoBeacon
+import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,13 +17,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.experimental.and
-import kotlin.experimental.or
 
 class ADXL367(
     data: NanoBeaconData? = null,
     val context: Context? = null,
     delegate: NanoBeaconDelegate? = null
-):NanoBeacon(
+): NanoBeacon(
     beaconData = data,
     context = context,
     delegate = delegate
@@ -45,7 +44,7 @@ class ADXL367(
 
     private var localHistoricalADXL367Data: MutableList<Pair<Long, ADXL367Data>> = mutableListOf()
 
-    override fun isTypeMatchFor(beaconData: NanoBeaconData, context: Context, delegate: NanoBeaconDelegate): NanoBeacon? {
+    override fun isTypeMatchFor(beaconData: NanoBeaconData, context: Context, delegate: com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate): NanoBeacon? {
         if (beaconData.name == "ADXL367_Temp"){
             return ADXL367(beaconData, context, delegate)
         }

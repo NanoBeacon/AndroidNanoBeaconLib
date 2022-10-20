@@ -2,12 +2,11 @@ package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
 import com.oncelabs.nanobeacon.device.ADXL367
-import com.oncelabs.nanobeacon.device.ICM20600
 import com.oncelabs.nanobeacon.interfaces.BeaconManagerInterface
-import com.oncelabs.nanobeacon.nanoBeaconLib.enums.NanoBeaconEvent
-import com.oncelabs.nanobeacon.nanoBeaconLib.manager.NanoBeaconManager
-import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeacon
-import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
+import com.oncelabs.nanobeaconlib.manager.NanoBeaconManager
+import com.oncelabs.nanobeaconlib.model.NanoBeacon
+import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

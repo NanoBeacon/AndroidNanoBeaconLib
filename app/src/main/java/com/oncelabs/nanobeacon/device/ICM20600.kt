@@ -1,10 +1,10 @@
 package com.oncelabs.nanobeacon.device
 
 import android.content.Context
-import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.CustomBeaconInterface
-import com.oncelabs.nanobeacon.nanoBeaconLib.interfaces.NanoBeaconDelegate
-import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeacon
-import com.oncelabs.nanobeacon.nanoBeaconLib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.interfaces.CustomBeaconInterface
+import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
+import com.oncelabs.nanobeaconlib.model.NanoBeacon
+import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 
 class ICM20600(
     data: NanoBeaconData? = null,

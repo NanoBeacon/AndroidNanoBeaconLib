@@ -1,0 +1,3 @@
+package com.oncelabs.nanobeaconlib.interfaces
+
+interface NanoBeaconDelegate
