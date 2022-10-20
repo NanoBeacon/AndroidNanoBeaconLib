@@ -1,24 +1,18 @@
 package com.oncelabs.nanobeacon.components
 
-import android.bluetooth.le.ScanResult
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.oncelabs.nanobeacon.model.Advertisement
-import com.oncelabs.nanobeaconlib.extension.toHexString
-import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import com.oncelabs.nanobeacon.ui.theme.logTextFont
 import java.util.*
-import kotlin.math.log
-import kotlin.math.max
 import kotlin.random.Random
 
 @Composable
@@ -81,6 +75,7 @@ data class BeaconDataEntry(
     val txPowerObserved: String,
     val primaryPhy: String,
     val secondaryPhy: String,
+    val searchableString: String,
 ) {
     companion object {
         fun getRandomBeaconDataEntry(): BeaconDataEntry {
@@ -97,6 +92,7 @@ data class BeaconDataEntry(
                 txPowerObserved = "${Random.nextInt(200)}",
                 primaryPhy = "${Random.nextInt(200)}",
                 secondaryPhy = "${Random.nextInt(200)}",
+                searchableString = ""
             )
         }
     }

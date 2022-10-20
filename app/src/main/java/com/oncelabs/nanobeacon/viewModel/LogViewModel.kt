@@ -75,7 +75,8 @@ class LogViewModel @Inject constructor(
             flags = "${nanoBeaconData.flags}",
             txPowerObserved = "${nanoBeaconData.transmitPowerObserved}",
             primaryPhy = "${nanoBeaconData.primaryPhy}",
-            secondaryPhy = "${nanoBeaconData.secondaryPhy}"
+            secondaryPhy = "${nanoBeaconData.secondaryPhy}",
+            searchableString = nanoBeaconData.searchableString
         )
     }
 

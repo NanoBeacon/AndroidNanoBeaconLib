@@ -117,7 +117,7 @@ private fun LogScreenContent(
         ) {
             items(
                 if(searchText.value.text.isNotEmpty()) {
-                    beaconDataLog.filter { it.localName.contains(searchText.value.text) }
+                    beaconDataLog.filter { it.searchableString.contains(searchText.value.text) }
                 } else {
                     beaconDataLog
                 }) {
