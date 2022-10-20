@@ -42,7 +42,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private val beaconScope = CoroutineScope(Dispatchers.IO)
     private val REQUEST_ENABLE_BT = 3
 
-    private val _scanState = MutableStateFlow<ScanState>(ScanState.UNKNOWN)
+    private val _scanState = MutableStateFlow(ScanState.UNKNOWN)
     private var scanState: StateFlow<ScanState> = _scanState.asStateFlow()
 
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
@@ -63,6 +63,20 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         if (!bluetoothAdapter.isEnabled){
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             NanoBeaconManager.getContext.let {
+                if (ActivityCompat.checkSelfPermission(
+                        getContext(),
+                        Manifest.permission.BLUETOOTH_CONNECT
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return
+                }
                 (it() as Activity).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
         }
@@ -213,7 +227,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                         if (!leDeviceMap.containsKey(deviceAddress)){
                             // Parse scan result
                             val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
-                            var nanoBeacon: NanoBeacon? = null
+                            var nanoBeacon: NanoBeacon?
                             // Check if match for one of the registered types
                             for (beaconType in registeredBeaconTypes){
                                 beaconType.isTypeMatchFor(beaconData, getContext(), this@NanoBeaconManager)?.let { customBeacon ->
