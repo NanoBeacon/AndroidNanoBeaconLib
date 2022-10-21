@@ -15,5 +15,14 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "Template"
-include ':app'
+
+ext {
+    IS_JITPACK = 'true' == System.env.JITPACK
+}
+
+if (!IS_JITPACK) {
+    rootProject.name = "Inplay"
+    include ':app'
+}
+
+include ':nanobeaconlib'

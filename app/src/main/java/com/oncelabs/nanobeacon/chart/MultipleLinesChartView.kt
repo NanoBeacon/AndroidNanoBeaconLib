@@ -193,7 +193,7 @@ private fun PreviewMultipleLinesChart() {
             chartData.forEach { Log.d("Preview", "Chart value -> $it") }
 
     }
-    TemplateTheme {
+    InplayTheme {
         MultipleLinesChartView(
             chartData = listOf(chartData, chartData2, chartData3),
         )

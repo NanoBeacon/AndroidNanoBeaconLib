@@ -65,8 +65,8 @@ fun RequestAllPermissions(
                     var show by remember { mutableStateOf(true) }
                     PermissionModal(
                         shouldShow = show,
-                        title = detailedPermission.title ?: "Unknown Permission",
-                        body = detailedPermission.description ?: "Unknown Permission",
+                        title = detailedPermission.title,
+                        body = detailedPermission.description,
                         confirmText = "Request permission",
                         denyText = "Don't ask again",
                         onConfirm = { permissionState.launchPermissionRequest(); show = false },
