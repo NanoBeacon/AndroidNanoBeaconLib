@@ -32,7 +32,6 @@ object BeaconManager: BeaconManagerInterface {
             context
         }
         NanoBeaconManager.register(ADXL367())
-
         addObservers()
     }
 
