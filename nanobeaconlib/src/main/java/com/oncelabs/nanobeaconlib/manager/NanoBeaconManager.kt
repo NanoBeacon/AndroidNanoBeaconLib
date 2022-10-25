@@ -227,19 +227,30 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                         if (!leDeviceMap.containsKey(deviceAddress)){
                             // Parse scan result
                             val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
-                            var nanoBeacon: NanoBeacon?
+                            var nanoBeacon: NanoBeacon? = null
                             // Check if match for one of the registered types
                             for (beaconType in registeredBeaconTypes){
                                 beaconType.isTypeMatchFor(beaconData, getContext(), this@NanoBeaconManager)?.let { customBeacon ->
+                                    nanoBeacon = customBeacon
+                                    leDeviceMap[deviceAddress] = nanoBeacon
                                     beaconScope.launch {
-                                        nanoBeacon = customBeacon
                                         registeredTypeFlow.emit(nanoBeacon)
-                                        leDeviceMap[deviceAddress] = nanoBeacon
                                         newBeaconDataFlow.emit(beaconData)
                                     }
                                 }
                             }
-                        // Device already present
+                            nanoBeacon?.let {} ?: run{
+                                nanoBeacon = NanoBeacon(
+                                    beaconData,
+                                    context = getContext(),
+                                    this@NanoBeaconManager
+                                )
+                                leDeviceMap[deviceAddress] = nanoBeacon
+                                beaconScope.launch {
+                                    newBeaconDataFlow.emit(beaconData)
+                                }
+                            }
+                            // Device already present
                         } else {
                             // Parse scan result
                             val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
