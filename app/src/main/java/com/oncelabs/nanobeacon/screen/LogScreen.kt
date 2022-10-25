@@ -16,12 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.components.*
@@ -67,10 +68,9 @@ private fun LogScreenContent(
     // listen for scroll events so we can disable auto-scroll
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
-            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                // On scroll ended detection
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {               autoScrollEnabled = false
                 autoScrollEnabled = false
-                return super.onPostFling(consumed, available)
+                return super.onPreScroll(available, source)
             }
         }
     }
