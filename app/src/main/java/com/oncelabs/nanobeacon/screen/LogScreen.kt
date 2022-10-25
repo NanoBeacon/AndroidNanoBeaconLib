@@ -139,40 +139,6 @@ private fun LogScreenContent(
             }
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 100.dp, end = 20.dp),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.End
-        ) {
-
-            /**Scroll enable*/
-            if (!autoScrollEnabled) {
-                FloatingActionButton(
-                    onClick = { autoScrollEnabled = true },
-                    backgroundColor = logFloatingButtonColor,
-                    contentColor = Color.White
-                ) {
-                    Icon(
-                        Icons.Default.ArrowDownward,
-                        "Enable auto-scroll",
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            /** Filter options*/
-            FloatingActionButton(
-                onClick = { modalIsOpen.value = true },
-                backgroundColor = logFloatingButtonColor,
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
-            }
-        }
 
         ProjectConfigurationModal(
             isOpen = modalIsOpen.value,
@@ -189,6 +155,41 @@ private fun LogScreenContent(
                 "Wef"
             )
         )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 100.dp, end = 20.dp),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End
+    ) {
+
+        /**Scroll enable*/
+        if (!autoScrollEnabled) {
+            FloatingActionButton(
+                onClick = { autoScrollEnabled = true },
+                backgroundColor = logFloatingButtonColor,
+                contentColor = Color.White
+            ) {
+                Icon(
+                    Icons.Default.ArrowDownward,
+                    "Enable auto-scroll",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        /** Filter options*/
+        FloatingActionButton(
+            onClick = { modalIsOpen.value = true },
+            backgroundColor = logFloatingButtonColor,
+            contentColor = Color.White
+        ) {
+            Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
+        }
     }
 }
 
