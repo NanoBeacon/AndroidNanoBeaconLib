@@ -7,15 +7,16 @@ val iconSelected = Color(0xFF72BAF5)
 val bottomNavBackground = Color(0xFF232323)
 val topBarBackground = Color(0xFF232323)
 
-
 val cardBackground =  Color(0xFF232323)
 
 val logTextColor = Color.White
+val placeholderTextColor = Color.White.copy(0.5f)
+val logItemTitleColor = Color(0xFF8DCEE8)
+val logItemSeparatorColor = Color.White
 val logAddButtonColor = Color(0xFF72BAF5)
 val logFloatingButtonColor = Color(0xFF72BAF5)
 val logModalItemBackgroundColor = Color(0xFF393939)
 val logModalDoneButtonColor = Color(0xFF5E646D)
-
 
 val chartColor = Color(0xFF8DCEE8)
 val zLineColor = Color(0xFFE55857)
