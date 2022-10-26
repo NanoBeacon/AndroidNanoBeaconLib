@@ -68,7 +68,7 @@ private fun LogScreenContent(
     // listen for scroll events so we can disable auto-scroll
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {               autoScrollEnabled = false
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 autoScrollEnabled = false
                 return super.onPreScroll(available, source)
             }
@@ -86,10 +86,9 @@ private fun LogScreenContent(
         ) {
             /**Search results*/
             SearchView(
-                modifier = Modifier
-                    .weight(1f),
+                modifier = Modifier.weight(1f),
                 state = searchText,
-                placeholder = "Placeholder Text"
+                placeholder = "BT Addr, Manufacturer Data..."
             )
 
             /**Filter results drop down*/
@@ -122,11 +121,11 @@ private fun LogScreenContent(
                     beaconDataLog
                 }) {
                 Row(Modifier.fillMaxWidth()) {
-                    Spacer(Modifier.weight(0.1f))
-                    Column(Modifier.weight(0.8f)) {
+                    Spacer(Modifier.weight(0.05f))
+                    Column(Modifier.weight(0.9f)) {
                         LogAdvertisementCard(data = it)
                     }
-                    Spacer(Modifier.weight(0.1f))
+                    Spacer(Modifier.weight(0.05f))
                 }
                 Spacer(Modifier.height(20.dp))
             }
@@ -180,16 +179,16 @@ private fun LogScreenContent(
             }
         }
 
-        Spacer(Modifier.height(8.dp))
-
-        /** Filter options*/
-        FloatingActionButton(
-            onClick = { modalIsOpen.value = true },
-            backgroundColor = logFloatingButtonColor,
-            contentColor = Color.White
-        ) {
-            Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
-        }
+//        Spacer(Modifier.height(8.dp))
+//
+//        /** Filter options*/
+//        FloatingActionButton(
+//            onClick = { modalIsOpen.value = true },
+//            backgroundColor = logFloatingButtonColor,
+//            contentColor = Color.White
+//        ) {
+//            Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
+//        }
     }
 }
 

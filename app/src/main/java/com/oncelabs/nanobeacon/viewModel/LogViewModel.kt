@@ -69,14 +69,16 @@ class LogViewModel @Inject constructor(
             rssi = "${nanoBeaconData.rssi}",
             advInterval = "${nanoBeaconData.estimatedAdvInterval}",
             manufacturerData = nanoBeaconData.manufacturerData.toHexString().uppercase(),
-            manufacturerId = nanoBeaconData.manufacturerId.toHexString(),
+            manufacturerId = nanoBeaconData.manufacturerId,
+            company = nanoBeaconData.company,
             txPower = "${nanoBeaconData.txPowerClaimed}",
             localName = nanoBeaconData.name ?: "Unknown",
             flags = "${nanoBeaconData.flags}",
             txPowerObserved = "${nanoBeaconData.transmitPowerObserved}",
             primaryPhy = "${nanoBeaconData.primaryPhy}",
             secondaryPhy = "${nanoBeaconData.secondaryPhy}",
-            searchableString = nanoBeaconData.searchableString
+            searchableString = nanoBeaconData.searchableString,
+            rawData = nanoBeaconData.raw?.uppercase() ?: ""
         )
     }
 

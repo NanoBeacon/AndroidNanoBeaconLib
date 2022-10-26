@@ -14,10 +14,24 @@ val helveticaNeue = FontFamily(
     Font(R.font.helvetica_neue)
 )
 
+val logItemTitleFont = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Light,
+    fontSize = 12.sp,
+    color = logItemTitleColor
+)
+
+val logItemSeparatorFont = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Light,
+    fontSize = 13.sp,
+    color = logItemSeparatorColor
+)
+
 val logTextFont = TextStyle(
     fontFamily = helveticaNeue,
-    fontWeight = FontWeight.Normal,
-    fontSize = 16.sp,
+    fontWeight = FontWeight.ExtraLight,
+    fontSize = 12.sp,
     color = logTextColor
 )
 
@@ -56,7 +70,12 @@ val logDoneFont = TextStyle(
     color = logTextColor
 )
 
-
+val placeholderFont = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Light,
+    fontSize = 14.sp,
+    color = placeholderTextColor
+)
 
 val liveCardNameFont = TextStyle(
     fontFamily = helveticaNeue,
