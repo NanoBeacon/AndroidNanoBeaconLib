@@ -22,7 +22,7 @@ fun InplayTopBar(
     title: String,
 ) {
     TopAppBar(
-        modifier = Modifier.height(75.dp),
+        modifier = Modifier.height(65.dp),
         backgroundColor = topBarBackground,
         title = {
             Box(Modifier.fillMaxSize()) {
