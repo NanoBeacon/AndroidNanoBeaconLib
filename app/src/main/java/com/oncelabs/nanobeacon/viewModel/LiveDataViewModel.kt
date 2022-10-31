@@ -1,14 +1,20 @@
 package com.oncelabs.nanobeacon.viewModel
 
 import android.app.Application
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.model.ADXL367Data
+import com.oncelabs.nanobeaconlib.enums.BleState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.collections.set
 
 
 @HiltViewModel
@@ -38,6 +44,16 @@ class LiveDataViewModel @Inject constructor(
                             }
                         }
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            BeaconManager.bleStateChange.collect { state ->
+                state.takeIf { it != null } ?: return@collect
+                if(state == BleState.AVAILABLE) {
+                    delay(3000) // Why?
+                    BeaconManager.startScanning()
                 }
             }
         }
