@@ -24,7 +24,7 @@ fun BottomNav(navController: NavController) {
     )
 
     BottomNavigation(
-        modifier = Modifier.height(75.dp),
+        modifier = Modifier.height(65.dp),
         backgroundColor = bottomNavBackground,
         contentColor = Color.White,
     ) {
@@ -46,7 +46,7 @@ fun BottomNav(navController: NavController) {
                             restoreState = true
                         }
                     },
-                    icon = { Icon(item.icon, "navIcon", modifier = Modifier.size(35.dp)) },
+                    icon = { Icon(item.icon, "navIcon", modifier = Modifier.size(25.dp)) },
                     label = { Text(text = item.title, fontSize = 14.sp) },
                     selectedContentColor = iconSelected,
                     unselectedContentColor = Color.White,

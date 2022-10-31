@@ -107,7 +107,7 @@ private fun LogScreenContent(
 
         LazyColumn(
             modifier = Modifier
-                .padding(bottom = 80.dp, top = 0.dp)
+                .padding(bottom = 0.dp, top = 0.dp)
                 .fillMaxSize()
                 .background(MaterialTheme.colors.background)
                 .nestedScroll(nestedScrollConnection),
