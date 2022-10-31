@@ -127,16 +127,17 @@ private fun LogScreenContent(
                     Spacer(Modifier.weight(0.05f))
                 }
                 Spacer(Modifier.height(20.dp))
-            }
 
-            // Scroll to last item whenever a new is added if enabled
-            if (autoScrollEnabled && beaconDataLog.lastIndex != -1) {
-                scope.launch {
-                    listState.animateScrollToItem(beaconDataLog.lastIndex)
+                // Scroll to last item whenever a new is added if enabled
+                if (autoScrollEnabled && beaconDataLog.lastIndex != -1) {
+                    LaunchedEffect(Unit) {
+                        scope.launch {
+                            listState.animateScrollToItem(beaconDataLog.lastIndex)
+                        }
+                    }
                 }
             }
         }
-
 
         ProjectConfigurationModal(
             isOpen = modalIsOpen.value,
