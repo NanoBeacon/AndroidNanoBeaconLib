@@ -3,6 +3,7 @@ package com.oncelabs.nanobeacon.manager
 import android.content.Context
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeacon.interfaces.BeaconManagerInterface
+import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeaconlib.manager.NanoBeaconManager
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
@@ -25,6 +26,9 @@ object BeaconManager: BeaconManagerInterface {
     private val _newBeaconDataFlow = MutableSharedFlow<NanoBeaconData>()
     val newBeaconDataFlow = _newBeaconDataFlow.asSharedFlow()
 
+    private val _bleStateChange = MutableSharedFlow<BleState?>()
+    val bleStateChange = _bleStateChange.asSharedFlow()
+
     private val discoveredRegisteredTypeFlow = MutableSharedFlow<NanoBeacon?>()
 
     fun init(context: Context) {
@@ -46,6 +50,7 @@ object BeaconManager: BeaconManagerInterface {
     private fun addObservers(){
         NanoBeaconManager.on(NanoBeaconEvent.DiscoveredRegisteredType(flow = discoveredRegisteredTypeFlow))
         NanoBeaconManager.on(NanoBeaconEvent.NewBeaconData(flow = _newBeaconDataFlow))
+        NanoBeaconManager.on(NanoBeaconEvent.BleStateChange(flow = _bleStateChange))
 
         scope.launch {
             discoveredRegisteredTypeFlow.collect{

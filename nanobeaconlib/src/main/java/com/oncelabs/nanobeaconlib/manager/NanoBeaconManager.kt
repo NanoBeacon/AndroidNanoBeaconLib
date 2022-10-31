@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeaconlib.manager
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -11,16 +12,13 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.util.Log
-import android.util.SparseArray
 import androidx.core.app.ActivityCompat
 import com.oncelabs.nanobeaconlib.enums.BleState
-
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeaconlib.enums.ScanState
-import com.oncelabs.nanobeaconlib.extension.toHexString
-import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconManagerInterface
 import com.oncelabs.nanobeaconlib.interfaces.CustomBeaconInterface
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
+import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconManagerInterface
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import kotlinx.coroutines.CoroutineScope
@@ -128,7 +126,12 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         registeredBeaconTypes.add(customBeacon)
     }
 
+    @SuppressLint("MissingPermission")
     override fun startScanning(){
+        if(!bluetoothAdapter.isEnabled) {
+            return
+        }
+
         getContext.let {
             if (ActivityCompat.checkSelfPermission(
                     it(),
@@ -145,7 +148,6 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 return
             }
         }
-
         bluetoothLeScanner
             .startScan(
                 scanFilters,
@@ -156,6 +158,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         _scanState.value = ScanState.SCANNING
     }
 
+    @SuppressLint("MissingPermission")
     override fun stopScanning() {
         getContext.let {
             if (ActivityCompat.checkSelfPermission(
@@ -196,12 +199,19 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                     )
 
                     when (currentState) {
-                        BluetoothAdapter.STATE_OFF ->
+                        BluetoothAdapter.STATE_OFF -> {
                             Log.d(TAG, "BluetoothAdapter State: Off")
+                            beaconScope.launch {
+                                bleStateFlow.emit(BleState.UNAVAILABLE)
+                            }
+                        }
                         BluetoothAdapter.STATE_TURNING_OFF ->
                             Log.d(TAG, "BluetoothAdapter State: Turning off")
                         BluetoothAdapter.STATE_ON -> {
                             Log.d(TAG, "BluetoothAdapter State: On")
+                            beaconScope.launch {
+                                bleStateFlow.emit(BleState.AVAILABLE)
+                            }
                         }
                         BluetoothAdapter.STATE_TURNING_ON ->
                             Log.d(TAG, "BluetoothAdapter State: Turning on")
