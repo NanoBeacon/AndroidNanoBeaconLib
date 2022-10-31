@@ -62,7 +62,7 @@ private fun LogScreenContent(
     val modalIsOpen = remember { mutableStateOf(false)}
     var autoScrollEnabled by remember { mutableStateOf(true) }
     val searchText = rememberSaveable { mutableStateOf("") }
-    var filterMenuExpanded by remember { mutableStateOf(false) }
+    var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
     // listen for scroll events so we can disable auto-scroll
     val nestedScrollConnection = remember {
