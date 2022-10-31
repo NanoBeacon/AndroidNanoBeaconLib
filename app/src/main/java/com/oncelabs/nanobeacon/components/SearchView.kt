@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
+import com.oncelabs.nanobeacon.ui.theme.placeholderFont
 
 @Composable
 fun SearchView(
@@ -32,7 +33,10 @@ fun SearchView(
             state.value = value
         },
         placeholder = {
-            Text(placeholder)
+            Text(
+                style = placeholderFont,
+                text = placeholder
+            )
         },
         modifier = modifier,
         textStyle = TextStyle(color = Color.White, fontSize = 18.sp),

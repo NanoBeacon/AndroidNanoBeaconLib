@@ -1,9 +1,6 @@
 package com.oncelabs.nanobeacon.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -11,7 +8,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.oncelabs.nanobeacon.ui.theme.logItemSeparatorFont
+import com.oncelabs.nanobeacon.ui.theme.logItemTitleFont
 import com.oncelabs.nanobeacon.ui.theme.logTextFont
+import com.oncelabs.nanobeacon.ui.theme.logTitleFont
 import java.util.*
 import kotlin.random.Random
 
@@ -20,24 +20,27 @@ fun LogAdvertisementCard(data: BeaconDataEntry) {
     Column(
         Modifier
             .fillMaxWidth()
-            .height(250.dp)) {
-        Text("<-----------Advertisement------------->", style = logTextFont, maxLines = 1)
-
-        //Text(beaconData.timeStampFormatted, style = logTextFont, maxLines = 1)
-        DataLine(title = "", data = data.timestamp, maxLines = 1)
-        Spacer(Modifier.height(10.dp))
-        DataLine(title = "BLE Address", data = data.address, maxLines = 1)
+            .wrapContentHeight()
+            .padding(top = 5.dp)
+        ){
+            //.height(30.dp)) {
+        Text("====================================", style = logItemSeparatorFont, maxLines = 1)
+        DataLine(title = "New Advertisement", data = data.timestamp, maxLines = 1)
+        Text("====================================", style = logItemSeparatorFont, maxLines = 1)
+        DataLine(title = "Address", data = data.address, maxLines = 1)
         DataLine(title = "RSSI", data = data.rssi, maxLines = 1)
         DataLine(title = "Estimated Adv Interval", data = "${data.advInterval}ms", maxLines = 1)
-        DataLine(title = "Manufacturer Data", data = data.manufacturerData, maxLines = 2)
+        DataLine(title = "Manufacturer Data", data = data.manufacturerData, maxLines = 2, separateData = true)
         DataLine(title = "Manufacturer ID", data = data.manufacturerId, maxLines = 1)
+        DataLine(title = "Company", data = data.company, maxLines = 2, separateData = false)
         DataLine(title = "Transmit Power Level", data = data.txPower, maxLines = 1)
         DataLine(title = "Local Name", data = data.localName, maxLines = 1)
         DataLine(title = "Flags", data = data.flags, maxLines = 1)
         DataLine(title = "TX Power Observed", data = data.txPowerObserved, maxLines = 1)
         DataLine(title = "Primary Phy", data = data.primaryPhy, maxLines = 1)
         DataLine(title = "Secondary Phy", data = data.secondaryPhy, maxLines = 1)
-
+        DataLine(title = "Raw", data = data.rawData, maxLines = 3, separateData = true)
+        Text("====================================", style = logItemSeparatorFont, maxLines = 1)
         // TODO: Not used?
         //Text("Sensor Trigger Source: ${advertisement.sensorTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
         //Text("GPIO Trigger Source: ${advertisement.gpioTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -50,13 +53,54 @@ fun DataLine(
     title: String,
     data: String,
     maxLines: Int,
+    separateData: Boolean = false
 ) {
-    Text(
-        "${if(title.isNotEmpty()) "$title: " else ""}$data",
-        style = logTextFont,
-        maxLines = maxLines,
-        overflow = TextOverflow.Ellipsis
-    )
+    if (!separateData || data.isEmpty()){
+        Row(modifier =
+            Modifier
+                .padding(bottom = 2.dp, top = 1.dp)
+        ) {
+            Text(
+                if (title.isNotEmpty()) "$title:  " else "",
+                style = logItemTitleFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                if (data.isNotEmpty()) data else "Not Set",
+                style = logTextFont,
+                maxLines = maxLines,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    } else {
+        Column(modifier =
+            Modifier
+                //.padding(bottom = 1.dp, top = 1.dp)
+        ) {
+            Text(
+                if (title.isNotEmpty()) "$title:  " else "",
+                style = logItemTitleFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (data.isNotEmpty()) {
+                Text(
+                    data,
+                    style = logTextFont,
+                    maxLines = maxLines,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Text(
+                    "Not Set",
+                    style = logTextFont,
+                    maxLines = maxLines,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
 }
 
 /**
@@ -69,6 +113,7 @@ data class BeaconDataEntry(
     val advInterval: String,
     val manufacturerData: String,
     val manufacturerId: String,
+    val company: String,
     val txPower: String,
     val localName: String,
     val flags: String,
@@ -76,6 +121,7 @@ data class BeaconDataEntry(
     val primaryPhy: String,
     val secondaryPhy: String,
     val searchableString: String,
+    val rawData:String
 ) {
     companion object {
         fun getRandomBeaconDataEntry(): BeaconDataEntry {
@@ -86,13 +132,15 @@ data class BeaconDataEntry(
                 advInterval = "${Random.nextInt(200)}",
                 manufacturerData = "${Random.nextInt(200)}",
                 manufacturerId = "${Random.nextInt(200)}",
+                company = "Your Company",
                 txPower = "${Random.nextInt(200)}",
                 localName = "${Random.nextInt(200)}",
                 flags = "${Random.nextInt(200)}",
                 txPowerObserved = "${Random.nextInt(200)}",
                 primaryPhy = "${Random.nextInt(200)}",
                 secondaryPhy = "${Random.nextInt(200)}",
-                searchableString = ""
+                searchableString = "",
+                rawData = "0x0000"
             )
         }
     }

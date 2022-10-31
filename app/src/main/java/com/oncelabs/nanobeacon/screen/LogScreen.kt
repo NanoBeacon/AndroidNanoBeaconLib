@@ -16,12 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.components.*
@@ -40,7 +41,7 @@ fun LogScreen(
     logDataViewModel: LogViewModel = hiltViewModel()
 ) {
     val listState = rememberLazyListState()
-    val beaconDataLog by logDataViewModel.filteredBeaconDataEntries.observeAsState(initial = listOf())
+    val beaconDataLog by logDataViewModel.beaconDataEntries.observeAsState(initial = listOf())
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
 
     LogScreenContent(
@@ -67,10 +68,9 @@ private fun LogScreenContent(
     // listen for scroll events so we can disable auto-scroll
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
-            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                // On scroll ended detection
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 autoScrollEnabled = false
-                return super.onPostFling(consumed, available)
+                return super.onPreScroll(available, source)
             }
         }
     }
@@ -86,10 +86,9 @@ private fun LogScreenContent(
         ) {
             /**Search results*/
             SearchView(
-                modifier = Modifier
-                    .weight(1f),
+                modifier = Modifier.weight(1f),
                 state = searchText,
-                placeholder = "Placeholder Text"
+                placeholder = "BT Addr, Manufacturer Data..."
             )
 
             /**Filter results drop down*/
@@ -108,7 +107,7 @@ private fun LogScreenContent(
 
         LazyColumn(
             modifier = Modifier
-                .padding(bottom = 80.dp, top = 80.dp)
+                .padding(bottom = 0.dp, top = 0.dp)
                 .fillMaxSize()
                 .background(MaterialTheme.colors.background)
                 .nestedScroll(nestedScrollConnection),
@@ -122,11 +121,11 @@ private fun LogScreenContent(
                     beaconDataLog
                 }) {
                 Row(Modifier.fillMaxWidth()) {
-                    Spacer(Modifier.weight(0.1f))
-                    Column(Modifier.weight(0.8f)) {
+                    Spacer(Modifier.weight(0.05f))
+                    Column(Modifier.weight(0.9f)) {
                         LogAdvertisementCard(data = it)
                     }
-                    Spacer(Modifier.weight(0.1f))
+                    Spacer(Modifier.weight(0.05f))
                 }
                 Spacer(Modifier.height(20.dp))
             }
@@ -139,40 +138,6 @@ private fun LogScreenContent(
             }
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 100.dp, end = 20.dp),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.End
-        ) {
-
-            /**Scroll enable*/
-            if (!autoScrollEnabled) {
-                FloatingActionButton(
-                    onClick = { autoScrollEnabled = true },
-                    backgroundColor = logFloatingButtonColor,
-                    contentColor = Color.White
-                ) {
-                    Icon(
-                        Icons.Default.ArrowDownward,
-                        "Enable auto-scroll",
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            /** Filter options*/
-            FloatingActionButton(
-                onClick = { modalIsOpen.value = true },
-                backgroundColor = logFloatingButtonColor,
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
-            }
-        }
 
         ProjectConfigurationModal(
             isOpen = modalIsOpen.value,
@@ -189,6 +154,41 @@ private fun LogScreenContent(
                 "Wef"
             )
         )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 100.dp, end = 20.dp),
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End
+    ) {
+
+        /**Scroll enable*/
+        if (!autoScrollEnabled) {
+            FloatingActionButton(
+                onClick = { autoScrollEnabled = true },
+                backgroundColor = logFloatingButtonColor,
+                contentColor = Color.White
+            ) {
+                Icon(
+                    Icons.Default.ArrowDownward,
+                    "Enable auto-scroll",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+        }
+
+//        Spacer(Modifier.height(8.dp))
+//
+//        /** Filter options*/
+//        FloatingActionButton(
+//            onClick = { modalIsOpen.value = true },
+//            backgroundColor = logFloatingButtonColor,
+//            contentColor = Color.White
+//        ) {
+//            Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
+//        }
     }
 }
 
