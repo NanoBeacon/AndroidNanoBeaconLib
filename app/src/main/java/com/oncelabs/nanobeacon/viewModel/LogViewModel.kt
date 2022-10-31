@@ -28,7 +28,6 @@ class LogViewModel @Inject constructor(
     private val _filteredBeaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
 
-    val beaconDataEntries: LiveData<List<BeaconDataEntry>> = _beaconDataEntries
     val filteredBeaconDataEntries: LiveData<List<BeaconDataEntry>> =_filteredBeaconDataEntries
     val filters: LiveData<List<FilterOption>> = _filters
 
@@ -40,7 +39,7 @@ class LogViewModel @Inject constructor(
     private fun addObservers(){
         viewModelScope.launch {
             BeaconManager.newBeaconDataFlow.collect {
-                val beaconEntriesCopy = beaconDataEntries.value?.toMutableList() ?: mutableListOf()
+                val beaconEntriesCopy = _beaconDataEntries.value?.toMutableList() ?: mutableListOf()
                 beaconEntriesCopy.add(formatToEntry(nanoBeaconData = it))
                 _beaconDataEntries.postValue(beaconEntriesCopy)
             }
@@ -72,8 +71,8 @@ class LogViewModel @Inject constructor(
             manufacturerId = nanoBeaconData.manufacturerId,
             company = nanoBeaconData.company,
             txPower = "${nanoBeaconData.txPowerClaimed}",
-            localName = nanoBeaconData.name ?: "Unknown",
-            flags = "${nanoBeaconData.flags}",
+            localName = nanoBeaconData.name,
+            flags = nanoBeaconData.flags,
             txPowerObserved = "${nanoBeaconData.transmitPowerObserved}",
             primaryPhy = "${nanoBeaconData.primaryPhy}",
             secondaryPhy = "${nanoBeaconData.secondaryPhy}",
@@ -90,7 +89,7 @@ class LogViewModel @Inject constructor(
                 when(filter.filterType) {
                     FilterType.RSSI -> {
                         filteredList = filteredList.filter {
-                            (it.rssi.toIntOrNull() ?: 0) > (filter.value as? Int ?: 0)
+                            (it.rssi.toFloatOrNull() ?: 0f) > (filter.value as? Float ?: 0f)
                         }
                     }
                 }
@@ -106,8 +105,8 @@ class LogViewModel @Inject constructor(
         val index = _filters.value?.indexOfFirst { it.filterType == type }
         if(index != -1 && index != null) {
             val filterCopy = _filters.value?.toMutableList()
-            _filters.value?.get(index)?.value = value
-            _filters.value?.get(index)?.enabled = enabled
+            filterCopy?.get(index)?.value = value
+            filterCopy?.get(index)?.enabled = enabled
             _filters.value = listOf()
             _filters.value = filterCopy
         }

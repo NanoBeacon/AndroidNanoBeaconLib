@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,7 +40,7 @@ fun LogScreen(
     logDataViewModel: LogViewModel = hiltViewModel()
 ) {
     val listState = rememberLazyListState()
-    val beaconDataLog by logDataViewModel.beaconDataEntries.observeAsState(initial = listOf())
+    val beaconDataLog by logDataViewModel.filteredBeaconDataEntries.observeAsState(initial = listOf())
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
 
     LogScreenContent(
