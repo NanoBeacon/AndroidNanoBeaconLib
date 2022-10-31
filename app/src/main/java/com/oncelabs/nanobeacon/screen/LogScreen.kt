@@ -10,10 +10,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,7 +40,7 @@ fun LogScreen(
     logDataViewModel: LogViewModel = hiltViewModel()
 ) {
     val listState = rememberLazyListState()
-    val beaconDataLog by logDataViewModel.beaconDataEntries.observeAsState(initial = listOf())
+    val beaconDataLog by logDataViewModel.filteredBeaconDataEntries.observeAsState(initial = listOf())
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
 
     LogScreenContent(
@@ -62,8 +61,8 @@ private fun LogScreenContent(
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(false)}
     var autoScrollEnabled by remember { mutableStateOf(true) }
-    val searchText = remember { mutableStateOf(TextFieldValue("")) }
-    var filterMenuExpanded by remember { mutableStateOf(false) }
+    val searchText = rememberSaveable { mutableStateOf("") }
+    var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
     // listen for scroll events so we can disable auto-scroll
     val nestedScrollConnection = remember {
@@ -115,8 +114,8 @@ private fun LogScreenContent(
             state = listState
         ) {
             items(
-                if(searchText.value.text.isNotEmpty()) {
-                    beaconDataLog.filter { it.searchableString.contains(searchText.value.text) }
+                if(searchText.value.isNotEmpty()) {
+                    beaconDataLog.filter { it.searchableString.contains(searchText.value, ignoreCase = true) }
                 } else {
                     beaconDataLog
                 }) {
@@ -128,16 +127,17 @@ private fun LogScreenContent(
                     Spacer(Modifier.weight(0.05f))
                 }
                 Spacer(Modifier.height(20.dp))
-            }
 
-            // Scroll to last item whenever a new is added if enabled
-            if (autoScrollEnabled && beaconDataLog.lastIndex != -1) {
-                scope.launch {
-                    listState.animateScrollToItem(beaconDataLog.lastIndex)
+                // Scroll to last item whenever a new is added if enabled
+                if (autoScrollEnabled && beaconDataLog.lastIndex != -1) {
+                    LaunchedEffect(Unit) {
+                        scope.launch {
+                            listState.animateScrollToItem(beaconDataLog.lastIndex)
+                        }
+                    }
                 }
             }
         }
-
 
         ProjectConfigurationModal(
             isOpen = modalIsOpen.value,

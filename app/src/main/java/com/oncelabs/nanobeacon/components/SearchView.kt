@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,7 +23,7 @@ import com.oncelabs.nanobeacon.ui.theme.placeholderFont
 @Composable
 fun SearchView(
     modifier: Modifier = Modifier,
-    state: MutableState<TextFieldValue>,
+    state: MutableState<String>,
     placeholder: String,
 ) {
     TextField(
@@ -50,11 +49,10 @@ fun SearchView(
             )
         },
         trailingIcon = {
-            if (state.value != TextFieldValue("")) {
+            if (state.value.isNotEmpty()) {
                 IconButton(
                     onClick = {
-                        state.value =
-                            TextFieldValue("") // Remove text from TextField when you press the 'X' icon
+                        state.value = ""
                     }
                 ) {
                     Icon(
@@ -85,7 +83,7 @@ fun SearchView(
 @Preview(showBackground = true)
 @Composable
 fun SearchViewPreview() {
-    val textState = remember { mutableStateOf(TextFieldValue("")) }
+    val textState = remember { mutableStateOf("") }
     SearchView(
         state = textState,
         placeholder = "placeholder"
