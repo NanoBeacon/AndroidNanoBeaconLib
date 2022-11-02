@@ -32,8 +32,9 @@ import java.util.concurrent.ConcurrentMap
 object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     private var newBeaconDataFlow = MutableSharedFlow<NanoBeaconData>()
+    private var newBeaconFlow = MutableSharedFlow<NanoBeacon>()
     private var registeredTypeFlow = MutableSharedFlow<NanoBeacon?>()
-    private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon?>()
+    private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon>()
     private var bleStateFlow = MutableSharedFlow<BleState?>()
 
     private val TAG = NanoBeaconManager::class.simpleName
@@ -41,7 +42,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private val REQUEST_ENABLE_BT = 3
 
     private val _scanState = MutableStateFlow(ScanState.UNKNOWN)
-    private var scanState: StateFlow<ScanState> = _scanState.asStateFlow()
+    val scanState: StateFlow<ScanState> = _scanState.asStateFlow()
 
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
     private var registeredBeaconTypes: MutableList<CustomBeaconInterface> = mutableListOf()
@@ -94,6 +95,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
             }
             is NanoBeaconEvent.NewBeaconData -> {
                 newBeaconDataFlow = event.flow
+            }
+            is NanoBeaconEvent.NewBeacon -> {
+                newBeaconFlow = event.flow
             }
         }
     }
@@ -235,12 +239,21 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
                         // Check for exisiting entry
                         if (!leDeviceMap.containsKey(deviceAddress)){
+
                             // Parse scan result
-                            val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+                            val beaconData =
+                                NanoBeaconData(
+                                    scanResult = result,
+                                    leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+
                             var nanoBeacon: NanoBeacon? = null
                             // Check if match for one of the registered types
                             for (beaconType in registeredBeaconTypes){
-                                beaconType.isTypeMatchFor(beaconData, getContext(), this@NanoBeaconManager)?.let { customBeacon ->
+                                beaconType.isTypeMatchFor(
+                                    beaconData,
+                                    getContext(),
+                                    this@NanoBeaconManager
+                                )?.let { customBeacon ->
                                     nanoBeacon = customBeacon
                                     leDeviceMap[deviceAddress] = nanoBeacon
                                     beaconScope.launch {
@@ -258,13 +271,22 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                                 leDeviceMap[deviceAddress] = nanoBeacon
                                 beaconScope.launch {
                                     newBeaconDataFlow.emit(beaconData)
+                                    nanoBeacon?.let { nb ->
+                                        newBeaconFlow.emit(nb)
+                                    }
                                 }
                             }
                             // Device already present
                         } else {
                             // Parse scan result
-                            val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+                            val beaconData =
+                                NanoBeaconData(
+                                    scanResult = result,
+                                    leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+
                             leDeviceMap[deviceAddress]?.let {
+
+                                // Pass new adv data to NanoBeacon Instance
                                 it.newBeaconData(beaconData = beaconData)
                                 beaconScope.launch {
                                     newBeaconDataFlow.emit(beaconData)

@@ -65,3 +65,4 @@ data class NanoBeaconData(
         return Pair(byteArray, manufacturerId)
     }
 }
+
