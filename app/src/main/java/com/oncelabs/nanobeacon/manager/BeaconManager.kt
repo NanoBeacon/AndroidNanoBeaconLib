@@ -10,19 +10,24 @@ import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 object BeaconManager: BeaconManagerInterface {
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    val scanningEnabled = NanoBeaconManager.scanState
+
+    // Registered beacon instance flow
     private val _discoveredAdxlBeacons = MutableStateFlow<List<ADXL367>>(listOf())
     val discoveredAdxlBeacons = _discoveredAdxlBeacons.asStateFlow()
 
+    // Beacon instance flow
+    private val _discoveredBeacons = MutableStateFlow<List<NanoBeacon>>(listOf())
+    val discoveredBeacons = _discoveredBeacons.asStateFlow()
+
+    // Raw beacon data flow
     private val _newBeaconDataFlow = MutableSharedFlow<NanoBeaconData>()
     val newBeaconDataFlow = _newBeaconDataFlow.asSharedFlow()
 
@@ -30,6 +35,8 @@ object BeaconManager: BeaconManagerInterface {
     val bleStateChange = _bleStateChange.asSharedFlow()
 
     private val discoveredRegisteredTypeFlow = MutableSharedFlow<NanoBeacon?>()
+    private val discoveredBeaconFlow = MutableSharedFlow<NanoBeacon>()
+    private val beaconTimeoutFlow = MutableSharedFlow<NanoBeacon>()
 
     fun init(context: Context) {
         NanoBeaconManager.init {
@@ -51,6 +58,8 @@ object BeaconManager: BeaconManagerInterface {
         NanoBeaconManager.on(NanoBeaconEvent.DiscoveredRegisteredType(flow = discoveredRegisteredTypeFlow))
         NanoBeaconManager.on(NanoBeaconEvent.NewBeaconData(flow = _newBeaconDataFlow))
         NanoBeaconManager.on(NanoBeaconEvent.BleStateChange(flow = _bleStateChange))
+        NanoBeaconManager.on(NanoBeaconEvent.NewBeacon(flow = discoveredBeaconFlow))
+        NanoBeaconManager.on(NanoBeaconEvent.BeaconDidTimeout(flow = beaconTimeoutFlow))
 
         scope.launch {
             discoveredRegisteredTypeFlow.collect{
@@ -61,6 +70,20 @@ object BeaconManager: BeaconManagerInterface {
                         }
                     }
                 }
+            }
+        }
+
+        scope.launch {
+            discoveredBeaconFlow.collect{ beacon ->
+                if (!_discoveredBeacons.value.contains(beacon)){
+                    _discoveredBeacons.value += listOf(beacon)
+                }
+            }
+        }
+
+        scope.launch {
+            beaconTimeoutFlow.collect {
+
             }
         }
     }

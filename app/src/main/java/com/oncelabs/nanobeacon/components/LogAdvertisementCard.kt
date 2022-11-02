@@ -1,17 +1,18 @@
 package com.oncelabs.nanobeacon.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.oncelabs.nanobeacon.ui.theme.logItemSeparatorFont
-import com.oncelabs.nanobeacon.ui.theme.logItemTitleFont
-import com.oncelabs.nanobeacon.ui.theme.logTextFont
-import com.oncelabs.nanobeacon.ui.theme.logTitleFont
+import com.oncelabs.nanobeacon.ui.theme.*
 import java.util.*
 import kotlin.random.Random
 
@@ -21,9 +22,9 @@ fun LogAdvertisementCard(data: BeaconDataEntry) {
         Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(top = 5.dp)
+            .background(topBarBackground, RoundedCornerShape(10.dp))
+            .padding(8.dp)
         ){
-            //.height(30.dp)) {
         Text("====================================", style = logItemSeparatorFont, maxLines = 1)
         DataLine(title = "New Advertisement", data = data.timestamp, maxLines = 1)
         Text("====================================", style = logItemSeparatorFont, maxLines = 1)

@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.Template" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/purple_700</item>
+        <item name="android:statusBarColor">@color/inplay_gray</item>
     </style>
 
 </resources>

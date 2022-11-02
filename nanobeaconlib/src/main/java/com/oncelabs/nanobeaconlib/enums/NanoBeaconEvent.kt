@@ -7,7 +7,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 sealed class NanoBeaconEvent{
     class DiscoveredRegisteredType(val flow: MutableSharedFlow<NanoBeacon?>): NanoBeaconEvent()
     class BleStateChange(val flow: MutableSharedFlow<BleState?>): NanoBeaconEvent()
-    class BeaconDidTimeout(val flow: MutableSharedFlow<NanoBeacon?>): NanoBeaconEvent()
+    class BeaconDidTimeout(val flow: MutableSharedFlow<NanoBeacon>): NanoBeaconEvent()
     class NewBeaconData(val flow: MutableSharedFlow<NanoBeaconData>): NanoBeaconEvent()
+    class NewBeacon(val flow: MutableSharedFlow<NanoBeacon>): NanoBeaconEvent()
 }
 

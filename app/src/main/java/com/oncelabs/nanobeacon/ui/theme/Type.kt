@@ -98,6 +98,13 @@ val liveSubTypeFont = TextStyle(
     color = chartColor
 )
 
+val autoScrollTogleFont = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Normal,
+    fontSize = 20.sp,
+    color = Color.White
+)
+
 
 // Set of Material typography styles to start with
 val Typography = Typography(
