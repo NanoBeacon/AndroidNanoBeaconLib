@@ -34,7 +34,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private var newBeaconDataFlow = MutableSharedFlow<NanoBeaconData>()
     private var newBeaconFlow = MutableSharedFlow<NanoBeacon>()
     private var registeredTypeFlow = MutableSharedFlow<NanoBeacon?>()
-    private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon?>()
+    private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon>()
     private var bleStateFlow = MutableSharedFlow<BleState?>()
 
     private val TAG = NanoBeaconManager::class.simpleName

@@ -34,6 +34,7 @@ import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
 import com.oncelabs.nanobeacon.ui.theme.*
 import com.oncelabs.nanobeacon.viewModel.LogViewModel
+import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.log
@@ -47,8 +48,11 @@ fun LogScreen(
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
     val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = true)
 
+    val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
+
     LogScreenContent(
         scanEnabled,
+        discoveredBeacons,
         beaconDataLog = beaconDataLog,
         listState = listState,
         filters = filters,
@@ -60,6 +64,7 @@ fun LogScreen(
 @Composable
 private fun LogScreenContent(
     scanningEnabled: Boolean,
+    discoveredBeacons: List<NanoBeaconInterface>,
     beaconDataLog: List<BeaconDataEntry>,
     listState: LazyListState,
     filters: List<FilterOption>,
@@ -125,16 +130,19 @@ private fun LogScreenContent(
             ) {
                 items(
                     if(searchText.value.isNotEmpty()) {
-                        beaconDataLog.filter {
-                            it.searchableString.contains(searchText.value, ignoreCase = true)
+                        discoveredBeacons.filter {
+                            it.beaconDataFlow.value?.searchableString?.contains(searchText.value, ignoreCase = true) == true
                         }
+                        //discoveredBeacons
                     } else {
-                        beaconDataLog
+                        //beaconDataLog
+                        discoveredBeacons
                     }) {
                     Row(Modifier.fillMaxWidth()) {
                         Spacer(Modifier.weight(0.025f))
                         Column(Modifier.weight(0.95f)) {
-                            LogAdvertisementCard(data = it)
+                            LogAdvertisementCard(beacon = it)
+                            //Text("${it.rssiFlow.collectAsState().value}", color = Color.White)
                         }
                         Spacer(Modifier.weight(0.025f))
                     }
@@ -333,6 +341,7 @@ fun PreviewLogScreen() {
 
         LogScreenContent(
             true,
+            discoveredBeacons = listOf(),
             beaconDataLog = logs,
             listState = state,
             filters = listOf(),
