@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.viewModel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +10,10 @@ import com.oncelabs.nanobeacon.components.BeaconDataEntry
 import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
+import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.extension.toHexString
+import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
+import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -22,27 +26,56 @@ class LogViewModel @Inject constructor(
     application: Application
 ): AndroidViewModel(application) {
 
+    private val TAG = LogViewModel::class.simpleName
+
     private var filterTimer: TimerTask? = null
-
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
-    private val _filteredBeaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
+    private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
+    private val _scanningEnabled = MutableLiveData(true)
+    private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
 
-    val beaconDataEntries: LiveData<List<BeaconDataEntry>> = _beaconDataEntries
-    val filteredBeaconDataEntries: LiveData<List<BeaconDataEntry>> =_filteredBeaconDataEntries
+    val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
+    val scanningEnabled: LiveData<Boolean> = _scanningEnabled
     val filters: LiveData<List<FilterOption>> = _filters
 
     init {
         addObservers()
         startFilterTimer()
+        BeaconManager.startScanning()
+    }
+
+    fun startScanning(){
+        BeaconManager.startScanning()
+    }
+
+    fun stopScanning(){
+        BeaconManager.stopScanning()
+    }
+
+    fun refresh(){
+        BeaconManager.refresh()
     }
 
     private fun addObservers(){
+
         viewModelScope.launch {
             BeaconManager.newBeaconDataFlow.collect {
-                val beaconEntriesCopy = beaconDataEntries.value?.toMutableList() ?: mutableListOf()
-                beaconEntriesCopy.add(formatToEntry(nanoBeaconData = it))
+                val beaconEntriesCopy = _beaconDataEntries.value?.toMutableList() ?: mutableListOf()
                 _beaconDataEntries.postValue(beaconEntriesCopy)
+            }
+        }
+
+        viewModelScope.launch {
+            BeaconManager.scanningEnabled.collect {
+                _scanningEnabled.postValue(it == ScanState.SCANNING)
+            }
+        }
+
+        viewModelScope.launch {
+            BeaconManager.discoveredBeacons.collect {
+                _discoveredBeacons.postValue(it)
+                Log.d(TAG, "Updated Beacon Count ${it.count()}")
             }
         }
     }
@@ -53,36 +86,11 @@ class LogViewModel @Inject constructor(
     private fun startFilterTimer() {
         filterTimer?.cancel()
         filterTimer = Timer().scheduleAtFixedRate(0, 1000) {
-            _filteredBeaconDataEntries.postValue(filterResults(unfilteredBeacons = _beaconDataEntries.value ?: listOf()))
+            _filteredDiscoveredBeacons.postValue(filterResults(unfilteredBeacons = _discoveredBeacons.value ?: listOf()))
         }
     }
 
-    /**
-     * Format the beacon class to a usable model for the view
-     * @param nanoBeaconData the incoming beacon
-     * @return [BeaconDataEntry] formatted for view
-     */
-    private fun formatToEntry(nanoBeaconData: NanoBeaconData): BeaconDataEntry {
-        return BeaconDataEntry(
-            address = nanoBeaconData.bluetoothAddress,
-            timestamp = nanoBeaconData.timeStampFormatted,
-            rssi = "${nanoBeaconData.rssi}",
-            advInterval = "${nanoBeaconData.estimatedAdvInterval}",
-            manufacturerData = nanoBeaconData.manufacturerData.toHexString().uppercase(),
-            manufacturerId = nanoBeaconData.manufacturerId,
-            company = nanoBeaconData.company,
-            txPower = "${nanoBeaconData.txPowerClaimed}",
-            localName = nanoBeaconData.name ?: "Unknown",
-            flags = "${nanoBeaconData.flags}",
-            txPowerObserved = "${nanoBeaconData.transmitPowerObserved}",
-            primaryPhy = "${nanoBeaconData.primaryPhy}",
-            secondaryPhy = "${nanoBeaconData.secondaryPhy}",
-            searchableString = nanoBeaconData.searchableString,
-            rawData = nanoBeaconData.raw?.uppercase() ?: ""
-        )
-    }
-
-    private fun filterResults(unfilteredBeacons: List<BeaconDataEntry>): List<BeaconDataEntry> {
+    private fun filterResults(unfilteredBeacons: List<NanoBeaconInterface>): List<NanoBeaconInterface> {
         var filteredList = unfilteredBeacons
 
         _filters.value?.let { filters ->
@@ -90,7 +98,7 @@ class LogViewModel @Inject constructor(
                 when(filter.filterType) {
                     FilterType.RSSI -> {
                         filteredList = filteredList.filter {
-                            (it.rssi.toIntOrNull() ?: 0) > (filter.value as? Int ?: 0)
+                            (it.beaconDataFlow.value?.rssi?.toFloat() ?: -127f) > (filter.value as? Float ?: 0f)
                         }
                     }
                 }
@@ -106,8 +114,8 @@ class LogViewModel @Inject constructor(
         val index = _filters.value?.indexOfFirst { it.filterType == type }
         if(index != -1 && index != null) {
             val filterCopy = _filters.value?.toMutableList()
-            _filters.value?.get(index)?.value = value
-            _filters.value?.get(index)?.enabled = enabled
+            filterCopy?.get(index)?.value = value
+            filterCopy?.get(index)?.enabled = enabled
             _filters.value = listOf()
             _filters.value = filterCopy
         }

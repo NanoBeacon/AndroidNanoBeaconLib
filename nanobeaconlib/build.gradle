@@ -23,11 +23,11 @@ project.afterEvaluate {
 
 android {
     namespace 'com.oncelabs.nanobeaconlib'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
-        minSdk 25
-        targetSdk 32
+        minSdk 26
+        targetSdk 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

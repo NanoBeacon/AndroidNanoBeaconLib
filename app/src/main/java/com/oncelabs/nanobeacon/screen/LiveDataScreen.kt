@@ -40,7 +40,7 @@ fun LiveDataContent(
 
     InplayTopBar(title = "Live Data")
     LazyColumn(modifier = Modifier
-        .padding(bottom = 80.dp, top = 80.dp)
+        .padding(bottom = 2.dp, top = 80.dp)
         .fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
         items(activeBeacons) { it->

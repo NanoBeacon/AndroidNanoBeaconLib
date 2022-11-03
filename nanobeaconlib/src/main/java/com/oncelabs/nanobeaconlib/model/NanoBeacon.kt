@@ -64,7 +64,7 @@ open class NanoBeacon(
             // Update adv interval estimate flow
             _estimatedAdvIntervalFlow.value = advIntervalAvg.toInt()
 
-            Log.d(TAG, "Estimated Adv Interval: $advIntervalAvg")
+            //Log.d(TAG, "Estimated Adv Interval: $advIntervalAvg")
         }
     }
 }

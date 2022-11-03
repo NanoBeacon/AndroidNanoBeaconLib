@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeaconlib.manager
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -11,16 +12,13 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.util.Log
-import android.util.SparseArray
 import androidx.core.app.ActivityCompat
 import com.oncelabs.nanobeaconlib.enums.BleState
-
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeaconlib.enums.ScanState
-import com.oncelabs.nanobeaconlib.extension.toHexString
-import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconManagerInterface
 import com.oncelabs.nanobeaconlib.interfaces.CustomBeaconInterface
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
+import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconManagerInterface
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import kotlinx.coroutines.CoroutineScope
@@ -34,8 +32,9 @@ import java.util.concurrent.ConcurrentMap
 object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     private var newBeaconDataFlow = MutableSharedFlow<NanoBeaconData>()
+    private var newBeaconFlow = MutableSharedFlow<NanoBeacon>()
     private var registeredTypeFlow = MutableSharedFlow<NanoBeacon?>()
-    private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon?>()
+    private var beaconTimeoutFlow = MutableSharedFlow<NanoBeacon>()
     private var bleStateFlow = MutableSharedFlow<BleState?>()
 
     private val TAG = NanoBeaconManager::class.simpleName
@@ -43,7 +42,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private val REQUEST_ENABLE_BT = 3
 
     private val _scanState = MutableStateFlow(ScanState.UNKNOWN)
-    private var scanState: StateFlow<ScanState> = _scanState.asStateFlow()
+    val scanState: StateFlow<ScanState> = _scanState.asStateFlow()
 
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
     private var registeredBeaconTypes: MutableList<CustomBeaconInterface> = mutableListOf()
@@ -82,6 +81,13 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         }
     }
 
+    override fun refresh(){
+        //if (_scanState.value == ScanState.SCANNING){
+            stopScanning()
+            leDeviceMap.clear()
+        //}
+    }
+
     fun on(event: NanoBeaconEvent) {
 
         when (event) {
@@ -96,6 +102,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
             }
             is NanoBeaconEvent.NewBeaconData -> {
                 newBeaconDataFlow = event.flow
+            }
+            is NanoBeaconEvent.NewBeacon -> {
+                newBeaconFlow = event.flow
             }
         }
     }
@@ -128,7 +137,12 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         registeredBeaconTypes.add(customBeacon)
     }
 
+    @SuppressLint("MissingPermission")
     override fun startScanning(){
+        if(!bluetoothAdapter.isEnabled) {
+            return
+        }
+
         getContext.let {
             if (ActivityCompat.checkSelfPermission(
                     it(),
@@ -145,7 +159,6 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 return
             }
         }
-
         bluetoothLeScanner
             .startScan(
                 scanFilters,
@@ -156,6 +169,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         _scanState.value = ScanState.SCANNING
     }
 
+    @SuppressLint("MissingPermission")
     override fun stopScanning() {
         getContext.let {
             if (ActivityCompat.checkSelfPermission(
@@ -196,12 +210,19 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                     )
 
                     when (currentState) {
-                        BluetoothAdapter.STATE_OFF ->
+                        BluetoothAdapter.STATE_OFF -> {
                             Log.d(TAG, "BluetoothAdapter State: Off")
+                            beaconScope.launch {
+                                bleStateFlow.emit(BleState.UNAVAILABLE)
+                            }
+                        }
                         BluetoothAdapter.STATE_TURNING_OFF ->
                             Log.d(TAG, "BluetoothAdapter State: Turning off")
                         BluetoothAdapter.STATE_ON -> {
                             Log.d(TAG, "BluetoothAdapter State: On")
+                            beaconScope.launch {
+                                bleStateFlow.emit(BleState.AVAILABLE)
+                            }
                         }
                         BluetoothAdapter.STATE_TURNING_ON ->
                             Log.d(TAG, "BluetoothAdapter State: Turning on")
@@ -225,17 +246,28 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
                         // Check for exisiting entry
                         if (!leDeviceMap.containsKey(deviceAddress)){
+
                             // Parse scan result
-                            val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+                            val beaconData =
+                                NanoBeaconData(
+                                    scanResult = result,
+                                    leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+
                             var nanoBeacon: NanoBeacon? = null
                             // Check if match for one of the registered types
                             for (beaconType in registeredBeaconTypes){
-                                beaconType.isTypeMatchFor(beaconData, getContext(), this@NanoBeaconManager)?.let { customBeacon ->
+                                beaconType.isTypeMatchFor(
+                                    beaconData,
+                                    getContext(),
+                                    this@NanoBeaconManager
+                                )?.let { customBeacon ->
                                     nanoBeacon = customBeacon
                                     leDeviceMap[deviceAddress] = nanoBeacon
                                     beaconScope.launch {
                                         registeredTypeFlow.emit(nanoBeacon)
-                                        newBeaconDataFlow.emit(beaconData)
+                                    }
+                                    beaconScope.launch {
+                                        newBeaconFlow.emit(customBeacon)
                                     }
                                 }
                             }
@@ -248,13 +280,22 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                                 leDeviceMap[deviceAddress] = nanoBeacon
                                 beaconScope.launch {
                                     newBeaconDataFlow.emit(beaconData)
+                                    nanoBeacon?.let { nb ->
+                                        newBeaconFlow.emit(nb)
+                                    }
                                 }
                             }
                             // Device already present
                         } else {
                             // Parse scan result
-                            val beaconData = NanoBeaconData(scanResult = result, leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+                            val beaconData =
+                                NanoBeaconData(
+                                    scanResult = result,
+                                    leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+
                             leDeviceMap[deviceAddress]?.let {
+
+                                // Pass new adv data to NanoBeacon Instance
                                 it.newBeaconData(beaconData = beaconData)
                                 beaconScope.launch {
                                     newBeaconDataFlow.emit(beaconData)

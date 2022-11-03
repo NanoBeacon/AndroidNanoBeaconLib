@@ -1,7 +1,10 @@
 package com.oncelabs.nanobeacon.screen
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.oncelabs.nanobeacon.navigation.BottomNav
 import com.oncelabs.nanobeacon.navigation.Navigation
@@ -10,6 +13,10 @@ import com.oncelabs.nanobeacon.navigation.Navigation
 fun MainScreenView() {
     val navController = rememberNavController()
     Scaffold(bottomBar = { BottomNav(navController = navController) }) {
-        Navigation(navController)
+        Box(modifier =
+            Modifier
+                .padding(it)) {
+            Navigation(navController)
+        }
     }
 }
