@@ -73,15 +73,18 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                     isExpanded = !isExpanded
                 }
         ) {
-            Text("====================================", style = logItemSeparatorFont, maxLines = 1)
             Row(
                 modifier = Modifier
+                    .padding(top = 0.dp, bottom = if (isExpanded) 10.dp else 0.dp)
                     .wrapContentHeight()
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                DataLine(title = "Address", data = data.address, maxLines = 1)
+                Row {
+                    Text(text = "Address: ", style = logCardTitleAccentFont)
+                    Text(text = data.address, style = logCardTitleFont)
+                }
                 Icon(
                     imageVector = if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
                     contentDescription = "Expand Button",
@@ -92,27 +95,25 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                         }
                 )
             }
-            Text("====================================", style = logItemSeparatorFont, maxLines = 1)
+            DataLine(title = "Local Name", data = data.localName, maxLines = 1)
+            DataLine(title = "Timestamp", data = data.timestamp, maxLines = 1)
+            DataLine(title = "RSSI", data = data.rssi, maxLines = 1)
+            DataLine(title = "Estimated Adv Interval", data = "${data.advInterval}ms", maxLines = 1)
             if (isExpanded){
-                DataLine(title = "Timestamp", data = data.timestamp, maxLines = 1)
-                DataLine(title = "RSSI", data = data.rssi, maxLines = 1)
-                DataLine(title = "Estimated Adv Interval", data = "${data.advInterval}ms", maxLines = 1)
+                DataLine(title = "Transmit Power Level", data = data.txPower, maxLines = 1)
+                DataLine(title = "Flags", data = data.flags, maxLines = 1)
+                DataLine(title = "TX Power Observed", data = data.txPowerObserved, maxLines = 1)
+                DataLine(title = "Primary Phy", data = data.primaryPhy, maxLines = 1)
+                DataLine(title = "Secondary Phy", data = data.secondaryPhy, maxLines = 1)
+                DataLine(title = "Company", data = data.company, maxLines = 2, separateData = false)
+                DataLine(title = "Manufacturer ID", data = data.manufacturerId, maxLines = 1)
                 DataLine(
                     title = "Manufacturer Data",
                     data = data.manufacturerData,
                     maxLines = 2,
                     separateData = true
                 )
-                DataLine(title = "Manufacturer ID", data = data.manufacturerId, maxLines = 1)
-                DataLine(title = "Company", data = data.company, maxLines = 2, separateData = false)
-                DataLine(title = "Transmit Power Level", data = data.txPower, maxLines = 1)
-                DataLine(title = "Local Name", data = data.localName, maxLines = 1)
-                DataLine(title = "Flags", data = data.flags, maxLines = 1)
-                DataLine(title = "TX Power Observed", data = data.txPowerObserved, maxLines = 1)
-                DataLine(title = "Primary Phy", data = data.primaryPhy, maxLines = 1)
-                DataLine(title = "Secondary Phy", data = data.secondaryPhy, maxLines = 1)
                 DataLine(title = "Raw", data = data.rawData, maxLines = 3, separateData = true)
-                Text("====================================", style = logItemSeparatorFont, maxLines = 1)
             }
             // TODO: Not used?
             //Text("Sensor Trigger Source: ${advertisement.sensorTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -122,6 +123,7 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
     }
 
 }
+
 
 @Composable
 fun DataLine(
@@ -163,7 +165,8 @@ fun DataLine(
             )
             if (data.isNotEmpty()) {
                 Text(
-                    data,
+                    modifier = Modifier.padding(bottom = 2.dp),
+                    text = data,
                     style = logTextFont,
                     maxLines = maxLines,
                     overflow = TextOverflow.Ellipsis

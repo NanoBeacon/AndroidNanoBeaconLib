@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.viewModel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -25,24 +26,23 @@ class LogViewModel @Inject constructor(
     application: Application
 ): AndroidViewModel(application) {
 
-    private var filterTimer: TimerTask? = null
+    private val TAG = LogViewModel::class.simpleName
 
+    private var filterTimer: TimerTask? = null
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
-    private val _filteredBeaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
     private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
     private val _scanningEnabled = MutableLiveData(true)
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
 
-    val discoveredBeacons: LiveData<List<NanoBeaconInterface>> = _discoveredBeacons
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
     val scanningEnabled: LiveData<Boolean> = _scanningEnabled
-    val filteredBeaconDataEntries: LiveData<List<BeaconDataEntry>> =_filteredBeaconDataEntries
     val filters: LiveData<List<FilterOption>> = _filters
 
     init {
         addObservers()
         startFilterTimer()
+        BeaconManager.startScanning()
     }
 
     fun startScanning(){
@@ -53,11 +53,15 @@ class LogViewModel @Inject constructor(
         BeaconManager.stopScanning()
     }
 
+    fun refresh(){
+        BeaconManager.refresh()
+    }
+
     private fun addObservers(){
+
         viewModelScope.launch {
             BeaconManager.newBeaconDataFlow.collect {
                 val beaconEntriesCopy = _beaconDataEntries.value?.toMutableList() ?: mutableListOf()
-                //beaconEntriesCopy.add(formatToEntry(nanoBeaconData = it))
                 _beaconDataEntries.postValue(beaconEntriesCopy)
             }
         }
@@ -71,6 +75,7 @@ class LogViewModel @Inject constructor(
         viewModelScope.launch {
             BeaconManager.discoveredBeacons.collect {
                 _discoveredBeacons.postValue(it)
+                Log.d(TAG, "Updated Beacon Count ${it.count()}")
             }
         }
     }

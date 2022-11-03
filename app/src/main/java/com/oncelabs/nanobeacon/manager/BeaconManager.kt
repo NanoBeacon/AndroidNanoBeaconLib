@@ -54,6 +54,13 @@ object BeaconManager: BeaconManagerInterface {
         NanoBeaconManager.stopScanning()
     }
 
+    override fun refresh() {
+        NanoBeaconManager.refresh()
+        _discoveredBeacons.value = listOf()
+        _discoveredAdxlBeacons.value = listOf()
+        startScanning()
+    }
+
     private fun addObservers(){
         NanoBeaconManager.on(NanoBeaconEvent.DiscoveredRegisteredType(flow = discoveredRegisteredTypeFlow))
         NanoBeaconManager.on(NanoBeaconEvent.NewBeaconData(flow = _newBeaconDataFlow))

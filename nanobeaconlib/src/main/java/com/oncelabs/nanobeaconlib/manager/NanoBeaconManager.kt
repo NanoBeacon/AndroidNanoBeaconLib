@@ -81,6 +81,13 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         }
     }
 
+    override fun refresh(){
+        //if (_scanState.value == ScanState.SCANNING){
+            stopScanning()
+            leDeviceMap.clear()
+        //}
+    }
+
     fun on(event: NanoBeaconEvent) {
 
         when (event) {
@@ -258,7 +265,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                                     leDeviceMap[deviceAddress] = nanoBeacon
                                     beaconScope.launch {
                                         registeredTypeFlow.emit(nanoBeacon)
-                                        newBeaconDataFlow.emit(beaconData)
+                                    }
+                                    beaconScope.launch {
+                                        newBeaconFlow.emit(customBeacon)
                                     }
                                 }
                             }

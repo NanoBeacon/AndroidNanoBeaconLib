@@ -13,13 +13,14 @@ import com.oncelabs.nanobeacon.screen.LogScreen
 @Composable
 fun Navigation(navController : NavHostController) {
 
-    NavHost(navController = navController, startDestination = Screen.LiveDataScreen.route) {
-        composable(route = Screen.LiveDataScreen.route) {
-            LiveDataScreen()
-        }
+    NavHost(navController = navController, startDestination = Screen.LogScreen.route) {
 
         composable(route = Screen.LogScreen.route) {
             LogScreen()
+        }
+
+        composable(route = Screen.LiveDataScreen.route) {
+            LiveDataScreen()
         }
     }
 }

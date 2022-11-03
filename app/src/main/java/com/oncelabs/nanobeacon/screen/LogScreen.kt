@@ -10,10 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,20 +41,18 @@ fun LogScreen(
     logDataViewModel: LogViewModel = hiltViewModel()
 ) {
     val listState = rememberLazyListState()
-    val beaconDataLog by logDataViewModel.filteredBeaconDataEntries.observeAsState(initial = listOf())
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
     val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = true)
-
     val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
 
     LogScreenContent(
         scanEnabled,
         discoveredBeacons,
-        beaconDataLog = beaconDataLog,
         listState = listState,
         filters = filters,
         onFilterChange = logDataViewModel::setFilter,
-        onScanButtonClick = if (scanEnabled) logDataViewModel::stopScanning else logDataViewModel::startScanning
+        onScanButtonClick = if (scanEnabled) logDataViewModel::stopScanning else logDataViewModel::startScanning,
+        onRefreshButtonClick = logDataViewModel::refresh
     )
 }
 
@@ -65,17 +60,18 @@ fun LogScreen(
 private fun LogScreenContent(
     scanningEnabled: Boolean,
     discoveredBeacons: List<NanoBeaconInterface>,
-    beaconDataLog: List<BeaconDataEntry>,
     listState: LazyListState,
     filters: List<FilterOption>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
-    onScanButtonClick: () -> Unit
+    onScanButtonClick: () -> Unit,
+    onRefreshButtonClick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(false)}
     var autoScrollEnabled by remember { mutableStateOf(true) }
     val searchText = rememberSaveable { mutableStateOf("") }
     var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    var actionButtonExpanded by rememberSaveable { mutableStateOf(false) }
 
     // listen for scroll events so we can disable auto-scroll
     val nestedScrollConnection = remember {
@@ -124,7 +120,7 @@ private fun LogScreenContent(
                     .fillMaxWidth()
                     .background(MaterialTheme.colors.background)
                     .nestedScroll(nestedScrollConnection)
-                    .padding(bottom = 0.dp, top = 10.dp),
+                    .padding(bottom = 0.dp, top = 0.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 state = listState
             ) {
@@ -133,26 +129,23 @@ private fun LogScreenContent(
                         discoveredBeacons.filter {
                             it.beaconDataFlow.value?.searchableString?.contains(searchText.value, ignoreCase = true) == true
                         }
-                        //discoveredBeacons
                     } else {
-                        //beaconDataLog
                         discoveredBeacons
                     }) {
                     Row(Modifier.fillMaxWidth()) {
                         Spacer(Modifier.weight(0.025f))
                         Column(Modifier.weight(0.95f)) {
                             LogAdvertisementCard(beacon = it)
-                            //Text("${it.rssiFlow.collectAsState().value}", color = Color.White)
                         }
                         Spacer(Modifier.weight(0.025f))
                     }
                     Spacer(Modifier.height(10.dp))
 
                     // Scroll to last item whenever a new is added if enabled
-                    if (autoScrollEnabled && beaconDataLog.lastIndex != -1) {
+                    if (autoScrollEnabled && discoveredBeacons.lastIndex != -1) {
                         LaunchedEffect(Unit) {
                             scope.launch {
-                                listState.animateScrollToItem(beaconDataLog.lastIndex)
+                                listState.animateScrollToItem(discoveredBeacons.lastIndex)
                             }
                         }
                     }
@@ -202,22 +195,37 @@ private fun LogScreenContent(
         horizontalAlignment = Alignment.End
     ) {
 
-        /**Scroll enable*/
-
-        FloatingActionButton(
-            onClick = {
-                onScanButtonClick()
-            },
-            backgroundColor = logFloatingButtonColor,
-            contentColor = Color.White
-        ) {
-            Icon(
-                if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
-                "Enable auto-scroll",
-                modifier = Modifier.size(36.dp)
-            )
+            if (!scanningEnabled) {
+                FloatingActionButton(
+                    onClick = {
+                        onRefreshButtonClick()
+                    },
+                    backgroundColor = logFloatingButtonColor,
+                    contentColor = Color.White,
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        "Refresh Button",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+                Spacer(Modifier.height(25.dp))
+            }
+            /**Scroll enable*/
+            FloatingActionButton(
+                onClick = {
+                    onScanButtonClick()
+                },
+                backgroundColor = logFloatingButtonColor,
+                contentColor = Color.White,
+            ) {
+                Icon(
+                    if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
+                    "Start Stop",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
         }
-
 
 //        Spacer(Modifier.height(8.dp))
 //
@@ -229,7 +237,7 @@ private fun LogScreenContent(
 //        ) {
 //            Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
 //        }
-    }
+
 }
 
 @Composable
@@ -342,13 +350,15 @@ fun PreviewLogScreen() {
         LogScreenContent(
             true,
             discoveredBeacons = listOf(),
-            beaconDataLog = logs,
             listState = state,
             filters = listOf(),
             onFilterChange = { _, _, _ ->
 
             },
             onScanButtonClick = {
+
+            },
+            onRefreshButtonClick = {
 
             }
         )
