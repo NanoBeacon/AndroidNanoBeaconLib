@@ -22,7 +22,7 @@ fun InplayTopBar(
     title: String,
 ) {
     TopAppBar(
-        modifier = Modifier.height(65.dp),
+        modifier = Modifier.height(45.dp),
         backgroundColor = topBarBackground,
         title = {
             Box(Modifier.fillMaxSize()) {
@@ -38,7 +38,7 @@ fun InplayTopBar(
                         painter = painterResource(id = com.oncelabs.nanobeacon.R.drawable.nanobeacon_logo_white_s),
                         contentDescription = "Company logo",
                         contentScale = ContentScale.Fit,
-                        modifier = Modifier.padding(end = 5.dp).size(85.dp)
+                        modifier = Modifier.padding(5.dp)//.size(85.dp)
                     )
                 }
             }
