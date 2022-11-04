@@ -122,7 +122,7 @@ class ADXL367(
         val z = byteArray.toShort(5).toFloat()*(245166f/1000000000f)*0.25f
         val tempRawShort = byteArray.toShort(7).toInt()/4
         val temp = (((tempRawShort + 1185) * (185_185_18f / 1_000_000_000f) * 2)*100).toInt().toFloat()/100
-        Log.d(TAG, "Awake: $awake, Inactive: $inactive, Active: $active, Data Read: $dataRead, Temp: $temp, Data Ready: ${byteArray.toHexString()}")
+        Log.d(TAG, "Awake: $awake, Inactive: $inactive, Active: $active, Data Read: $dataRead, Temp: $temp, Data Ready: ${byteArray.toHexString("")}")
         if (_adxlAwake.value){
             context?.let {
                 NotificationService.startService(context = it, "ADXL367 Alert", "Device Awake", true)

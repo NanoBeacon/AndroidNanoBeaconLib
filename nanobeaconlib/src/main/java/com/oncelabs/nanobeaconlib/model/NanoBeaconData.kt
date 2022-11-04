@@ -51,7 +51,7 @@ data class NanoBeaconData(
     var serviceSolicitationUuids = if (Build.VERSION.SDK_INT >= 29) scanResult.scanRecord?.serviceSolicitationUuids else null
     var estimatedAdvInterval = estAdvInterval
     val searchableString = "$this $manufacturerData $name $bluetoothAddress $company"
-    val raw = scanResult.scanRecord?.bytes?.toHexString()
+    val raw = scanResult.scanRecord?.bytes?.toHexString("-")
 
     private fun parseManufacturerData(data: SparseArray<ByteArray>?): Pair<ByteArray, Int> {
         var byteArray = byteArrayOf()
