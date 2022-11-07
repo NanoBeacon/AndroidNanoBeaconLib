@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.permission.PermissionType
 import com.oncelabs.nanobeacon.permission.RequestAllPermissions
 import com.oncelabs.nanobeacon.screen.MainScreenView
@@ -35,7 +34,7 @@ class MainActivity : ComponentActivity() {
                         PermissionType.navigateToSettings(context = this)
                     },
                     onAllGranted = {
-                        BeaconManager.init(this)
+                        //BeaconManagerImpl.init(this)
                         //MainScreenView()
                         /*TODO: */
                     }

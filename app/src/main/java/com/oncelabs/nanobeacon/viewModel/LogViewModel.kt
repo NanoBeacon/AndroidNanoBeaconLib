@@ -11,10 +11,7 @@ import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
 import com.oncelabs.nanobeaconlib.enums.ScanState
-import com.oncelabs.nanobeaconlib.extension.toHexString
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
-import com.oncelabs.nanobeaconlib.model.NanoBeacon
-import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.util.*
@@ -23,6 +20,7 @@ import kotlin.concurrent.scheduleAtFixedRate
 
 @HiltViewModel
 class LogViewModel @Inject constructor(
+    private val beaconManager: BeaconManager,
     application: Application
 ): AndroidViewModel(application) {
 
@@ -42,38 +40,38 @@ class LogViewModel @Inject constructor(
     init {
         addObservers()
         startFilterTimer()
-        BeaconManager.startScanning()
+        beaconManager.startScanning()
     }
 
     fun startScanning(){
-        BeaconManager.startScanning()
+        beaconManager.startScanning()
     }
 
     fun stopScanning(){
-        BeaconManager.stopScanning()
+        beaconManager.stopScanning()
     }
 
     fun refresh(){
-        BeaconManager.refresh()
+        beaconManager.refresh()
     }
 
     private fun addObservers(){
 
         viewModelScope.launch {
-            BeaconManager.newBeaconDataFlow.collect {
+            beaconManager.newBeaconDataFlow.collect {
                 val beaconEntriesCopy = _beaconDataEntries.value?.toMutableList() ?: mutableListOf()
                 _beaconDataEntries.postValue(beaconEntriesCopy)
             }
         }
 
         viewModelScope.launch {
-            BeaconManager.scanningEnabled.collect {
+            beaconManager.scanningEnabled.collect {
                 _scanningEnabled.postValue(it == ScanState.SCANNING)
             }
         }
 
         viewModelScope.launch {
-            BeaconManager.discoveredBeacons.collect {
+            beaconManager.discoveredBeacons.collect {
                 _discoveredBeacons.postValue(it)
                 Log.d(TAG, "Updated Beacon Count ${it.count()}")
             }
