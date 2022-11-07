@@ -139,10 +139,6 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     @SuppressLint("MissingPermission")
     override fun startScanning(){
-        if(!bluetoothAdapter.isEnabled) {
-            return
-        }
-
         getContext.let {
             if (ActivityCompat.checkSelfPermission(
                     it(),
@@ -158,6 +154,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 // for ActivityCompat#requestPermissions for more details.
                 return
             }
+        }
+        if(!bluetoothAdapter.isEnabled) {
+            return
         }
         bluetoothLeScanner
             .startScan(
