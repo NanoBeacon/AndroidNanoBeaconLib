@@ -25,7 +25,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        BeaconManager.init(this)
         setContent {
             InplayTheme {
 //                Navigation()
@@ -36,10 +35,12 @@ class MainActivity : ComponentActivity() {
                         PermissionType.navigateToSettings(context = this)
                     },
                     onAllGranted = {
+                        BeaconManager.init(this)
                         //MainScreenView()
                         /*TODO: */
                     }
                 )
+
             }
         }
     }
