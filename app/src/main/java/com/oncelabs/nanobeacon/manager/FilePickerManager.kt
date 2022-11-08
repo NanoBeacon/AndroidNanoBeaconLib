@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.lifecycle.MutableLiveData
 import com.beust.klaxon.Klaxon
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.device.ADXL367
@@ -21,6 +22,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface FilePickerManager {
+    val savedConfigs : StateFlow<List<ConfigData>>
     fun openFilePicker()
     fun createActivity(act : Activity)
     fun onResultFromActivity(requestCode: Int, resultCode: Int, data: Intent?)

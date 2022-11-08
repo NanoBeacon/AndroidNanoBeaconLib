@@ -6,8 +6,13 @@ import android.content.Intent
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.lifecycle.MutableLiveData
 import com.beust.klaxon.Klaxon
 import com.oncelabs.nanobeacon.codable.ConfigData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import javax.inject.Inject
@@ -18,6 +23,10 @@ class FilePickerManagerImpl @Inject constructor() : FilePickerManager {
 
     val PICK_CFG_FILE = 1
     private var activity : Activity? = null
+
+    private val _savedConfigs = MutableStateFlow<List<ConfigData>>(listOf())
+    override val savedConfigs: StateFlow<List<ConfigData>> = _savedConfigs.asStateFlow()
+
     override fun onResultFromActivity(requestCode: Int, resultCode: Int, data: Intent?) {
         activity?.let {
             val cR: ContentResolver = it.contentResolver
@@ -37,6 +46,11 @@ class FilePickerManagerImpl @Inject constructor() : FilePickerManager {
                 Log.d("Filer", holder)
                 val json = Klaxon().parse<ConfigData>(holder)
                 Log.d("JSON", json.toString())
+                var listHolder = savedConfigs.value.toMutableList()
+                json?.let {
+                    listHolder.add(json)
+                    _savedConfigs.value = listHolder
+                }
             }
         }
     }
