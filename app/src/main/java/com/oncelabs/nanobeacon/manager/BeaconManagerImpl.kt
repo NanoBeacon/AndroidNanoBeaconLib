@@ -54,6 +54,7 @@ class BeaconManagerImpl @Inject constructor(
     }
 
     override fun startScanning() {
+        NanoBeaconManager.requestBluetoothEnable()
         NanoBeaconManager.startScanning()
     }
 

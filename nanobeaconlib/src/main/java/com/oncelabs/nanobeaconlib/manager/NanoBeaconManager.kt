@@ -58,6 +58,10 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
 
         setupBluetoothAdapterStateHandler()
+        requestBluetoothEnable()
+    }
+
+    fun requestBluetoothEnable() {
         if (!bluetoothAdapter.isEnabled){
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             enableBtIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
