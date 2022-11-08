@@ -82,6 +82,7 @@ dependencies {
     kapt libraries.hiltCompiler
     implementation libraries.hiltNavigation
     implementation libraries.permissions
+    implementation 'com.beust:klaxon:5.5'
 
     //Graph
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
