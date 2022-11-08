@@ -1,5 +1,6 @@
 package com.oncelabs.nanobeacon.manager
 
+import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.ScanState

@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
+import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
@@ -10,10 +11,7 @@ import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -42,6 +40,8 @@ class BeaconManagerImpl @Inject constructor(
 
     private val _bleStateChange = MutableSharedFlow<BleState?>()
     override val bleStateChange = _bleStateChange.asSharedFlow()
+
+
 
     private val discoveredRegisteredTypeFlow = MutableSharedFlow<NanoBeacon?>()
     private val discoveredBeaconFlow = MutableSharedFlow<NanoBeacon>()
@@ -101,5 +101,7 @@ class BeaconManagerImpl @Inject constructor(
 
             }
         }
+
+
     }
 }

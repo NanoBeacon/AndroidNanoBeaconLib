@@ -25,6 +25,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.*
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterInputType
@@ -45,12 +46,13 @@ fun LogScreen(
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
     val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = true)
     val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
-
+    val savedConfigs by logDataViewModel.savedConfigs.observeAsState()
     LogScreenContent(
         scanEnabled,
         discoveredBeacons,
         listState = listState,
         filters = filters,
+        savedConfigs = savedConfigs ?: listOf(),
         onFilterChange = logDataViewModel::setFilter,
         onScanButtonClick = if (scanEnabled) logDataViewModel::stopScanning else logDataViewModel::startScanning,
         onRefreshButtonClick = logDataViewModel::refresh,
@@ -64,13 +66,14 @@ private fun LogScreenContent(
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
     filters: List<FilterOption>,
+    savedConfigs : List<ConfigData>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
     onRefreshButtonClick: () -> Unit,
     openFilePickerManager: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val modalIsOpen = remember { mutableStateOf(false)}
+    val modalIsOpen = remember { mutableStateOf(true)}
     var autoScrollEnabled by remember { mutableStateOf(true) }
     val searchText = rememberSaveable { mutableStateOf("") }
     var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -104,7 +107,7 @@ private fun LogScreenContent(
 
             /**Filter results drop down*/
             FilterButton {
-                //filterMenuExpanded = !filterMenuExpanded
+                filterMenuExpanded = !filterMenuExpanded
                 openFilePickerManager()
             }
         }
@@ -179,15 +182,8 @@ private fun LogScreenContent(
             {
                 modalIsOpen.value = false
             },
-            listOf(
-                "deneineffefe",
-                "fenjfnjfewfdfsfwgwgwgarhqbebeERGahtghaq",
-                "efw",
-                "wfe",
-                "wef",
-                "wef",
-                "Wef"
-            )
+            savedConfigs,
+            openFilePickerManager
         )
     }
 
@@ -356,6 +352,7 @@ fun PreviewLogScreen() {
             discoveredBeacons = listOf(),
             listState = state,
             filters = listOf(),
+            savedConfigs = listOf(),
             onFilterChange = { _, _, _ ->
 
             },

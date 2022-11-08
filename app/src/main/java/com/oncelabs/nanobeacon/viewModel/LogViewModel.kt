@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.BeaconDataEntry
 import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
@@ -15,6 +16,7 @@ import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.*
 import javax.inject.Inject
 import kotlin.concurrent.scheduleAtFixedRate
@@ -34,7 +36,8 @@ class LogViewModel @Inject constructor(
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
     private val _scanningEnabled = MutableLiveData(true)
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
-
+    private val _savedConfigs = MutableLiveData<List<ConfigData>>(filePickerManager.savedConfigs.value)
+    val savedConfigs : LiveData<List<ConfigData>> = _savedConfigs
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
     val scanningEnabled: LiveData<Boolean> = _scanningEnabled
     val filters: LiveData<List<FilterOption>> = _filters
@@ -76,6 +79,12 @@ class LogViewModel @Inject constructor(
             beaconManager.discoveredBeacons.collect {
                 _discoveredBeacons.postValue(it)
                 Log.d(TAG, "Updated Beacon Count ${it.count()}")
+            }
+        }
+
+        viewModelScope.launch {
+            filePickerManager.savedConfigs.collect {
+                _savedConfigs.postValue(it)
             }
         }
     }
