@@ -19,6 +19,7 @@ import kotlin.collections.set
 
 @HiltViewModel
 class LiveDataViewModel @Inject constructor(
+    beaconManager: BeaconManager,
     application: Application
 ): AndroidViewModel(application) {
 
@@ -31,10 +32,10 @@ class LiveDataViewModel @Inject constructor(
     private var index = 0
 
     init {
-        BeaconManager.startScanning()
+        beaconManager.startScanning()
 
         viewModelScope.launch {
-            BeaconManager.discoveredAdxlBeacons.collect {
+            beaconManager.discoveredAdxlBeacons.collect {
                 it.forEach { adxlBeacon ->
                     adxlBeacon.address?.let { address ->
                         _activeBeacons.value?.let { ab ->
@@ -49,11 +50,11 @@ class LiveDataViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            BeaconManager.bleStateChange.collect { state ->
+            beaconManager.bleStateChange.collect { state ->
                 state.takeIf { it != null } ?: return@collect
                 if(state == BleState.AVAILABLE) {
                     delay(3000) // Why?
-                    BeaconManager.startScanning()
+                    beaconManager.startScanning()
                 }
             }
         }
