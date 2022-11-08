@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.components.*
+import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
@@ -52,7 +53,8 @@ fun LogScreen(
         filters = filters,
         onFilterChange = logDataViewModel::setFilter,
         onScanButtonClick = if (scanEnabled) logDataViewModel::stopScanning else logDataViewModel::startScanning,
-        onRefreshButtonClick = logDataViewModel::refresh
+        onRefreshButtonClick = logDataViewModel::refresh,
+        openFilePickerManager = {logDataViewModel.openFilePickerManager() }
     )
 }
 
@@ -64,7 +66,8 @@ private fun LogScreenContent(
     filters: List<FilterOption>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
-    onRefreshButtonClick: () -> Unit
+    onRefreshButtonClick: () -> Unit,
+    openFilePickerManager: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(false)}
@@ -101,7 +104,8 @@ private fun LogScreenContent(
 
             /**Filter results drop down*/
             FilterButton {
-                filterMenuExpanded = !filterMenuExpanded
+                //filterMenuExpanded = !filterMenuExpanded
+                openFilePickerManager()
             }
         }
 
@@ -359,6 +363,9 @@ fun PreviewLogScreen() {
 
             },
             onRefreshButtonClick = {
+
+            },
+            openFilePickerManager = {
 
             }
         )

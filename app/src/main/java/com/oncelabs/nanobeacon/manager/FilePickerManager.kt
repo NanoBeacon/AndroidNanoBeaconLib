@@ -8,47 +8,20 @@ import android.webkit.MimeTypeMap
 import androidx.core.app.ActivityCompat.startActivityForResult
 import com.beust.klaxon.Klaxon
 import com.oncelabs.nanobeacon.codable.ConfigData
+import com.oncelabs.nanobeacon.device.ADXL367
+import com.oncelabs.nanobeaconlib.enums.BleState
+import com.oncelabs.nanobeaconlib.enums.ScanState
+import com.oncelabs.nanobeaconlib.model.NanoBeacon
+import com.oncelabs.nanobeaconlib.model.NanoBeaconData
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class FilePickerManager @Inject constructor(private val activity : Activity) {
-
-    val PICK_CFG_FILE = 1
-
-    fun onResultFromActivity(requestCode: Int, resultCode: Int, data: Intent?) {
-
-        val cR: ContentResolver = activity.contentResolver
-        val mime = MimeTypeMap.getSingleton()
-        Log.d("Filer", data?.data.toString())
-
-        data?.data?.let {
-            val x = cR.openInputStream(it)
-
-            val reader = BufferedReader(InputStreamReader(x))
-            var holder = ""
-            var t = reader.readLine()
-            while(t != null) {
-                holder += t
-                t = reader.readLine()
-            }
-            Log.d("Filer", holder)
-            val json = Klaxon().parse<ConfigData>(holder)
-            Log.d("JSON",json.toString())
-        }
-    }
-
-    fun openFilePicker() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            type = "*/*"
-            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/octet-stream"))
-            // Optionally, specify a URI for the file that should appear in the
-            // system file picker when it loads.
-        }
-
-        activity.startActivityForResult(intent, PICK_CFG_FILE)
-    }
-
+interface FilePickerManager {
+    fun openFilePicker()
+    fun createActivity(act : Activity)
+    fun onResultFromActivity(requestCode: Int, resultCode: Int, data: Intent?)
 }

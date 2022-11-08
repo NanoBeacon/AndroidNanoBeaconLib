@@ -21,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import javax.inject.Inject
 
 
 /**
@@ -30,12 +31,13 @@ import java.io.InputStreamReader
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    var filePickerManager : FilePickerManager? = null
+   @Inject
+   lateinit var filePickerManager : FilePickerManager
 
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        filePickerManager = FilePickerManager(this)
+        filePickerManager.createActivity(this)
 
         setContent {
             InplayTheme {

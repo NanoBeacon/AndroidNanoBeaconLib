@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.oncelabs.nanobeacon.components.BeaconDataEntry
 import com.oncelabs.nanobeacon.manager.BeaconManager
+import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
 import com.oncelabs.nanobeaconlib.enums.ScanState
@@ -21,7 +22,8 @@ import kotlin.concurrent.scheduleAtFixedRate
 @HiltViewModel
 class LogViewModel @Inject constructor(
     private val beaconManager: BeaconManager,
-    application: Application
+    application: Application,
+    private val filePickerManager : FilePickerManager
 ): AndroidViewModel(application) {
 
     private val TAG = LogViewModel::class.simpleName
@@ -117,5 +119,9 @@ class LogViewModel @Inject constructor(
             _filters.value = listOf()
             _filters.value = filterCopy
         }
+    }
+
+    fun openFilePickerManager() {
+        filePickerManager.openFilePicker()
     }
 }
