@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -51,7 +50,7 @@ class BeaconManagerImpl @Inject constructor(
     override fun init() {
         if(!initialized) {
             initialized = true
-            NanoBeaconManager.init(getContext = (WeakReference(context)))
+            //NanoBeaconManager.init(getContext = (WeakReference(context)))
             NanoBeaconManager.register(ADXL367())
             addObservers()
         }
