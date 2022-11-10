@@ -108,7 +108,6 @@ private fun LogScreenContent(
             /**Filter results drop down*/
             FilterButton {
                 filterMenuExpanded = !filterMenuExpanded
-                openFilePickerManager()
             }
         }
 
