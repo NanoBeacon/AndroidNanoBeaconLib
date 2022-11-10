@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun RequestAllPermissions(
     navigateToSettingsScreen: () -> Unit,
-    onAllGranted: () -> Unit
+    onAllGranted: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val detailedPermissions = mutableMapOf<String, PermissionType>()

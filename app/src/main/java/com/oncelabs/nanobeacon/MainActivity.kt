@@ -42,13 +42,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             InplayTheme {
 //                Navigation()
-                MainScreenView()
+
                 /**TODO: Request needed permissions*/
                 RequestAllPermissions(
                     navigateToSettingsScreen = {
                         PermissionType.navigateToSettings(context = this)
                     },
                     onAllGranted = {
+                        MainScreenView()
                         //BeaconManagerImpl.init(this)
                         //MainScreenView()
                         /*TODO: */
