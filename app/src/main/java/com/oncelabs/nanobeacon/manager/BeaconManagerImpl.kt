@@ -1,7 +1,6 @@
 package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
-import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
@@ -11,7 +10,10 @@ import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -23,6 +25,7 @@ class BeaconManagerImpl @Inject constructor(
 ): BeaconManager {
 
     private val scope = CoroutineScope(Dispatchers.IO)
+    private var initialized = false
 
     override val scanningEnabled = NanoBeaconManager.scanState
 
@@ -46,9 +49,12 @@ class BeaconManagerImpl @Inject constructor(
     private val beaconTimeoutFlow = MutableSharedFlow<NanoBeacon>()
 
     override fun init() {
-        NanoBeaconManager.init(getContext = (WeakReference(context)))
-        NanoBeaconManager.register(ADXL367())
-        addObservers()
+        if(!initialized) {
+            initialized = true
+            NanoBeaconManager.init(getContext = (WeakReference(context)))
+            NanoBeaconManager.register(ADXL367())
+            addObservers()
+        }
     }
 
     override fun startScanning() {
