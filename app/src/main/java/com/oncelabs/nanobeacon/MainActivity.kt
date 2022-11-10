@@ -41,8 +41,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             InplayTheme {
-//                Navigation()
-
                 /**TODO: Request needed permissions*/
                 RequestAllPermissions(
                     navigateToSettingsScreen = {

@@ -41,8 +41,6 @@ class BeaconManagerImpl @Inject constructor(
     private val _bleStateChange = MutableSharedFlow<BleState?>()
     override val bleStateChange = _bleStateChange.asSharedFlow()
 
-
-
     private val discoveredRegisteredTypeFlow = MutableSharedFlow<NanoBeacon?>()
     private val discoveredBeaconFlow = MutableSharedFlow<NanoBeacon>()
     private val beaconTimeoutFlow = MutableSharedFlow<NanoBeacon>()
