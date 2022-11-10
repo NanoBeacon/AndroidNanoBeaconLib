@@ -80,8 +80,11 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                         // for ActivityCompat#requestPermissions for more details.
                         return
                     }
+                    Log.d(TAG, "Requesting BLE to be turned on")
                     it.startActivity(enableBtIntent)
                 }
+            } else {
+                Log.d(TAG, "BLE is turned on. No need to request again.")
             }
         } ?: run {
             Log.d(TAG, "Cannot request BLE enable. Bluetooth adapter is null")
@@ -172,6 +175,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 )
 
             _scanState.value = ScanState.SCANNING
+            Log.d(TAG, "Starting scan")
         }  ?: run {
             Log.d(TAG, "Cannot start scanning. Bluetooth adapter is null")
         }
@@ -197,6 +201,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         }
         bluetoothLeScanner?.stopScan(leScanCallback)
         _scanState.value = ScanState.STOPPED
+        Log.d(TAG, "Starting scan")
     }
 
     private fun setupBluetoothAdapterStateHandler() {
