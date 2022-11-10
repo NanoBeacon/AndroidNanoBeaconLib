@@ -34,6 +34,12 @@ enum class PermissionType(
         "Bluetooth Connect",
         "This permission is required to connect to a nearby device.",
         31,
+        false),
+    BLUETOOTH(
+        Manifest.permission.BLUETOOTH,
+        "Bluetooth Connect",
+        "This permission is required to connect to a nearby device.",
+        31,
         false);
 
     companion object {
