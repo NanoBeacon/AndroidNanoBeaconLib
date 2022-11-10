@@ -56,7 +56,6 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         bluetoothManager = (getContext.get()?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
         bluetoothAdapter = bluetoothManager.adapter
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-
         setupBluetoothAdapterStateHandler()
         requestBluetoothEnable()
     }

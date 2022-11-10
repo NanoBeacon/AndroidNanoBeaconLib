@@ -45,7 +45,7 @@ class BeaconManagerImpl @Inject constructor(
     private val discoveredBeaconFlow = MutableSharedFlow<NanoBeacon>()
     private val beaconTimeoutFlow = MutableSharedFlow<NanoBeacon>()
 
-    init {
+    override fun init() {
         NanoBeaconManager.init(getContext = (WeakReference(context)))
         NanoBeaconManager.register(ADXL367())
         addObservers()

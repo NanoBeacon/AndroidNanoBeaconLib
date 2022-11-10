@@ -34,19 +34,13 @@ enum class PermissionType(
         "Bluetooth Connect",
         "This permission is required to connect to a nearby device.",
         31,
-        false),
-//    BLUETOOTH_ADMIN(
-//        Manifest.permission.BLUETOOTH_ADMIN,
-//        "Bluetooth Connect",
-//        "This permission is required to connect to a nearby device.",
-//        30,
-//        false),
-    BLUETOOTH(
-        Manifest.permission.BLUETOOTH,
-        "Bluetooth Connect",
-        "This permission is required to scan for nearby devices.",
-        null,
         false);
+//    BLUETOOTH(
+//        Manifest.permission.BLUETOOTH,
+//        "Bluetooth Connect",
+//        "This permission is required to scan for nearby devices.",
+//        null,
+//        false);
 
     companion object {
         private val TAG: String = PermissionType::class.java.simpleName
