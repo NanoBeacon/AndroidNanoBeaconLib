@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import com.beust.klaxon.Klaxon
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.permission.PermissionType
 import com.oncelabs.nanobeacon.permission.RequestAllPermissions
@@ -34,6 +35,9 @@ class MainActivity : ComponentActivity() {
    @Inject
    lateinit var filePickerManager : FilePickerManager
 
+   @Inject
+   lateinit var beaconManager: BeaconManager
+
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +51,7 @@ class MainActivity : ComponentActivity() {
                         PermissionType.navigateToSettings(context = this)
                     },
                     onAllGranted = {
+                        beaconManager.init()
                         MainScreenView()
                         //BeaconManagerImpl.init(this)
                         //MainScreenView()

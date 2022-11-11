@@ -10,13 +10,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -27,16 +29,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.*
-import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
-import com.oncelabs.nanobeacon.ui.theme.*
+import com.oncelabs.nanobeacon.ui.theme.InplayTheme
+import com.oncelabs.nanobeacon.ui.theme.autoScrollTogleFont
+import com.oncelabs.nanobeacon.ui.theme.logFloatingButtonColor
+import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
 import com.oncelabs.nanobeacon.viewModel.LogViewModel
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 @Composable
 fun LogScreen(
@@ -108,7 +111,6 @@ private fun LogScreenContent(
             /**Filter results drop down*/
             FilterButton {
                 filterMenuExpanded = !filterMenuExpanded
-                openFilePickerManager()
             }
         }
 

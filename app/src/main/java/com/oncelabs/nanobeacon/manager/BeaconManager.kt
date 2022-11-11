@@ -18,4 +18,5 @@ interface BeaconManager {
     fun startScanning()
     fun stopScanning()
     fun refresh()
+    fun init()
 }
