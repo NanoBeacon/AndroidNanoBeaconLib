@@ -10,13 +10,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -25,16 +27,19 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.*
 import com.oncelabs.nanobeacon.model.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
-import com.oncelabs.nanobeacon.ui.theme.*
+import com.oncelabs.nanobeacon.ui.theme.InplayTheme
+import com.oncelabs.nanobeacon.ui.theme.autoScrollTogleFont
+import com.oncelabs.nanobeacon.ui.theme.logFloatingButtonColor
+import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
 import com.oncelabs.nanobeacon.viewModel.LogViewModel
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 @Composable
 fun LogScreen(
@@ -44,15 +49,17 @@ fun LogScreen(
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
     val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = true)
     val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
-
+    val savedConfigs by logDataViewModel.savedConfigs.observeAsState()
     LogScreenContent(
         scanEnabled,
         discoveredBeacons,
         listState = listState,
         filters = filters,
+        savedConfigs = savedConfigs ?: listOf(),
         onFilterChange = logDataViewModel::setFilter,
         onScanButtonClick = if (scanEnabled) logDataViewModel::stopScanning else logDataViewModel::startScanning,
-        onRefreshButtonClick = logDataViewModel::refresh
+        onRefreshButtonClick = logDataViewModel::refresh,
+        openFilePickerManager = {logDataViewModel.openFilePickerManager() }
     )
 }
 
@@ -62,12 +69,14 @@ private fun LogScreenContent(
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
     filters: List<FilterOption>,
+    savedConfigs : List<ConfigData>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
-    onRefreshButtonClick: () -> Unit
+    onRefreshButtonClick: () -> Unit,
+    openFilePickerManager: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val modalIsOpen = remember { mutableStateOf(false)}
+    val modalIsOpen = remember { mutableStateOf(true)}
     var autoScrollEnabled by remember { mutableStateOf(true) }
     val searchText = rememberSaveable { mutableStateOf("") }
     var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -175,15 +184,8 @@ private fun LogScreenContent(
             {
                 modalIsOpen.value = false
             },
-            listOf(
-                "deneineffefe",
-                "fenjfnjfewfdfsfwgwgwgarhqbebeERGahtghaq",
-                "efw",
-                "wfe",
-                "wef",
-                "wef",
-                "Wef"
-            )
+            savedConfigs,
+            openFilePickerManager
         )
     }
 
@@ -352,6 +354,7 @@ fun PreviewLogScreen() {
             discoveredBeacons = listOf(),
             listState = state,
             filters = listOf(),
+            savedConfigs = listOf(),
             onFilterChange = { _, _, _ ->
 
             },
@@ -359,6 +362,9 @@ fun PreviewLogScreen() {
 
             },
             onRefreshButtonClick = {
+
+            },
+            openFilePickerManager = {
 
             }
         )

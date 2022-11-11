@@ -13,7 +13,7 @@ fun ByteArray.toInt(start: Int = 0, endian: ByteOrder = ByteOrder.BIG_ENDIAN): I
     return ByteBuffer.wrap(this.copyOfRange(start, start + 4)).order(endian).int
 }
 
-fun ByteArray.toHexString(): String = joinToString(separator = "") {
+fun ByteArray.toHexString(separator: String): String = joinToString(separator = separator) {
         eachByte -> "%02x".format(eachByte)
 }
 
