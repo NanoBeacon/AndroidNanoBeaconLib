@@ -47,49 +47,53 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private var registeredBeaconTypes: MutableList<CustomBeaconInterface> = mutableListOf()
 
     private var context: WeakReference<Context>? = null
-    private lateinit var bluetoothManager: BluetoothManager
-    private lateinit var bluetoothAdapter: BluetoothAdapter
-    private lateinit var bluetoothLeScanner: BluetoothLeScanner
+    private var bluetoothManager: BluetoothManager? = null
+    private var bluetoothAdapter: BluetoothAdapter? = null
+    private var bluetoothLeScanner: BluetoothLeScanner? = null
 
     fun init(getContext: WeakReference<Context>) {
         context = getContext
         bluetoothManager = (getContext.get()?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
-        bluetoothAdapter = bluetoothManager.adapter
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-
+        bluetoothAdapter = bluetoothManager?.adapter
+        bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
         setupBluetoothAdapterStateHandler()
         requestBluetoothEnable()
     }
 
     fun requestBluetoothEnable() {
-        if (!bluetoothAdapter.isEnabled){
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            enableBtIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context?.get()?.let {
-                if (ActivityCompat.checkSelfPermission(
-                        it,
-                        Manifest.permission.BLUETOOTH_CONNECT
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return
+        bluetoothAdapter?.let { adapter ->
+            if (!adapter.isEnabled) {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                enableBtIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context?.get()?.let {
+                    if (ActivityCompat.checkSelfPermission(
+                            it,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return
+                    }
+                    Log.d(TAG, "Requesting BLE to be turned on")
+                    it.startActivity(enableBtIntent)
                 }
-                it.startActivity(enableBtIntent)
+            } else {
+                Log.d(TAG, "BLE is turned on. No need to request again.")
             }
+        } ?: run {
+            Log.d(TAG, "Cannot request BLE enable. Bluetooth adapter is null")
         }
     }
 
     override fun refresh(){
-        //if (_scanState.value == ScanState.SCANNING){
-            stopScanning()
-            leDeviceMap.clear()
-        //}
+        stopScanning()
+        leDeviceMap.clear()
     }
 
     fun on(event: NanoBeaconEvent) {
@@ -159,17 +163,22 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 return
             }
         }
-        if(!bluetoothAdapter.isEnabled) {
-            return
-        }
-        bluetoothLeScanner
-            .startScan(
-                scanFilters,
-                scanSettings,
-                leScanCallback
-            )
+        bluetoothAdapter?.let { adapter ->
+            if (!adapter.isEnabled) {
+                return
+            }
+            bluetoothLeScanner
+                ?.startScan(
+                    scanFilters,
+                    scanSettings,
+                    leScanCallback
+                )
 
-        _scanState.value = ScanState.SCANNING
+            _scanState.value = ScanState.SCANNING
+            Log.d(TAG, "Starting scan")
+        }  ?: run {
+            Log.d(TAG, "Cannot start scanning. Bluetooth adapter is null")
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -190,8 +199,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 return
             }
         }
-        bluetoothLeScanner.stopScan(leScanCallback)
+        bluetoothLeScanner?.stopScan(leScanCallback)
         _scanState.value = ScanState.STOPPED
+        Log.d(TAG, "Starting scan")
     }
 
     private fun setupBluetoothAdapterStateHandler() {
