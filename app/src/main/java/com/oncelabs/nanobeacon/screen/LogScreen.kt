@@ -179,14 +179,14 @@ private fun LogScreenContent(
             }
         }
 
-        ProjectConfigurationModal(
-            isOpen = modalIsOpen.value,
-            {
-                modalIsOpen.value = false
-            },
-            savedConfigs,
-            openFilePickerManager
-        )
+//        ProjectConfigurationModal(
+//            isOpen = modalIsOpen.value,
+//            {
+//                modalIsOpen.value = false
+//            },
+//            savedConfigs,
+//            openFilePickerManager
+//        )
     }
 
     Column(
