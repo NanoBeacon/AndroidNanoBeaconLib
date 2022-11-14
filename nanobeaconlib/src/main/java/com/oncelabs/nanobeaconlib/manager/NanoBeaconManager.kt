@@ -147,6 +147,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     @SuppressLint("MissingPermission")
     override fun startScanning(){
+        if (_scanState.value == ScanState.SCANNING) return
         context?.get()?.let {
             if (ActivityCompat.checkSelfPermission(
                     it,

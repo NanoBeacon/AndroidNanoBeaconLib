@@ -47,7 +47,7 @@ fun LogScreen(
 ) {
     val listState = rememberLazyListState()
     val filters by logDataViewModel.filters.observeAsState(initial = listOf())
-    val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = true)
+    val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = false)
     val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
     val savedConfigs by logDataViewModel.savedConfigs.observeAsState()
     LogScreenContent(

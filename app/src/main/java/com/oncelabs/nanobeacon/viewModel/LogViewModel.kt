@@ -71,6 +71,7 @@ class LogViewModel @Inject constructor(
 
         viewModelScope.launch {
             beaconManager.scanningEnabled.collect {
+                Log.d(TAG, "Scan State $it")
                 _scanningEnabled.postValue(it == ScanState.SCANNING)
             }
         }
