@@ -13,7 +13,7 @@ android {
         minSdk 26
         targetSdk 33
         versionCode 1
-        versionName "0.0.4"
+        versionName "0.0.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -82,11 +82,10 @@ dependencies {
     kapt libraries.hiltCompiler
     implementation libraries.hiltNavigation
     implementation libraries.permissions
+    implementation 'com.beust:klaxon:5.5'
 
     //Graph
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-
-
 }
 
 // Allow references to generated code

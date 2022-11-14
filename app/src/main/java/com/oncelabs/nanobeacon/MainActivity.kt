@@ -1,18 +1,29 @@
 package com.oncelabs.nanobeacon
 
+import android.content.ContentResolver
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
+import com.beust.klaxon.Klaxon
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.oncelabs.nanobeacon.manager.BeaconManager
+import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.permission.PermissionType
 import com.oncelabs.nanobeacon.permission.RequestAllPermissions
 import com.oncelabs.nanobeacon.screen.MainScreenView
 import com.oncelabs.nanobeacon.ui.theme.InplayTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
+import javax.inject.Inject
+
 
 /**
  * This is a Single Activity application,
@@ -21,32 +32,40 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+   @Inject
+   lateinit var filePickerManager : FilePickerManager
+
+   @Inject
+   lateinit var beaconManager: BeaconManager
+
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        filePickerManager.createActivity(this)
 
-        BeaconManager.init(this)
         setContent {
             InplayTheme {
-//                Navigation()
-                MainScreenView()
                 /**TODO: Request needed permissions*/
                 RequestAllPermissions(
                     navigateToSettingsScreen = {
                         PermissionType.navigateToSettings(context = this)
                     },
                     onAllGranted = {
+                        beaconManager.init()
+                        MainScreenView()
+                        //BeaconManagerImpl.init(this)
                         //MainScreenView()
                         /*TODO: */
                     }
                 )
+
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if(allPermissionsGranted()) {
+        if (allPermissionsGranted()) {
             /**TODO: */
         }
     }
@@ -69,5 +88,12 @@ class MainActivity : ComponentActivity() {
             ) == PackageManager.PERMISSION_GRANTED
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        filePickerManager?.onResultFromActivity(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+
 }
 

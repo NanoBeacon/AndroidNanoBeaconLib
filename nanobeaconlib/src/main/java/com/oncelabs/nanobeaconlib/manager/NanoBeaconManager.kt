@@ -2,7 +2,6 @@ package com.oncelabs.nanobeaconlib.manager
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
@@ -25,9 +24,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-
 
 object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
@@ -47,45 +46,54 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
     private var registeredBeaconTypes: MutableList<CustomBeaconInterface> = mutableListOf()
 
-    private lateinit var getContext: (() -> Context)
-    private lateinit var bluetoothManager: BluetoothManager
-    private lateinit var bluetoothAdapter: BluetoothAdapter
-    private lateinit var bluetoothLeScanner: BluetoothLeScanner
+    private var context: WeakReference<Context>? = null
+    private var bluetoothManager: BluetoothManager? = null
+    private var bluetoothAdapter: BluetoothAdapter? = null
+    private var bluetoothLeScanner: BluetoothLeScanner? = null
 
-    fun init(getContext: () -> Context) {
-        NanoBeaconManager.getContext = getContext
-        bluetoothManager = (getContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
-        bluetoothAdapter = bluetoothManager.adapter
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-
+    fun init(getContext: WeakReference<Context>) {
+        context = getContext
+        bluetoothManager = (getContext.get()?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
+        bluetoothAdapter = bluetoothManager?.adapter
+        bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
         setupBluetoothAdapterStateHandler()
-        if (!bluetoothAdapter.isEnabled){
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            NanoBeaconManager.getContext.let {
-                if (ActivityCompat.checkSelfPermission(
-                        getContext(),
-                        Manifest.permission.BLUETOOTH_CONNECT
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return
+        requestBluetoothEnable()
+    }
+
+    fun requestBluetoothEnable() {
+        bluetoothAdapter?.let { adapter ->
+            if (!adapter.isEnabled) {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                enableBtIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context?.get()?.let {
+                    if (ActivityCompat.checkSelfPermission(
+                            it,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return
+                    }
+                    Log.d(TAG, "Requesting BLE to be turned on")
+                    it.startActivity(enableBtIntent)
                 }
-                (it() as Activity).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            } else {
+                Log.d(TAG, "BLE is turned on. No need to request again.")
             }
+        } ?: run {
+            Log.d(TAG, "Cannot request BLE enable. Bluetooth adapter is null")
         }
     }
 
     override fun refresh(){
-        //if (_scanState.value == ScanState.SCANNING){
-            stopScanning()
-            leDeviceMap.clear()
-        //}
+        stopScanning()
+        leDeviceMap.clear()
     }
 
     fun on(event: NanoBeaconEvent) {
@@ -139,13 +147,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     @SuppressLint("MissingPermission")
     override fun startScanning(){
-        if(!bluetoothAdapter.isEnabled) {
-            return
-        }
-
-        getContext.let {
+        context?.get()?.let {
             if (ActivityCompat.checkSelfPermission(
-                    it(),
+                    it,
                     Manifest.permission.BLUETOOTH_SCAN
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
@@ -159,21 +163,29 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 return
             }
         }
-        bluetoothLeScanner
-            .startScan(
-                scanFilters,
-                scanSettings,
-                leScanCallback
-            )
+        bluetoothAdapter?.let { adapter ->
+            if (!adapter.isEnabled) {
+                return
+            }
+            bluetoothLeScanner
+                ?.startScan(
+                    scanFilters,
+                    scanSettings,
+                    leScanCallback
+                )
 
-        _scanState.value = ScanState.SCANNING
+            _scanState.value = ScanState.SCANNING
+            Log.d(TAG, "Starting scan")
+        }  ?: run {
+            Log.d(TAG, "Cannot start scanning. Bluetooth adapter is null")
+        }
     }
 
     @SuppressLint("MissingPermission")
     override fun stopScanning() {
-        getContext.let {
+        context?.get()?.let {
             if (ActivityCompat.checkSelfPermission(
-                    it(),
+                    it,
                     Manifest.permission.BLUETOOTH_SCAN
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
@@ -187,8 +199,9 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                 return
             }
         }
-        bluetoothLeScanner.stopScan(leScanCallback)
+        bluetoothLeScanner?.stopScan(leScanCallback)
         _scanState.value = ScanState.STOPPED
+        Log.d(TAG, "Starting scan")
     }
 
     private fun setupBluetoothAdapterStateHandler() {
@@ -232,8 +245,8 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         }
 
         val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
-        getContext.let {
-            (it() as Activity).registerReceiver(bluetoothAdapterStateReceiver, filter)
+        context?.get()?.let {
+            (it).registerReceiver(bluetoothAdapterStateReceiver, filter)
         }
     }
 
@@ -241,7 +254,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
-                getContext.let {
+                context?.get()?.let { context ->
                     result?.device?.address?.let { deviceAddress ->
 
                         // Check for exisiting entry
@@ -258,7 +271,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                             for (beaconType in registeredBeaconTypes){
                                 beaconType.isTypeMatchFor(
                                     beaconData,
-                                    getContext(),
+                                    context,
                                     this@NanoBeaconManager
                                 )?.let { customBeacon ->
                                     nanoBeacon = customBeacon
@@ -274,7 +287,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                             nanoBeacon?.let {} ?: run{
                                 nanoBeacon = NanoBeacon(
                                     beaconData,
-                                    context = getContext(),
+                                    context,
                                     this@NanoBeaconManager
                                 )
                                 leDeviceMap[deviceAddress] = nanoBeacon

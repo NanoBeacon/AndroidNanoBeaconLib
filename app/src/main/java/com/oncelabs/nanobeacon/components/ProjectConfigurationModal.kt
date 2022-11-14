@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.ui.theme.*
 
 
@@ -22,7 +24,8 @@ import com.oncelabs.nanobeacon.ui.theme.*
 fun ProjectConfigurationModal(
     isOpen: Boolean,
     onDismiss: () -> Unit,
-    configurations: List<String>
+    configurations: List<ConfigData>,
+    openFileSelector : () -> Unit
 ) {
 
 
@@ -54,7 +57,7 @@ fun ProjectConfigurationModal(
                                 .weight(0.85f)
                         ) {
                             items(configurations) {
-                                configurationItem(id = it)
+                                configurationItem(id = it.version ?: "1.0")
                                 Spacer(Modifier.height(10.dp))
                             }
                             item {
@@ -62,7 +65,7 @@ fun ProjectConfigurationModal(
                                     Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.Center
                                 ) {
-                                    Text("Add Configuration +", style = logButtonFont)
+                                    Text(modifier  = Modifier.clickable { openFileSelector() },text = "Add Configuration +", style = logButtonFont)
                                 }
                             }
 
