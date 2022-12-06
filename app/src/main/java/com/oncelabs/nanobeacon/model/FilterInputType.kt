@@ -6,5 +6,6 @@ package com.oncelabs.nanobeacon.model
 enum class FilterInputType {
     BINARY, // checkbox
     SLIDER, // variable slider
-    SEARCH; // search field
+    SEARCH, // search field
+    OPTIONS
 }

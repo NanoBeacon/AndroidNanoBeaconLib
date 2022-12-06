@@ -4,7 +4,8 @@ enum class FilterType {
     ADDRESS,
     RSSI,
     HIDE_UNNAMED,
-    ONLY_SHOW_CONFIGURATION;
+    ONLY_SHOW_CONFIGURATION,
+    BY_TYPE;
 
     fun getName(): String {
         return when(this) {
@@ -12,6 +13,7 @@ enum class FilterType {
             RSSI -> "Minimum RSSI"
             HIDE_UNNAMED -> "Hide unnamed devices"
             ONLY_SHOW_CONFIGURATION -> "Only show project configuration matches"
+            BY_TYPE -> "Type"
         }
     }
 
@@ -21,6 +23,10 @@ enum class FilterType {
             ADDRESS -> ""
             HIDE_UNNAMED -> false
             ONLY_SHOW_CONFIGURATION -> false
+            BY_TYPE -> mutableMapOf(
+                BeaconType.BEACON.description to false,
+                BeaconType.EDDYSTONE.description to false,
+            )
         }
     }
 
@@ -30,6 +36,7 @@ enum class FilterType {
             RSSI -> true
             HIDE_UNNAMED -> false
             ONLY_SHOW_CONFIGURATION -> false
+            BY_TYPE -> true
         }
     }
 
@@ -39,6 +46,7 @@ enum class FilterType {
             ADDRESS -> FilterInputType.SEARCH
             HIDE_UNNAMED -> FilterInputType.BINARY
             ONLY_SHOW_CONFIGURATION -> FilterInputType.BINARY
+            BY_TYPE -> FilterInputType.OPTIONS
         }
     }
 
@@ -48,6 +56,7 @@ enum class FilterType {
             ADDRESS -> null
             HIDE_UNNAMED -> null
             ONLY_SHOW_CONFIGURATION -> null
+            BY_TYPE -> null
         }
     }
 }
