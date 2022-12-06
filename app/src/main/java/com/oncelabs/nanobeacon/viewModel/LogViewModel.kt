@@ -16,7 +16,6 @@ import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.*
 import javax.inject.Inject
 import kotlin.concurrent.scheduleAtFixedRate
@@ -120,7 +119,7 @@ class LogViewModel @Inject constructor(
     /**
      * Mutate a specified [type] filter value
      */
-    fun setFilter(type: FilterType, value: Any?, enabled: Boolean) {
+    fun onFilterChanged(type: FilterType, value: Any?, enabled: Boolean) {
         val index = _filters.value?.indexOfFirst { it.filterType == type }
         if(index != -1 && index != null) {
             val filterCopy = _filters.value?.toMutableList()
