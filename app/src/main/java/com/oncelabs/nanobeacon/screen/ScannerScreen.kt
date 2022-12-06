@@ -86,14 +86,14 @@ private fun ScannerContent(
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
     filters: List<FilterOption>,
-    savedConfigs : List<ConfigData>,
+    savedConfigs: List<ConfigData>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
     onRefreshButtonClick: () -> Unit,
     openFilePickerManager: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val modalIsOpen = remember { mutableStateOf(true)}
+    val modalIsOpen = remember { mutableStateOf(true) }
     var autoScrollEnabled by remember { mutableStateOf(true) }
     val filterByNameText = rememberSaveable { mutableStateOf("") }
     var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -107,6 +107,15 @@ private fun ScannerContent(
                 return super.onPreScroll(available, source)
             }
         }
+    }
+
+    fun scrollToTopAndPause() {
+        scope.launch {
+            if (discoveredBeacons.isNotEmpty()) {
+                listState.animateScrollToItem(0)
+            }
+        }
+        autoScrollEnabled = false
     }
 
     Column {
@@ -152,9 +161,12 @@ private fun ScannerContent(
                 state = listState
             ) {
                 items(
-                    if(filterByNameText.value.isNotEmpty()) {
+                    if (filterByNameText.value.isNotEmpty()) {
                         discoveredBeacons.filter {
-                            it.beaconDataFlow.value?.name?.contains(filterByNameText.value, ignoreCase = true) == true
+                            it.beaconDataFlow.value?.name?.contains(
+                                filterByNameText.value,
+                                ignoreCase = true
+                            ) == true
                         }
                     } else {
                         discoveredBeacons
@@ -178,7 +190,7 @@ private fun ScannerContent(
                     }
                 }
             }
-            if (!autoScrollEnabled){
+            if (!autoScrollEnabled) {
                 Box(
                     modifier = Modifier
                         .background(logFloatingButtonColor.copy(0.87f))
@@ -215,37 +227,56 @@ private fun ScannerContent(
         horizontalAlignment = Alignment.End
     ) {
 
-            if (!scanningEnabled) {
-                FloatingActionButton(
-                    onClick = {
-                        onRefreshButtonClick()
-                    },
-                    backgroundColor = logFloatingButtonColor,
-                    contentColor = Color.White,
-                ) {
-                    Icon(
-                        Icons.Default.Refresh,
-                        "Refresh Button",
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-                Spacer(Modifier.height(25.dp))
-            }
-            /**Scroll enable*/
+        if (!scanningEnabled) {
             FloatingActionButton(
                 onClick = {
-                    onScanButtonClick()
+                    onRefreshButtonClick()
                 },
                 backgroundColor = logFloatingButtonColor,
                 contentColor = Color.White,
             ) {
                 Icon(
-                    if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    "Start Stop",
+                    Icons.Default.Refresh,
+                    "Refresh Button",
                     modifier = Modifier.size(36.dp)
                 )
             }
+            Spacer(Modifier.height(25.dp))
         }
+
+        /**Scroll to top*/
+        FloatingActionButton(
+            onClick = {
+                // Scroll to top
+                scrollToTopAndPause()
+            },
+            backgroundColor = logFloatingButtonColor,
+            contentColor = Color.White,
+        ) {
+            Icon(
+                Icons.Filled.VerticalAlignTop,
+                "Top",
+                modifier = Modifier.size(36.dp)
+            )
+        }
+        Spacer(Modifier.height(25.dp))
+
+
+        /**Start/stop scanning*/
+        FloatingActionButton(
+            onClick = {
+                onScanButtonClick()
+            },
+            backgroundColor = logFloatingButtonColor,
+            contentColor = Color.White,
+        ) {
+            Icon(
+                if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
+                "Start Stop",
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
 
 //        Spacer(Modifier.height(8.dp))
 //
@@ -257,7 +288,6 @@ private fun ScannerContent(
 //        ) {
 //            Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
 //        }
-
 }
 
 @Composable
@@ -295,7 +325,7 @@ private fun FilterCard(
     filter: FilterOption,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit
 ) {
-    when(filter.filterType.getInputType()) {
+    when (filter.filterType.getInputType()) {
         FilterInputType.BINARY -> BinaryFilterCard(
             filter = filter,
             onChange = {
@@ -328,7 +358,8 @@ private fun BinaryFilterCard(
     filter: FilterOption,
     onChange: (Boolean) -> Unit
 ) {
-    val checkedState = filter.value as? Boolean ?: filter.filterType.getDefaultValue() as? Boolean ?: false
+    val checkedState =
+        filter.value as? Boolean ?: filter.filterType.getDefaultValue() as? Boolean ?: false
 
     Row(
         verticalAlignment = Alignment.CenterVertically
@@ -399,8 +430,8 @@ private fun SliderFilterCard(
                 onChange(it)
             },
             valueRange = (
-                range
-            ),
+                    range
+                    ),
             modifier = Modifier
                 .weight(2f)
         )
@@ -492,7 +523,7 @@ fun PreviewLogScreen() {
 
         // Randomly add beacons to list to simulate scanning
         LaunchedEffect(Unit) {
-            while(true) {
+            while (true) {
                 delay(1000)
                 logsCopy.add(BeaconDataEntry.getRandomBeaconDataEntry())
                 logs.clear()
