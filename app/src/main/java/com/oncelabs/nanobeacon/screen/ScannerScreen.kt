@@ -1,7 +1,6 @@
 package com.oncelabs.nanobeacon.screen
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -73,7 +72,7 @@ private fun ScannerContent(
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(true)}
     var autoScrollEnabled by remember { mutableStateOf(true) }
-    val searchText = rememberSaveable { mutableStateOf("") }
+    val filterByNameText = rememberSaveable { mutableStateOf("") }
     var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
     var actionButtonExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -99,7 +98,7 @@ private fun ScannerContent(
             /**Name filter*/
             SearchView(
                 modifier = Modifier.weight(1f),
-                state = searchText,
+                state = filterByNameText,
                 placeholder = "Filter by name",
                 leadingIcon = Icons.Default.Search
             )
@@ -130,9 +129,9 @@ private fun ScannerContent(
                 state = listState
             ) {
                 items(
-                    if(searchText.value.isNotEmpty()) {
+                    if(filterByNameText.value.isNotEmpty()) {
                         discoveredBeacons.filter {
-                            it.beaconDataFlow.value?.searchableString?.contains(searchText.value, ignoreCase = true) == true
+                            it.beaconDataFlow.value?.name?.contains(filterByNameText.value, ignoreCase = true) == true
                         }
                     } else {
                         discoveredBeacons
@@ -330,7 +329,7 @@ private fun SearchFilterCard(
     filter: FilterOption,
     onChange: (String) -> Unit
 ) {
-    val value = remember { mutableStateOf("") }
+    val value = rememberSaveable { mutableStateOf("") }
 
     Row(
         verticalAlignment = Alignment.CenterVertically
