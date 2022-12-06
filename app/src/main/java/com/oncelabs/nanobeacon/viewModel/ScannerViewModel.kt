@@ -126,6 +126,9 @@ class ScannerViewModel @Inject constructor(
                     FilterType.ONLY_SHOW_CONFIGURATION -> {
                         Log.e(TAG, "${filter.filterType} not yet implemented")
                     }
+                    FilterType.BY_TYPE -> {
+                        Log.e(TAG, "${filter.filterType} not yet implemented")
+                    }
                 }
             }
         }

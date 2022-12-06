@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.screen
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.*
+import com.oncelabs.nanobeacon.model.BeaconType
 import com.oncelabs.nanobeacon.model.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
@@ -311,6 +314,12 @@ private fun FilterCard(
                 onFilterChange(filter.filterType, it, true)
             }
         )
+        FilterInputType.OPTIONS -> GroupedOptionsFilterCard(
+            filter = filter,
+            onChange = {
+                onFilterChange(filter.filterType, it, true)
+            }
+        )
     }
 }
 
@@ -401,6 +410,73 @@ private fun SliderFilterCard(
             modifier = Modifier
                 .weight(.5f)
         )
+    }
+}
+
+@Composable
+private fun GroupedOptionsFilterCard(
+    filter: FilterOption,
+    onChange: (MutableMap<String, Boolean>) -> Unit
+) {
+    val optionMap = (filter.value as? MutableMap<String, Boolean>) ?: mapOf()
+    val localMap = optionMap.toMutableMap()
+    var expanded by remember { mutableStateOf(false) }
+
+    fun editMap(type: String, value: Boolean) {
+        localMap[type] = value
+        onChange(localMap)
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            filter.filterType.getName(),
+            modifier = Modifier
+                .weight(1f)
+        )
+        Box {
+            IconButton(onClick = { expanded = !expanded }) {
+                Image(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = "",
+                    colorFilter = ColorFilter.tint(color = Color.White)
+                )
+            }
+
+            // drop down menu
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                }
+            ) {
+                // adding items
+                optionMap.keys.forEachIndexed { _, itemValue ->
+                    DropdownMenuItem(
+                        onClick = {}
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = itemValue,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Checkbox(
+                                checked = optionMap[itemValue] ?: false,
+                                onCheckedChange = {
+                                    editMap(type = itemValue, value = it)
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = iconSelected,
+                                    uncheckedColor = Color.Gray,
+                                    checkmarkColor = MaterialTheme.colors.primary
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
