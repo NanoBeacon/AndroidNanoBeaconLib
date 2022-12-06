@@ -16,8 +16,6 @@ data class NanoBeaconData(
 ){
     var bluetoothDevice = scanResult.device
     var bluetoothAddress = scanResult.device.address
-    var primaryPhy = scanResult.primaryPhy
-    var secondaryPhy = scanResult.secondaryPhy
     var advInterval = scanResult.periodicAdvertisingInterval
     var connectable = scanResult.isConnectable
     var manufacturerData = parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).first
