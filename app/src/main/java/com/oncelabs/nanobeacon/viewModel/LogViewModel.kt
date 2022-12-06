@@ -104,6 +104,7 @@ class LogViewModel @Inject constructor(
 
         _filters.value?.let { filters ->
             for(filter in filters) {
+                if(!filter.enabled) { continue }
                 when(filter.filterType) {
                     FilterType.ADDRESS -> {
                         filteredList = filteredList.filter {
@@ -115,7 +116,11 @@ class LogViewModel @Inject constructor(
                             (it.beaconDataFlow.value?.rssi?.toFloat() ?: -127f) > (filter.value as? Float ?: 0f)
                         }
                     }
-                    FilterType.HIDE_UNNAMED -> {}
+                    FilterType.HIDE_UNNAMED -> {
+                        filteredList = filteredList.filter {
+                            (it.beaconDataFlow.value?.name?.isNotBlank()) ?: true
+                        }
+                    }
                     FilterType.ONLY_SHOW_CONFIGURATION -> {}
                 }
             }

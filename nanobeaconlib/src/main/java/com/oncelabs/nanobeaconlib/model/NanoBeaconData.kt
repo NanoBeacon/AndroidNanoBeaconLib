@@ -38,7 +38,7 @@ data class NanoBeaconData(
             val rxDate = Date(timeStampMillis)
             return SimpleDateFormat("HH:mm:ss.sss", Locale.US).format(rxDate)
         }
-    var name = scanResult.scanRecord?.deviceName ?: "Not Set"
+    var name = scanResult.scanRecord?.deviceName ?: ""
     var flags = if (scanResult.scanRecord?.advertiseFlags == -1) "Not Set" else "%02X".format(scanResult.scanRecord?.advertiseFlags?.toByte())
     var serviceUuids = scanResult.scanRecord?.serviceUuids
     var serviceData = scanResult.scanRecord?.serviceData

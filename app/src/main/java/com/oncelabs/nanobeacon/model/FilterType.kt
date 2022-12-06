@@ -24,6 +24,15 @@ enum class FilterType {
         }
     }
 
+    fun isEnabledByDefault(): Boolean {
+        return when(this) {
+            ADDRESS -> true
+            RSSI -> true
+            HIDE_UNNAMED -> false
+            ONLY_SHOW_CONFIGURATION -> false
+        }
+    }
+
     fun getInputType(): FilterInputType {
         return when(this) {
             RSSI -> FilterInputType.SLIDER

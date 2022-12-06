@@ -276,19 +276,19 @@ private fun FilterCard(
         FilterInputType.BINARY -> BinaryFilterCard(
             filter = filter,
             onChange = {
-                onFilterChange(filter.filterType, it, false)
+                onFilterChange(filter.filterType, it, it)
             }
         )
         FilterInputType.SLIDER -> SliderFilterCard(
             filter = filter,
             onChange = {
-                onFilterChange(filter.filterType, it, false)
+                onFilterChange(filter.filterType, it, true)
             }
         )
         FilterInputType.SEARCH -> SearchFilterCard(
             filter = filter,
             onChange = {
-                onFilterChange(filter.filterType, it, false)
+                onFilterChange(filter.filterType, it, true)
             }
         )
     }
