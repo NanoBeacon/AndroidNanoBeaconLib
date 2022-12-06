@@ -420,6 +420,7 @@ private fun GroupedOptionsFilterCard(
 ) {
     val optionMap = (filter.value as? MutableMap<String, Boolean>) ?: mapOf()
     val localMap = optionMap.toMutableMap()
+    val enabledOptions = optionMap.filter { it.value }.keys
     var expanded by remember { mutableStateOf(false) }
 
     fun editMap(type: String, value: Boolean) {
@@ -431,7 +432,7 @@ private fun GroupedOptionsFilterCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            filter.filterType.getName(),
+            text = "${filter.filterType.getName()}: ${enabledOptions.joinToString(", ")}",
             modifier = Modifier
                 .weight(1f)
         )
