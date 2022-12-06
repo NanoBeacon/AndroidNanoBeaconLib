@@ -2,6 +2,8 @@ package com.oncelabs.nanobeacon.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -11,10 +13,13 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +35,8 @@ fun SearchView(
     trailingIcon: ImageVector = Icons.Default.Close,
     onValueChange: (String) -> Unit = {}
 ) {
+    val focusManager = LocalFocusManager.current
+
     TextField(
         value = state.value,
         onValueChange = { value ->
@@ -44,6 +51,11 @@ fun SearchView(
         },
         modifier = modifier,
         textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                focusManager.clearFocus()
+            }),
         leadingIcon = {
             leadingIcon?.let {
                 Icon(

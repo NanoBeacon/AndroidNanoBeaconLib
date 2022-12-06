@@ -2,6 +2,7 @@ package com.oncelabs.nanobeacon.viewModel
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,14 +21,15 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.concurrent.scheduleAtFixedRate
 
+@ExperimentalMaterialApi
 @HiltViewModel
-class LogViewModel @Inject constructor(
+class ScannerViewModel @Inject constructor(
     private val beaconManager: BeaconManager,
     application: Application,
     private val filePickerManager : FilePickerManager
 ): AndroidViewModel(application) {
 
-    private val TAG = LogViewModel::class.simpleName
+    private val TAG = ScannerViewModel::class.simpleName
 
     private var filterTimer: TimerTask? = null
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()

@@ -3,6 +3,7 @@ package com.oncelabs.nanobeacon.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,11 +16,13 @@ import com.oncelabs.nanobeacon.components.LiveDataSheet
 import com.oncelabs.nanobeacon.model.ADXL367Data
 import com.oncelabs.nanobeacon.viewModel.LiveDataViewModel
 
+@ExperimentalMaterialApi
 @Composable
 fun LiveDataScreen() {
     LiveDataContent()
 }
 
+@ExperimentalMaterialApi
 @Composable
 fun LiveDataContent(
     liveDataViewModel: LiveDataViewModel = hiltViewModel()

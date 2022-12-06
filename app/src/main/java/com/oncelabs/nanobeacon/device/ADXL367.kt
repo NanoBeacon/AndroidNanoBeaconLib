@@ -2,6 +2,7 @@ package com.oncelabs.nanobeacon.device
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.manager.NotificationService
 import com.oncelabs.nanobeacon.model.ADXL367Data
 import com.oncelabs.nanobeaconlib.extension.toHexString
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.experimental.and
 
+@ExperimentalMaterialApi
 class ADXL367(
     data: NanoBeaconData? = null,
     val context: Context? = null,
