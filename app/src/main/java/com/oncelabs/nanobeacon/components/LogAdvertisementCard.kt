@@ -78,12 +78,14 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                     .wrapContentHeight()
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                SignalStrength(modifier = Modifier.size(32.dp), rawSignal = data.rssi.toIntOrNull() ?: -127)
+                Spacer(modifier = Modifier.weight(.1f))
                 Row {
                     Text(text = "Address: ", style = logCardTitleAccentFont)
                     Text(text = data.address, style = logCardTitleFont)
                 }
+                Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
                     contentDescription = "Expand Button",
