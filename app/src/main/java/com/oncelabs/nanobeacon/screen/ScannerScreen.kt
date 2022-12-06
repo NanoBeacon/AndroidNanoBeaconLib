@@ -10,10 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,17 +29,14 @@ import com.oncelabs.nanobeacon.components.*
 import com.oncelabs.nanobeacon.model.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
-import com.oncelabs.nanobeacon.ui.theme.InplayTheme
-import com.oncelabs.nanobeacon.ui.theme.autoScrollTogleFont
-import com.oncelabs.nanobeacon.ui.theme.logFloatingButtonColor
-import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
+import com.oncelabs.nanobeacon.ui.theme.*
 import com.oncelabs.nanobeacon.viewModel.LogViewModel
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun LogScreen(
+fun ScannerScreen(
     logDataViewModel: LogViewModel = hiltViewModel()
 ) {
     val listState = rememberLazyListState()
@@ -50,13 +44,13 @@ fun LogScreen(
     val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = false)
     val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
     val savedConfigs by logDataViewModel.savedConfigs.observeAsState()
-    LogScreenContent(
+    ScannerContent(
         scanEnabled,
         discoveredBeacons,
         listState = listState,
         filters = filters,
         savedConfigs = savedConfigs ?: listOf(),
-        onFilterChange = logDataViewModel::setFilter,
+        onFilterChange = logDataViewModel::onFilterChanged,
         onScanButtonClick = if (scanEnabled) logDataViewModel::stopScanning else logDataViewModel::startScanning,
         onRefreshButtonClick = logDataViewModel::refresh,
         openFilePickerManager = {logDataViewModel.openFilePickerManager() }
@@ -64,7 +58,7 @@ fun LogScreen(
 }
 
 @Composable
-private fun LogScreenContent(
+private fun ScannerContent(
     scanningEnabled: Boolean,
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
@@ -78,7 +72,7 @@ private fun LogScreenContent(
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(true)}
     var autoScrollEnabled by remember { mutableStateOf(true) }
-    val searchText = rememberSaveable { mutableStateOf("") }
+    val filterByNameText = rememberSaveable { mutableStateOf("") }
     var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
     var actionButtonExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -93,7 +87,7 @@ private fun LogScreenContent(
     }
     Column {
         /**Top bar*/
-        InplayTopBar(title = "Log")
+        InplayTopBar(title = "Scanner")
 
         Row(
             modifier = Modifier
@@ -101,11 +95,12 @@ private fun LogScreenContent(
                 .height(IntrinsicSize.Max),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            /**Search results*/
+            /**Name filter*/
             SearchView(
                 modifier = Modifier.weight(1f),
-                state = searchText,
-                placeholder = "BT Addr, Manufacturer Data..."
+                state = filterByNameText,
+                placeholder = "Filter by name",
+                leadingIcon = Icons.Default.Search
             )
 
             /**Filter results drop down*/
@@ -134,9 +129,9 @@ private fun LogScreenContent(
                 state = listState
             ) {
                 items(
-                    if(searchText.value.isNotEmpty()) {
+                    if(filterByNameText.value.isNotEmpty()) {
                         discoveredBeacons.filter {
-                            it.beaconDataFlow.value?.searchableString?.contains(searchText.value, ignoreCase = true) == true
+                            it.beaconDataFlow.value?.name?.contains(filterByNameText.value, ignoreCase = true) == true
                         }
                     } else {
                         discoveredBeacons
@@ -278,12 +273,72 @@ private fun FilterCard(
     onFilterChange: (FilterType, Any?, Boolean) -> Unit
 ) {
     when(filter.filterType.getInputType()) {
-        FilterInputType.BINARY -> {/**Probably a toggle button*/}
+        FilterInputType.BINARY -> BinaryFilterCard(
+            filter = filter,
+            onChange = {
+                onFilterChange(filter.filterType, it, it)
+            }
+        )
         FilterInputType.SLIDER -> SliderFilterCard(
             filter = filter,
             onChange = {
-                onFilterChange(filter.filterType, it, false)
+                onFilterChange(filter.filterType, it, true)
             }
+        )
+        FilterInputType.SEARCH -> SearchFilterCard(
+            filter = filter,
+            onChange = {
+                onFilterChange(filter.filterType, it, true)
+            }
+        )
+    }
+}
+
+@Composable
+private fun BinaryFilterCard(
+    filter: FilterOption,
+    onChange: (Boolean) -> Unit
+) {
+    val checkedState = filter.value as? Boolean ?: filter.filterType.getDefaultValue() as? Boolean ?: false
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            filter.filterType.getName(),
+            modifier = Modifier
+                .weight(1f)
+        )
+        Checkbox(
+            checked = checkedState,
+            onCheckedChange = {
+                onChange(it)
+            },
+            colors = CheckboxDefaults.colors(
+                checkedColor = iconSelected,
+                uncheckedColor = Color.Gray,
+                checkmarkColor = MaterialTheme.colors.primary
+            )
+        )
+    }
+}
+
+@Composable
+private fun SearchFilterCard(
+    filter: FilterOption,
+    onChange: (String) -> Unit
+) {
+    val value = rememberSaveable { mutableStateOf(filter.value as? String ?: "") }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SearchView(
+            modifier = Modifier.weight(1f),
+            state = value,
+            placeholder = filter.filterType.getName(),
+            leadingIcon = null,
+            onValueChange = onChange
         )
     }
 }
@@ -296,7 +351,6 @@ private fun SliderFilterCard(
     filter: FilterOption,
     onChange: (Float) -> Unit
 ) {
-    check(filter.filterType.getInputType() == FilterInputType.SLIDER)
     val lower: Float = filter.filterType.getRange()?.first?.toFloat() ?: 0f
     val upper: Float = filter.filterType.getRange()?.second?.toFloat() ?: 100f
     val range = lower..upper
@@ -309,6 +363,7 @@ private fun SliderFilterCard(
             modifier = Modifier
                 .weight(1f)
         )
+        Spacer(modifier = Modifier.weight(.25f))
         Slider(
             value = filter.value as? Float ?: 0f,
             onValueChange = {
@@ -326,7 +381,6 @@ private fun SliderFilterCard(
             modifier = Modifier
                 .weight(.5f)
         )
-        Spacer(modifier = Modifier.weight(.25f))
     }
 }
 
@@ -349,7 +403,7 @@ fun PreviewLogScreen() {
             }
         }
 
-        LogScreenContent(
+        ScannerContent(
             true,
             discoveredBeacons = listOf(),
             listState = state,

@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,11 +26,15 @@ fun SearchView(
     modifier: Modifier = Modifier,
     state: MutableState<String>,
     placeholder: String,
+    leadingIcon: ImageVector?,
+    trailingIcon: ImageVector = Icons.Default.Close,
+    onValueChange: (String) -> Unit = {}
 ) {
     TextField(
         value = state.value,
         onValueChange = { value ->
             state.value = value
+            onValueChange(value)
         },
         placeholder = {
             Text(
@@ -40,23 +45,26 @@ fun SearchView(
         modifier = modifier,
         textStyle = TextStyle(color = Color.White, fontSize = 18.sp),
         leadingIcon = {
-            Icon(
-                Icons.Default.Search,
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(15.dp)
-                    .size(24.dp)
-            )
+            leadingIcon?.let {
+                Icon(
+                    it,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .size(24.dp)
+                )
+            }
         },
         trailingIcon = {
             if (state.value.isNotEmpty()) {
                 IconButton(
                     onClick = {
                         state.value = ""
+                        onValueChange("")
                     }
                 ) {
                     Icon(
-                        Icons.Default.Close,
+                        trailingIcon,
                         contentDescription = "",
                         modifier = Modifier
                             .padding(15.dp)
@@ -86,6 +94,7 @@ fun SearchViewPreview() {
     val textState = remember { mutableStateOf("") }
     SearchView(
         state = textState,
-        placeholder = "placeholder"
+        placeholder = "placeholder",
+        leadingIcon = Icons.Default.Search
     )
 }

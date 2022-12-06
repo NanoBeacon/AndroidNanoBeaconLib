@@ -4,6 +4,7 @@ package com.oncelabs.nanobeacon.model
  * Types of filter options
  */
 enum class FilterInputType {
-    BINARY,
-    SLIDER;
+    BINARY, // checkbox
+    SLIDER, // variable slider
+    SEARCH; // search field
 }

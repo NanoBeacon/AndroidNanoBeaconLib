@@ -10,7 +10,7 @@ import com.oncelabs.nanobeacon.navigation.BottomNav
 import com.oncelabs.nanobeacon.navigation.Navigation
 
 @Composable
-fun MainScreenView() {
+fun MainScreen() {
     val navController = rememberNavController()
     Scaffold(bottomBar = { BottomNav(navController = navController) }) {
         Box(modifier =

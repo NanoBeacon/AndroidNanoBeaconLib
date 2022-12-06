@@ -9,6 +9,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
  */
 sealed class Screen(val route: String, val icon : ImageVector, val title : String) {
     object LiveDataScreen : Screen("liveData", Icons.Default.QueryStats, "Live Data")
-    object LogScreen : Screen("log", Icons.Default.Description, "Log")
+    object ScannerScreen : Screen("scanner", Icons.Default.Description, "Scanner")
 }
 
