@@ -105,7 +105,11 @@ class LogViewModel @Inject constructor(
         _filters.value?.let { filters ->
             for(filter in filters) {
                 when(filter.filterType) {
-                    FilterType.ADDRESS -> {}
+                    FilterType.ADDRESS -> {
+                        filteredList = filteredList.filter {
+                            (it.beaconDataFlow.value?.bluetoothAddress)?.contains(filter.value as? String ?: "") ?: false
+                        }
+                    }
                     FilterType.RSSI -> {
                         filteredList = filteredList.filter {
                             (it.beaconDataFlow.value?.rssi?.toFloat() ?: -127f) > (filter.value as? Float ?: 0f)

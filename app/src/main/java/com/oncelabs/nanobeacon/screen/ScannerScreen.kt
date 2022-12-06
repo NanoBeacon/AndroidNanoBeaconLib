@@ -299,7 +299,7 @@ private fun BinaryFilterCard(
     filter: FilterOption,
     onChange: (Boolean) -> Unit
 ) {
-    val checkedState = remember { mutableStateOf(filter.filterType.getDefaultValue() as? Boolean ?: false) }
+    val checkedState = filter.value as? Boolean ?: filter.filterType.getDefaultValue() as? Boolean ?: false
 
     Row(
         verticalAlignment = Alignment.CenterVertically
@@ -310,9 +310,8 @@ private fun BinaryFilterCard(
                 .weight(1f)
         )
         Checkbox(
-            checked = checkedState.value,
+            checked = checkedState,
             onCheckedChange = {
-                checkedState.value = it
                 onChange(it)
             },
             colors = CheckboxDefaults.colors(
@@ -329,7 +328,7 @@ private fun SearchFilterCard(
     filter: FilterOption,
     onChange: (String) -> Unit
 ) {
-    val value = rememberSaveable { mutableStateOf("") }
+    val value = rememberSaveable { mutableStateOf(filter.value as? String ?: "") }
 
     Row(
         verticalAlignment = Alignment.CenterVertically
