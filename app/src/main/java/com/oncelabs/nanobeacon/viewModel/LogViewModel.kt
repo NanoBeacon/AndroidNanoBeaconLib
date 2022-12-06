@@ -121,7 +121,9 @@ class LogViewModel @Inject constructor(
                             (it.beaconDataFlow.value?.name?.isNotBlank()) ?: true
                         }
                     }
-                    FilterType.ONLY_SHOW_CONFIGURATION -> {}
+                    FilterType.ONLY_SHOW_CONFIGURATION -> {
+                        Log.e(TAG, "${filter.filterType} not yet implemented")
+                    }
                 }
             }
         }
