@@ -13,6 +13,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -20,8 +21,8 @@ import com.oncelabs.nanobeacon.MainActivity
 import com.oncelabs.nanobeacon.R
 import java.io.File
 
+@ExperimentalMaterialApi
 class NotificationService : Service() {
-
     private var previousChannel = ""
 
     companion object {

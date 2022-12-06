@@ -1,5 +1,6 @@
 package com.oncelabs.nanobeacon.module
 
+import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.BeaconManagerImpl
 import com.oncelabs.nanobeacon.manager.FilePickerManager
@@ -9,6 +10,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
+@ExperimentalMaterialApi
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ServiceModule {

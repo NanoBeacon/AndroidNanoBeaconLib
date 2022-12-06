@@ -11,6 +11,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -30,33 +33,50 @@ import com.oncelabs.nanobeacon.model.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
 import com.oncelabs.nanobeacon.ui.theme.*
-import com.oncelabs.nanobeacon.viewModel.LogViewModel
+import com.oncelabs.nanobeacon.viewModel.ScannerViewModel
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@ExperimentalMaterialApi
 @Composable
 fun ScannerScreen(
-    logDataViewModel: LogViewModel = hiltViewModel()
+    viewModel: ScannerViewModel = hiltViewModel()
 ) {
+    val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
-    val filters by logDataViewModel.filters.observeAsState(initial = listOf())
-    val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = false)
-    val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
-    val savedConfigs by logDataViewModel.savedConfigs.observeAsState()
-    ScannerContent(
-        scanEnabled,
-        discoveredBeacons,
-        listState = listState,
-        filters = filters,
-        savedConfigs = savedConfigs ?: listOf(),
-        onFilterChange = logDataViewModel::onFilterChanged,
-        onScanButtonClick = if (scanEnabled) logDataViewModel::stopScanning else logDataViewModel::startScanning,
-        onRefreshButtonClick = logDataViewModel::refresh,
-        openFilePickerManager = {logDataViewModel.openFilePickerManager() }
-    )
+    val filters by viewModel.filters.observeAsState(initial = listOf())
+    val scanEnabled by viewModel.scanningEnabled.observeAsState(initial = false)
+    val discoveredBeacons by viewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
+    val savedConfigs by viewModel.savedConfigs.observeAsState()
+    var refreshing by remember { mutableStateOf(false) }
+
+    fun refresh() = scope.launch {
+        refreshing = true
+        viewModel.refresh()
+        delay(1500)
+        refreshing = false
+    }
+
+    val state = rememberPullRefreshState(refreshing, ::refresh)
+
+    Box(modifier = Modifier.pullRefresh(state)) {
+        ScannerContent(
+            scanEnabled,
+            discoveredBeacons,
+            listState = listState,
+            filters = filters,
+            savedConfigs = savedConfigs ?: listOf(),
+            onFilterChange = viewModel::onFilterChanged,
+            onScanButtonClick = if (scanEnabled) viewModel::stopScanning else viewModel::startScanning,
+            onRefreshButtonClick = viewModel::refresh,
+            openFilePickerManager = { viewModel.openFilePickerManager() }
+        )
+        PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
+    }
 }
 
+@ExperimentalMaterialApi
 @Composable
 private fun ScannerContent(
     scanningEnabled: Boolean,
@@ -85,10 +105,10 @@ private fun ScannerContent(
             }
         }
     }
+
     Column {
         /**Top bar*/
         InplayTopBar(title = "Scanner")
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -384,6 +404,7 @@ private fun SliderFilterCard(
     }
 }
 
+@ExperimentalMaterialApi
 @Composable
 @Preview
 fun PreviewLogScreen() {

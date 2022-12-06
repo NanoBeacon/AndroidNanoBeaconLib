@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
+import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
@@ -19,6 +20,7 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@ExperimentalMaterialApi
 @Singleton
 class BeaconManagerImpl @Inject constructor(
     @ApplicationContext private val context: Context

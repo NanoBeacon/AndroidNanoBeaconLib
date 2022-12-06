@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.viewModel
 
 import android.app.Application
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -16,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.collections.set
 
-
+@ExperimentalMaterialApi
 @HiltViewModel
 class LiveDataViewModel @Inject constructor(
     beaconManager: BeaconManager,
