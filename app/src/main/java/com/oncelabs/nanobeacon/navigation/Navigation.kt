@@ -5,7 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.oncelabs.nanobeacon.screen.LiveDataScreen
-import com.oncelabs.nanobeacon.screen.LogScreen
+import com.oncelabs.nanobeacon.screen.ScannerScreen
 
 /**
  * Define all associated [Composable] Screens with their given [Screen]
@@ -13,10 +13,10 @@ import com.oncelabs.nanobeacon.screen.LogScreen
 @Composable
 fun Navigation(navController : NavHostController) {
 
-    NavHost(navController = navController, startDestination = Screen.LogScreen.route) {
+    NavHost(navController = navController, startDestination = Screen.ScannerScreen.route) {
 
-        composable(route = Screen.LogScreen.route) {
-            LogScreen()
+        composable(route = Screen.ScannerScreen.route) {
+            ScannerScreen()
         }
 
         composable(route = Screen.LiveDataScreen.route) {

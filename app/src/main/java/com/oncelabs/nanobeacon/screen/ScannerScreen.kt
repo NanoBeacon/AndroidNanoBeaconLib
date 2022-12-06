@@ -42,7 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun LogScreen(
+fun ScannerScreen(
     logDataViewModel: LogViewModel = hiltViewModel()
 ) {
     val listState = rememberLazyListState()
@@ -50,7 +50,7 @@ fun LogScreen(
     val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = false)
     val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
     val savedConfigs by logDataViewModel.savedConfigs.observeAsState()
-    LogScreenContent(
+    ScannerContent(
         scanEnabled,
         discoveredBeacons,
         listState = listState,
@@ -64,7 +64,7 @@ fun LogScreen(
 }
 
 @Composable
-private fun LogScreenContent(
+private fun ScannerContent(
     scanningEnabled: Boolean,
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
@@ -93,7 +93,7 @@ private fun LogScreenContent(
     }
     Column {
         /**Top bar*/
-        InplayTopBar(title = "Log")
+        InplayTopBar(title = "Scanner")
 
         Row(
             modifier = Modifier
@@ -349,7 +349,7 @@ fun PreviewLogScreen() {
             }
         }
 
-        LogScreenContent(
+        ScannerContent(
             true,
             discoveredBeacons = listOf(),
             listState = state,
