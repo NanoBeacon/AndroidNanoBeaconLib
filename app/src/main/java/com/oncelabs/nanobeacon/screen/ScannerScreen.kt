@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.screen
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,10 +11,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -29,56 +31,71 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.*
+import com.oncelabs.nanobeacon.model.BeaconType
 import com.oncelabs.nanobeacon.model.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
-import com.oncelabs.nanobeacon.ui.theme.InplayTheme
-import com.oncelabs.nanobeacon.ui.theme.autoScrollTogleFont
-import com.oncelabs.nanobeacon.ui.theme.logFloatingButtonColor
-import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
-import com.oncelabs.nanobeacon.viewModel.LogViewModel
+import com.oncelabs.nanobeacon.ui.theme.*
+import com.oncelabs.nanobeacon.viewModel.ScannerViewModel
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@ExperimentalMaterialApi
 @Composable
-fun LogScreen(
-    logDataViewModel: LogViewModel = hiltViewModel()
+fun ScannerScreen(
+    viewModel: ScannerViewModel = hiltViewModel()
 ) {
+    val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
-    val filters by logDataViewModel.filters.observeAsState(initial = listOf())
-    val scanEnabled by logDataViewModel.scanningEnabled.observeAsState(initial = true)
-    val discoveredBeacons by logDataViewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
-    val savedConfigs by logDataViewModel.savedConfigs.observeAsState()
-    LogScreenContent(
-        scanEnabled,
-        discoveredBeacons,
-        listState = listState,
-        filters = filters,
-        savedConfigs = savedConfigs ?: listOf(),
-        onFilterChange = logDataViewModel::setFilter,
-        onScanButtonClick = if (scanEnabled) logDataViewModel::stopScanning else logDataViewModel::startScanning,
-        onRefreshButtonClick = logDataViewModel::refresh,
-        openFilePickerManager = {logDataViewModel.openFilePickerManager() }
-    )
+    val filters by viewModel.filters.observeAsState(initial = listOf())
+    val scanEnabled by viewModel.scanningEnabled.observeAsState(initial = false)
+    val discoveredBeacons by viewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
+    val savedConfigs by viewModel.savedConfigs.observeAsState()
+    var refreshing by remember { mutableStateOf(false) }
+
+    fun refresh() = scope.launch {
+        refreshing = true
+        viewModel.refresh()
+        delay(1500)
+        refreshing = false
+    }
+
+    val state = rememberPullRefreshState(refreshing, ::refresh)
+
+    Box(modifier = Modifier.pullRefresh(state)) {
+        ScannerContent(
+            scanEnabled,
+            discoveredBeacons,
+            listState = listState,
+            filters = filters,
+            savedConfigs = savedConfigs ?: listOf(),
+            onFilterChange = viewModel::onFilterChanged,
+            onScanButtonClick = if (scanEnabled) viewModel::stopScanning else viewModel::startScanning,
+            onRefreshButtonClick = viewModel::refresh,
+            openFilePickerManager = { viewModel.openFilePickerManager() }
+        )
+        PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
+    }
 }
 
+@ExperimentalMaterialApi
 @Composable
-private fun LogScreenContent(
+private fun ScannerContent(
     scanningEnabled: Boolean,
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
     filters: List<FilterOption>,
-    savedConfigs : List<ConfigData>,
+    savedConfigs: List<ConfigData>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
     onRefreshButtonClick: () -> Unit,
     openFilePickerManager: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val modalIsOpen = remember { mutableStateOf(true)}
+    val modalIsOpen = remember { mutableStateOf(true) }
     var autoScrollEnabled by remember { mutableStateOf(true) }
-    val searchText = rememberSaveable { mutableStateOf("") }
+    val filterByNameText = rememberSaveable { mutableStateOf("") }
     var filterMenuExpanded by rememberSaveable { mutableStateOf(false) }
     var actionButtonExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -91,21 +108,31 @@ private fun LogScreenContent(
             }
         }
     }
+
+    fun scrollToTopAndPause() {
+        scope.launch {
+            if (discoveredBeacons.isNotEmpty()) {
+                listState.animateScrollToItem(0)
+            }
+        }
+        autoScrollEnabled = false
+    }
+
     Column {
         /**Top bar*/
-        InplayTopBar(title = "Log")
-
+        InplayTopBar(title = "Scanner")
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Max),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            /**Search results*/
+            /**Name filter*/
             SearchView(
                 modifier = Modifier.weight(1f),
-                state = searchText,
-                placeholder = "BT Addr, Manufacturer Data..."
+                state = filterByNameText,
+                placeholder = "Filter by name",
+                leadingIcon = Icons.Default.Search
             )
 
             /**Filter results drop down*/
@@ -134,9 +161,12 @@ private fun LogScreenContent(
                 state = listState
             ) {
                 items(
-                    if(searchText.value.isNotEmpty()) {
+                    if (filterByNameText.value.isNotEmpty()) {
                         discoveredBeacons.filter {
-                            it.beaconDataFlow.value?.searchableString?.contains(searchText.value, ignoreCase = true) == true
+                            it.beaconDataFlow.value?.name?.contains(
+                                filterByNameText.value,
+                                ignoreCase = true
+                            ) == true
                         }
                     } else {
                         discoveredBeacons
@@ -160,7 +190,7 @@ private fun LogScreenContent(
                     }
                 }
             }
-            if (!autoScrollEnabled){
+            if (!autoScrollEnabled) {
                 Box(
                     modifier = Modifier
                         .background(logFloatingButtonColor.copy(0.87f))
@@ -197,37 +227,56 @@ private fun LogScreenContent(
         horizontalAlignment = Alignment.End
     ) {
 
-            if (!scanningEnabled) {
-                FloatingActionButton(
-                    onClick = {
-                        onRefreshButtonClick()
-                    },
-                    backgroundColor = logFloatingButtonColor,
-                    contentColor = Color.White,
-                ) {
-                    Icon(
-                        Icons.Default.Refresh,
-                        "Refresh Button",
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-                Spacer(Modifier.height(25.dp))
-            }
-            /**Scroll enable*/
+        if (!scanningEnabled) {
             FloatingActionButton(
                 onClick = {
-                    onScanButtonClick()
+                    onRefreshButtonClick()
                 },
                 backgroundColor = logFloatingButtonColor,
                 contentColor = Color.White,
             ) {
                 Icon(
-                    if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
-                    "Start Stop",
+                    Icons.Default.Refresh,
+                    "Refresh Button",
                     modifier = Modifier.size(36.dp)
                 )
             }
+            Spacer(Modifier.height(25.dp))
         }
+
+        /**Scroll to top*/
+        FloatingActionButton(
+            onClick = {
+                // Scroll to top
+                scrollToTopAndPause()
+            },
+            backgroundColor = logFloatingButtonColor,
+            contentColor = Color.White,
+        ) {
+            Icon(
+                Icons.Filled.VerticalAlignTop,
+                "Top",
+                modifier = Modifier.size(36.dp)
+            )
+        }
+        Spacer(Modifier.height(25.dp))
+
+
+        /**Start/stop scanning*/
+        FloatingActionButton(
+            onClick = {
+                onScanButtonClick()
+            },
+            backgroundColor = logFloatingButtonColor,
+            contentColor = Color.White,
+        ) {
+            Icon(
+                if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
+                "Start Stop",
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
 
 //        Spacer(Modifier.height(8.dp))
 //
@@ -239,7 +288,6 @@ private fun LogScreenContent(
 //        ) {
 //            Icon(Icons.Default.FilterAlt, "filter Settings", modifier = Modifier.size(36.dp))
 //        }
-
 }
 
 @Composable
@@ -277,13 +325,80 @@ private fun FilterCard(
     filter: FilterOption,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit
 ) {
-    when(filter.filterType.getInputType()) {
-        FilterInputType.BINARY -> {/**Probably a toggle button*/}
+    when (filter.filterType.getInputType()) {
+        FilterInputType.BINARY -> BinaryFilterCard(
+            filter = filter,
+            onChange = {
+                onFilterChange(filter.filterType, it, it)
+            }
+        )
         FilterInputType.SLIDER -> SliderFilterCard(
             filter = filter,
             onChange = {
-                onFilterChange(filter.filterType, it, false)
+                onFilterChange(filter.filterType, it, true)
             }
+        )
+        FilterInputType.SEARCH -> SearchFilterCard(
+            filter = filter,
+            onChange = {
+                onFilterChange(filter.filterType, it, true)
+            }
+        )
+        FilterInputType.OPTIONS -> GroupedOptionsFilterCard(
+            filter = filter,
+            onChange = {
+                onFilterChange(filter.filterType, it, true)
+            }
+        )
+    }
+}
+
+@Composable
+private fun BinaryFilterCard(
+    filter: FilterOption,
+    onChange: (Boolean) -> Unit
+) {
+    val checkedState =
+        filter.value as? Boolean ?: filter.filterType.getDefaultValue() as? Boolean ?: false
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            filter.filterType.getName(),
+            modifier = Modifier
+                .weight(1f)
+        )
+        Checkbox(
+            checked = checkedState,
+            onCheckedChange = {
+                onChange(it)
+            },
+            colors = CheckboxDefaults.colors(
+                checkedColor = iconSelected,
+                uncheckedColor = Color.Gray,
+                checkmarkColor = MaterialTheme.colors.primary
+            )
+        )
+    }
+}
+
+@Composable
+private fun SearchFilterCard(
+    filter: FilterOption,
+    onChange: (String) -> Unit
+) {
+    val value = rememberSaveable { mutableStateOf(filter.value as? String ?: "") }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SearchView(
+            modifier = Modifier.weight(1f),
+            state = value,
+            placeholder = filter.filterType.getName(),
+            leadingIcon = null,
+            onValueChange = onChange
         )
     }
 }
@@ -296,7 +411,6 @@ private fun SliderFilterCard(
     filter: FilterOption,
     onChange: (Float) -> Unit
 ) {
-    check(filter.filterType.getInputType() == FilterInputType.SLIDER)
     val lower: Float = filter.filterType.getRange()?.first?.toFloat() ?: 0f
     val upper: Float = filter.filterType.getRange()?.second?.toFloat() ?: 100f
     val range = lower..upper
@@ -309,14 +423,15 @@ private fun SliderFilterCard(
             modifier = Modifier
                 .weight(1f)
         )
+        Spacer(modifier = Modifier.weight(.25f))
         Slider(
             value = filter.value as? Float ?: 0f,
             onValueChange = {
                 onChange(it)
             },
             valueRange = (
-                range
-            ),
+                    range
+                    ),
             modifier = Modifier
                 .weight(2f)
         )
@@ -326,10 +441,78 @@ private fun SliderFilterCard(
             modifier = Modifier
                 .weight(.5f)
         )
-        Spacer(modifier = Modifier.weight(.25f))
     }
 }
 
+@Composable
+private fun GroupedOptionsFilterCard(
+    filter: FilterOption,
+    onChange: (MutableMap<String, Boolean>) -> Unit
+) {
+    val optionMap = (filter.value as? MutableMap<String, Boolean>) ?: mapOf()
+    val localMap = optionMap.toMutableMap()
+    val enabledOptions = optionMap.filter { it.value }.keys
+    var expanded by remember { mutableStateOf(false) }
+
+    fun editMap(type: String, value: Boolean) {
+        localMap[type] = value
+        onChange(localMap)
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "${filter.filterType.getName()}: ${enabledOptions.joinToString(", ")}",
+            modifier = Modifier
+                .weight(1f)
+        )
+        Box {
+            IconButton(onClick = { expanded = !expanded }) {
+                Image(
+                    imageVector = Icons.Filled.MoreVert,
+                    contentDescription = "",
+                    colorFilter = ColorFilter.tint(color = Color.White)
+                )
+            }
+
+            // drop down menu
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = {
+                    expanded = false
+                }
+            ) {
+                // adding items
+                optionMap.keys.forEachIndexed { _, itemValue ->
+                    DropdownMenuItem(
+                        onClick = {}
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = itemValue,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Checkbox(
+                                checked = optionMap[itemValue] ?: false,
+                                onCheckedChange = {
+                                    editMap(type = itemValue, value = it)
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = iconSelected,
+                                    uncheckedColor = Color.Gray,
+                                    checkmarkColor = MaterialTheme.colors.primary
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@ExperimentalMaterialApi
 @Composable
 @Preview
 fun PreviewLogScreen() {
@@ -340,7 +523,7 @@ fun PreviewLogScreen() {
 
         // Randomly add beacons to list to simulate scanning
         LaunchedEffect(Unit) {
-            while(true) {
+            while (true) {
                 delay(1000)
                 logsCopy.add(BeaconDataEntry.getRandomBeaconDataEntry())
                 logs.clear()
@@ -349,7 +532,7 @@ fun PreviewLogScreen() {
             }
         }
 
-        LogScreenContent(
+        ScannerContent(
             true,
             discoveredBeacons = listOf(),
             listState = state,

@@ -47,8 +47,6 @@ internal fun formatToEntry(nanoBeaconData: NanoBeaconData): BeaconDataEntry {
         localName = nanoBeaconData.name,
         flags = nanoBeaconData.flags,
         txPowerObserved = "${nanoBeaconData.transmitPowerObserved}",
-        primaryPhy = "${nanoBeaconData.primaryPhy}",
-        secondaryPhy = "${nanoBeaconData.secondaryPhy}",
         searchableString = nanoBeaconData.searchableString,
         rawData = nanoBeaconData.raw?.uppercase() ?: ""
     )
@@ -80,12 +78,14 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                     .wrapContentHeight()
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                SignalStrength(modifier = Modifier.size(32.dp), rawSignal = data.rssi.toIntOrNull() ?: -127)
+                Spacer(modifier = Modifier.weight(.1f))
                 Row {
                     Text(text = "Address: ", style = logCardTitleAccentFont)
                     Text(text = data.address, style = logCardTitleFont)
                 }
+                Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = if (!isExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropUp,
                     contentDescription = "Expand Button",
@@ -105,8 +105,6 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                     DataLine(title = "Transmit Power Level", data = data.txPower, maxLines = 1)
                     DataLine(title = "Flags", data = data.flags, maxLines = 1)
                     DataLine(title = "TX Power Observed", data = data.txPowerObserved, maxLines = 1)
-                    DataLine(title = "Primary Phy", data = data.primaryPhy, maxLines = 1)
-                    DataLine(title = "Secondary Phy", data = data.secondaryPhy, maxLines = 1)
                     DataLine(title = "Company", data = data.company, maxLines = 2, separateData = false)
                     DataLine(title = "Manufacturer ID", data = data.manufacturerId, maxLines = 1)
                     DataLine(
@@ -200,8 +198,6 @@ data class BeaconDataEntry(
     val localName: String,
     val flags: String,
     val txPowerObserved: String,
-    val primaryPhy: String,
-    val secondaryPhy: String,
     val searchableString: String,
     val rawData:String
 ) {
@@ -219,8 +215,6 @@ data class BeaconDataEntry(
                 localName = "${Random.nextInt(200)}",
                 flags = "${Random.nextInt(200)}",
                 txPowerObserved = "${Random.nextInt(200)}",
-                primaryPhy = "${Random.nextInt(200)}",
-                secondaryPhy = "${Random.nextInt(200)}",
                 searchableString = "",
                 rawData = "0x0000"
             )

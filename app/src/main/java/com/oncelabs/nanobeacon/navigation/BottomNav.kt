@@ -19,7 +19,7 @@ import com.oncelabs.nanobeacon.ui.theme.iconSelected
 @Composable
 fun BottomNav(navController: NavController) {
     val items = listOf(
-        Screen.LogScreen,
+        Screen.ScannerScreen,
         Screen.LiveDataScreen
     )
 

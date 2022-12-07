@@ -2,6 +2,7 @@ package com.oncelabs.nanobeacon.viewModel
 
 import android.app.Application
 import android.util.Log
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -16,19 +17,19 @@ import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.*
 import javax.inject.Inject
 import kotlin.concurrent.scheduleAtFixedRate
 
+@ExperimentalMaterialApi
 @HiltViewModel
-class LogViewModel @Inject constructor(
+class ScannerViewModel @Inject constructor(
     private val beaconManager: BeaconManager,
     application: Application,
     private val filePickerManager : FilePickerManager
 ): AndroidViewModel(application) {
 
-    private val TAG = LogViewModel::class.simpleName
+    private val TAG = ScannerViewModel::class.simpleName
 
     private var filterTimer: TimerTask? = null
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
@@ -71,6 +72,7 @@ class LogViewModel @Inject constructor(
 
         viewModelScope.launch {
             beaconManager.scanningEnabled.collect {
+                Log.d(TAG, "Scan State $it")
                 _scanningEnabled.postValue(it == ScanState.SCANNING)
             }
         }
@@ -104,11 +106,28 @@ class LogViewModel @Inject constructor(
 
         _filters.value?.let { filters ->
             for(filter in filters) {
+                if(!filter.enabled) { continue }
                 when(filter.filterType) {
+                    FilterType.ADDRESS -> {
+                        filteredList = filteredList.filter {
+                            (it.beaconDataFlow.value?.bluetoothAddress)?.contains(filter.value as? String ?: "") ?: false
+                        }
+                    }
                     FilterType.RSSI -> {
                         filteredList = filteredList.filter {
                             (it.beaconDataFlow.value?.rssi?.toFloat() ?: -127f) > (filter.value as? Float ?: 0f)
                         }
+                    }
+                    FilterType.HIDE_UNNAMED -> {
+                        filteredList = filteredList.filter {
+                            (it.beaconDataFlow.value?.name?.isNotBlank()) ?: true
+                        }
+                    }
+                    FilterType.ONLY_SHOW_CONFIGURATION -> {
+                        Log.e(TAG, "${filter.filterType} not yet implemented")
+                    }
+                    FilterType.BY_TYPE -> {
+                        Log.e(TAG, "${filter.filterType} not yet implemented")
                     }
                 }
             }
@@ -119,7 +138,7 @@ class LogViewModel @Inject constructor(
     /**
      * Mutate a specified [type] filter value
      */
-    fun setFilter(type: FilterType, value: Any?, enabled: Boolean) {
+    fun onFilterChanged(type: FilterType, value: Any?, enabled: Boolean) {
         val index = _filters.value?.indexOfFirst { it.filterType == type }
         if(index != -1 && index != null) {
             val filterCopy = _filters.value?.toMutableList()

@@ -1,27 +1,21 @@
 package com.oncelabs.nanobeacon
 
-import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.app.ActivityCompat
-import com.beust.klaxon.Klaxon
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.permission.PermissionType
 import com.oncelabs.nanobeacon.permission.RequestAllPermissions
-import com.oncelabs.nanobeacon.screen.MainScreenView
+import com.oncelabs.nanobeacon.screen.MainScreen
 import com.oncelabs.nanobeacon.ui.theme.InplayTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStreamReader
 import javax.inject.Inject
 
 
@@ -29,6 +23,7 @@ import javax.inject.Inject
  * This is a Single Activity application,
  * try and keep this file as clean as possible
  */
+@ExperimentalMaterialApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -52,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     },
                     onAllGranted = {
                         beaconManager.init()
-                        MainScreenView()
+                        MainScreen()
                         //BeaconManagerImpl.init(this)
                         //MainScreenView()
                         /*TODO: */
