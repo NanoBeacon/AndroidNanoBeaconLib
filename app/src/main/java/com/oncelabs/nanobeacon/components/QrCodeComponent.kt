@@ -73,7 +73,7 @@ fun QrCodeComponent(showModal: Boolean, onCodeScanned : (String) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (hasCamPermission) {
-            if (hasReadCode) {
+            if (hasReadCode || showModal) {
                 cameraProviderFeature.get().unbindAll()
             } else {
                 val previewView = remember { PreviewView(context) }
@@ -97,7 +97,6 @@ fun QrCodeComponent(showModal: Boolean, onCodeScanned : (String) -> Unit) {
                     ContextCompat.getMainExecutor(context),
                     QRCodeAnalyzer { result ->
                         onCodeScanned(result)
-
                     }
                 )
 

@@ -149,6 +149,8 @@ class ScannerViewModel @Inject constructor(
         }
     }
 
+
+
     fun openFilePickerManager() {
         filePickerManager.openFilePicker()
     }

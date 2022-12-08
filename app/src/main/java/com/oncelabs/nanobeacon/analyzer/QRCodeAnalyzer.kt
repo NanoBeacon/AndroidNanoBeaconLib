@@ -66,12 +66,12 @@ class QRCodeAnalyzer(
         }
     }
 }
-fun ByteArray.gzipDecompress(): String {
+fun ByteArray.gzipDecompress(): ByteArray {
     val bais = ByteArrayInputStream(this)
     try {
-
-        GZIPInputStream(bais).bufferedReader(Charsets.UTF_8).use { return it.readText() }
+        GZIPInputStream(bais).use { return it.readBytes() }
     } catch (e : ZipException) {
-        return ""
+        Log.d("ERror", e.toString())
+        return byteArrayOf()
     }
 }

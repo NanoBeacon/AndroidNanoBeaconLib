@@ -70,4 +70,9 @@ class FilePickerManagerImpl @Inject constructor() : FilePickerManager {
         activity?.let {} ?: run { activity = act }
     }
 
+    override fun addConfigToList(configData: ConfigData) {
+        var holder : MutableList<ConfigData> = savedConfigs.value?.toMutableList() ?: mutableListOf()
+        holder.add(configData)
+        _savedConfigs.value = holder
+    }
 }

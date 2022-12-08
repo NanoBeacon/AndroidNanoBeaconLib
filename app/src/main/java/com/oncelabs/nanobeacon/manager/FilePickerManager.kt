@@ -26,4 +26,5 @@ interface FilePickerManager {
     fun openFilePicker()
     fun createActivity(act : Activity)
     fun onResultFromActivity(requestCode: Int, resultCode: Int, data: Intent?)
+    fun addConfigToList(configData: ConfigData)
 }
