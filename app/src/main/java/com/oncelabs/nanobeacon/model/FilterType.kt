@@ -19,6 +19,17 @@ enum class FilterType {
         }
     }
 
+    fun getDescription(): String {
+        return when(this) {
+            NAME -> ""
+            ADDRESS -> ""
+            RSSI -> "dB"
+            HIDE_UNNAMED -> "Hide unnamed"
+            ONLY_SHOW_CONFIGURATION -> "Only show configurations"
+            BY_TYPE -> ""
+        }
+    }
+
     fun getDefaultValue(): Any {
         return when(this) {
             RSSI -> -127f

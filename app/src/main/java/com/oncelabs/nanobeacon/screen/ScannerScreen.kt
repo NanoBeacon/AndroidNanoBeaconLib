@@ -51,6 +51,7 @@ fun ScannerScreen(
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val filters by viewModel.filters.observeAsState(initial = listOf())
+    val filtersDescription by viewModel.currentFiltersDescription.observeAsState(initial = "No filters")
     val scanEnabled by viewModel.scanningEnabled.observeAsState(initial = false)
     val discoveredBeacons by viewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
     val savedConfigs by viewModel.savedConfigs.observeAsState()
@@ -71,6 +72,7 @@ fun ScannerScreen(
             discoveredBeacons,
             listState = listState,
             filters = filters,
+            filtersDescription = filtersDescription ?: "No filters",
             savedConfigs = savedConfigs ?: listOf(),
             onFilterChange = viewModel::onFilterChanged,
             onScanButtonClick = if (scanEnabled) viewModel::stopScanning else viewModel::startScanning,
@@ -88,6 +90,7 @@ private fun ScannerContent(
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
     filters: List<FilterOption>,
+    filtersDescription: String,
     savedConfigs: List<ConfigData>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
@@ -145,7 +148,12 @@ private fun ScannerContent(
             //    leadingIcon = Icons.Default.Search
             //)
 
-            Spacer(Modifier.weight(1f))
+            Text(
+                text = filtersDescription,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(8.dp)
+            )
             /**Filter results drop down*/
             FilterButton {
                 filterMenuExpanded = !filterMenuExpanded
@@ -541,6 +549,7 @@ fun PreviewLogScreen() {
             discoveredBeacons = listOf(),
             listState = state,
             filters = listOf(),
+            filtersDescription = "",
             savedConfigs = listOf(),
             onFilterChange = { _, _, _ ->
 
