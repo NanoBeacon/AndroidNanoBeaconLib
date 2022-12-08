@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.model
 
 enum class FilterType {
+    NAME,
     ADDRESS,
     RSSI,
     HIDE_UNNAMED,
@@ -9,11 +10,12 @@ enum class FilterType {
 
     fun getName(): String {
         return when(this) {
-            ADDRESS -> "Filter by address"
+            ADDRESS -> "address"
             RSSI -> "Minimum RSSI"
             HIDE_UNNAMED -> "Hide unnamed devices"
             ONLY_SHOW_CONFIGURATION -> "Only show project configuration matches"
             BY_TYPE -> "Type"
+            NAME -> "name"
         }
     }
 
@@ -27,6 +29,7 @@ enum class FilterType {
                 BeaconType.BEACON.description to false,
                 BeaconType.EDDYSTONE.description to false,
             )
+            NAME -> ""
         }
     }
 
@@ -37,6 +40,7 @@ enum class FilterType {
             HIDE_UNNAMED -> false
             ONLY_SHOW_CONFIGURATION -> false
             BY_TYPE -> true
+            NAME -> true
         }
     }
 
@@ -47,6 +51,7 @@ enum class FilterType {
             HIDE_UNNAMED -> FilterInputType.BINARY
             ONLY_SHOW_CONFIGURATION -> FilterInputType.BINARY
             BY_TYPE -> FilterInputType.OPTIONS
+            NAME -> FilterInputType.SEARCH
         }
     }
 
@@ -57,6 +62,7 @@ enum class FilterType {
             HIDE_UNNAMED -> null
             ONLY_SHOW_CONFIGURATION -> null
             BY_TYPE -> null
+            NAME -> null
         }
     }
 }
