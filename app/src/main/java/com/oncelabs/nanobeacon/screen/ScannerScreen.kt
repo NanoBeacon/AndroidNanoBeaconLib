@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +41,7 @@ import com.oncelabs.nanobeacon.viewModel.ScannerViewModel
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
 
 @ExperimentalMaterialApi
 @Composable
@@ -124,17 +126,26 @@ private fun ScannerContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(logModalItemBackgroundColor)
                 .height(IntrinsicSize.Max),
             verticalAlignment = Alignment.CenterVertically
         ) {
             /**Name filter*/
-            SearchView(
-                modifier = Modifier.weight(1f),
-                state = filterByNameText,
-                placeholder = "Filter by name",
-                leadingIcon = Icons.Default.Search
-            )
+//            Text("name"
+//                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
+//            FilterTextField(
+//                modifier = Modifier.weight(1f),
+//                state = filterByNameText,
+//                placeholder = "Filter by name",
+//            )
+            //SearchView(
+            //    modifier = Modifier.weight(1f),
+            //    state = filterByNameText,
+            //    placeholder = "Filter by name",
+            //    leadingIcon = Icons.Default.Search
+            //)
 
+            Spacer(Modifier.weight(1f))
             /**Filter results drop down*/
             FilterButton {
                 filterMenuExpanded = !filterMenuExpanded
@@ -160,17 +171,7 @@ private fun ScannerContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 state = listState
             ) {
-                items(
-                    if (filterByNameText.value.isNotEmpty()) {
-                        discoveredBeacons.filter {
-                            it.beaconDataFlow.value?.name?.contains(
-                                filterByNameText.value,
-                                ignoreCase = true
-                            ) == true
-                        }
-                    } else {
-                        discoveredBeacons
-                    }) {
+                items(discoveredBeacons) {
                     Row(Modifier.fillMaxWidth()) {
                         Spacer(Modifier.weight(0.025f))
                         Column(Modifier.weight(0.95f)) {
@@ -393,11 +394,14 @@ private fun SearchFilterCard(
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SearchView(
-            modifier = Modifier.weight(1f),
+        Text(filter.filterType.getName()
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
+            modifier = Modifier.weight(1f)
+        )
+        FilterTextField(
+            modifier = Modifier.weight(3f),
             state = value,
-            placeholder = filter.filterType.getName(),
-            leadingIcon = null,
+            placeholder = "Filter by ${filter.filterType.getName()}",
             onValueChange = onChange
         )
     }

@@ -129,6 +129,18 @@ class ScannerViewModel @Inject constructor(
                     FilterType.BY_TYPE -> {
                         Log.e(TAG, "${filter.filterType} not yet implemented")
                     }
+                    FilterType.NAME -> {
+                        (filter.value as? String)?.let { value ->
+                            if (value.isNotEmpty()) {
+                                filteredList = filteredList.filter {
+                                    it.beaconDataFlow.value?.name?.contains(
+                                        value,
+                                        ignoreCase = true
+                                    ) == true
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
