@@ -49,10 +49,7 @@ class QrScanViewModel @Inject constructor(
         if (pendingQr != rawValue) {
             pendingQr = rawValue
             try {
-                //val decoded = rawValue.encodeToByteArray().gzipDecompress()
-                //val decoded = GZIPInputStream(rawValue.toByteArray().inputStream()).bufferedReader(UTF_8).use { it.readText() }
-
-                //val decoded = GZIPInputStream(rawValue.byteInputStream()).bufferedReader(UTF_8).use { it.readText() }
+                rawValue.toByteArray().gzipDecompress()
                 val decoded = Base64.getDecoder().decode(rawValue).gzipDecompress()
                 Log.d("JSON", rawValue)
                 Log.d("JSON", decoded.toString())
