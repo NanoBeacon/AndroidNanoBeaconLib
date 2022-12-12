@@ -35,6 +35,9 @@ data class FilterOption(
             FilterType.SORT_RSSI -> {
                 enabled
             }
+            FilterType.ADVANCED_SEARCH -> {
+                ((value as? String)?.isNotEmpty() == true)
+            }
         }
         return if (isActive) {
             when(filterType.getInputType()) {

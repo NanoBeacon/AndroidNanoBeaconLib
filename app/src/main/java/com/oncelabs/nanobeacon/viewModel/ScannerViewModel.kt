@@ -115,6 +115,11 @@ class ScannerViewModel @Inject constructor(
                             (it.beaconDataFlow.value?.bluetoothAddress)?.contains(filter.value as? String ?: "") ?: false
                         }
                     }
+                    FilterType.ADVANCED_SEARCH -> {
+                        filteredList = filteredList.filter {
+                            it.beaconDataFlow.value?.searchableString?.contains(filter.value as? String ?: "", ignoreCase = true) ?: false
+                        }
+                    }
                     FilterType.RSSI -> {
                         filteredList = filteredList.filter {
                             (it.beaconDataFlow.value?.rssi?.toFloat() ?: -127f) > (filter.value as? Float ?: 0f)
