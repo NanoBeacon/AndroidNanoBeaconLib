@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -17,7 +15,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,10 +40,10 @@ internal fun formatToEntry(nanoBeaconData: NanoBeaconData): BeaconDataEntry {
         manufacturerData = nanoBeaconData.manufacturerData.toHexString("-").uppercase(),
         manufacturerId = nanoBeaconData.manufacturerId,
         company = nanoBeaconData.company,
-        txPower = "${nanoBeaconData.txPowerClaimed}",
+        txPower = nanoBeaconData.txPowerClaimed?.toString(),
         localName = nanoBeaconData.name,
         flags = nanoBeaconData.flags,
-        txPowerObserved = "${nanoBeaconData.transmitPowerObserved}",
+        txPowerObserved = nanoBeaconData.transmitPowerObserved?.toString(),
         searchableString = nanoBeaconData.searchableString,
         rawData = nanoBeaconData.raw?.uppercase() ?: ""
     )
@@ -105,7 +102,12 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                     DataLine(title = "Transmit Power Level", data = data.txPower, maxLines = 1)
                     DataLine(title = "Flags", data = data.flags, maxLines = 1)
                     DataLine(title = "TX Power Observed", data = data.txPowerObserved, maxLines = 1)
-                    DataLine(title = "Company", data = data.company, maxLines = 2, separateData = false)
+                    DataLine(
+                        title = "Company",
+                        data = data.company,
+                        maxLines = 2,
+                        separateData = false
+                    )
                     DataLine(title = "Manufacturer ID", data = data.manufacturerId, maxLines = 1)
                     DataLine(
                         title = "Manufacturer Data",
@@ -128,11 +130,14 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
 @Composable
 fun DataLine(
     title: String,
-    data: String,
+    data: String?,
     maxLines: Int,
-    separateData: Boolean = false,
-    isTitle: Boolean = false
+    separateData: Boolean = false
 ) {
+    // Hide unset properties
+    if(data.isNullOrEmpty()) {
+        return
+    }
 
     if (!separateData || data.isEmpty()){
         Row(modifier =
@@ -146,7 +151,7 @@ fun DataLine(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                if (data.isNotEmpty()) data else "Not Set",
+                data.ifEmpty { "Not Set" },
                 style = logTextFont,
                 maxLines = maxLines,
                 overflow = TextOverflow.Ellipsis
@@ -192,12 +197,12 @@ data class BeaconDataEntry(
     val rssi: String,
     val advInterval: String,
     val manufacturerData: String,
-    val manufacturerId: String,
-    val company: String,
-    val txPower: String,
+    val manufacturerId: String?,
+    val company: String?,
+    val txPower: String?,
     val localName: String,
-    val flags: String,
-    val txPowerObserved: String,
+    val flags: String?,
+    val txPowerObserved: String?,
     val searchableString: String,
     val rawData:String
 ) {
