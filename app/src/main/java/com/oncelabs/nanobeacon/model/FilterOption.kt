@@ -1,5 +1,8 @@
 package com.oncelabs.nanobeacon.model
 
+import com.oncelabs.nanobeacon.enums.FilterInputType
+import com.oncelabs.nanobeacon.enums.FilterType
+
 data class FilterOption(
     val filterType: FilterType,
     var enabled: Boolean = true,
@@ -28,6 +31,9 @@ data class FilterOption(
             }
             FilterType.BY_TYPE -> {
                 (value as? MutableMap<String, Boolean>)?.values?.any { it } ?: false
+            }
+            FilterType.SORT_RSSI -> {
+                enabled
             }
         }
         return if (isActive) {

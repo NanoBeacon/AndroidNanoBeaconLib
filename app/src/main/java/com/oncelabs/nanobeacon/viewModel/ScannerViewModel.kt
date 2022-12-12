@@ -12,7 +12,7 @@ import com.oncelabs.nanobeacon.components.BeaconDataEntry
 import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterOption
-import com.oncelabs.nanobeacon.model.FilterType
+import com.oncelabs.nanobeacon.enums.FilterType
 import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -142,6 +142,9 @@ class ScannerViewModel @Inject constructor(
                                 }
                             }
                         }
+                    }
+                    FilterType.SORT_RSSI -> {
+                        filteredList = filteredList.sortedBy { it.beaconDataFlow.value?.rssi }
                     }
                 }
             }
