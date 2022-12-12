@@ -38,10 +38,12 @@ class ScannerViewModel @Inject constructor(
     private val _scanningEnabled = MutableLiveData(true)
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
     private val _savedConfigs = MutableLiveData<List<ConfigData>>(filePickerManager.savedConfigs.value)
+    private val _currentFiltersDescription = MutableLiveData<String?>(null)
     val savedConfigs : LiveData<List<ConfigData>> = _savedConfigs
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
     val scanningEnabled: LiveData<Boolean> = _scanningEnabled
     val filters: LiveData<List<FilterOption>> = _filters
+    val currentFiltersDescription: LiveData<String?> = _currentFiltersDescription
 
     init {
         addObservers()
@@ -158,6 +160,15 @@ class ScannerViewModel @Inject constructor(
             filterCopy?.get(index)?.enabled = enabled
             _filters.value = listOf()
             _filters.value = filterCopy
+        }
+
+        _filters.value?.mapNotNull { it.getDescription() }?.let { filterDescriptions ->
+            if(filterDescriptions.isEmpty()) {
+                _currentFiltersDescription.value = "No filters"
+                return
+            }
+
+            _currentFiltersDescription.value = filterDescriptions.joinToString(", ")
         }
     }
 

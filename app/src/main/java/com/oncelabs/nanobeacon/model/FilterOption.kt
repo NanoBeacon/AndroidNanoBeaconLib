@@ -6,6 +6,41 @@ data class FilterOption(
     var value: Any?
 ) {
 
+    fun getDescription(): String? {
+        // Check if filter is active
+        enabled.takeIf { it } ?: return null
+
+        val isActive: Boolean = when(filterType) {
+            FilterType.NAME -> {
+                ((value as? String)?.isNotEmpty() == true)
+            }
+            FilterType.ADDRESS -> {
+                ((value as? String)?.isNotEmpty() == true)
+            }
+            FilterType.RSSI -> {
+                ((value as? Float) ?: -127.0f) > -127.0f
+            }
+            FilterType.HIDE_UNNAMED -> {
+                enabled
+            }
+            FilterType.ONLY_SHOW_CONFIGURATION -> {
+                enabled
+            }
+            FilterType.BY_TYPE -> {
+                (value as? MutableMap<String, Boolean>)?.values?.any { it } ?: false
+            }
+        }
+        return if (isActive) {
+            when(filterType.getInputType()) {
+                FilterInputType.BINARY -> filterType.getDescription()
+                FilterInputType.SLIDER, FilterInputType.OPTIONS -> "$value ${filterType.getDescription()}"
+                FilterInputType.SEARCH -> "$value"
+            }
+        } else {
+            null
+        }
+    }
+
     companion object {
         fun getDefaultOptions(): List<FilterOption> {
             return FilterType.values().map {
