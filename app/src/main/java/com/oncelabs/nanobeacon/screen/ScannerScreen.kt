@@ -398,7 +398,7 @@ private fun SearchFilterCard(
         FilterTextField(
             modifier = Modifier.weight(3f),
             state = value,
-            placeholder = "Filter by ${filter.filterType.getName()}",
+            placeholder = filter.filterType.getPlaceholderName(),
             onValueChange = onChange
         )
     }

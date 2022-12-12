@@ -5,6 +5,7 @@ import com.oncelabs.nanobeacon.model.BeaconType
 enum class FilterType {
     NAME,
     ADDRESS,
+    ADVANCED_SEARCH,
     RSSI,
     HIDE_UNNAMED,
     ONLY_SHOW_CONFIGURATION,
@@ -23,6 +24,20 @@ enum class FilterType {
             BY_TYPE -> "Type"
             NAME -> "name"
             SORT_RSSI -> "Sort by RSSI"
+            ADVANCED_SEARCH -> "Advanced"
+        }
+    }
+
+    fun getPlaceholderName(): String {
+        return when(this) {
+            ADDRESS -> "Filter by address"
+            RSSI -> ""
+            HIDE_UNNAMED -> ""
+            ONLY_SHOW_CONFIGURATION -> ""
+            BY_TYPE -> ""
+            NAME -> "Filter by name"
+            SORT_RSSI -> ""
+            ADVANCED_SEARCH -> "Filter by address, Manufacturer Data, Company, Name"
         }
     }
 
@@ -39,6 +54,7 @@ enum class FilterType {
             ONLY_SHOW_CONFIGURATION -> "Only show configurations"
             BY_TYPE -> ""
             SORT_RSSI -> "Sort RSSI"
+            ADVANCED_SEARCH -> ""
         }
     }
 
@@ -54,6 +70,7 @@ enum class FilterType {
             )
             NAME -> ""
             SORT_RSSI -> false
+            ADVANCED_SEARCH -> ""
         }
     }
 
@@ -66,6 +83,7 @@ enum class FilterType {
             BY_TYPE -> true
             NAME -> true
             SORT_RSSI -> false
+            ADVANCED_SEARCH -> true
         }
     }
 
@@ -78,6 +96,7 @@ enum class FilterType {
             BY_TYPE -> FilterInputType.OPTIONS
             NAME -> FilterInputType.SEARCH
             SORT_RSSI -> FilterInputType.BINARY
+            ADVANCED_SEARCH -> FilterInputType.SEARCH
         }
     }
 
@@ -90,6 +109,7 @@ enum class FilterType {
             BY_TYPE -> null
             NAME -> null
             SORT_RSSI -> null
+            ADVANCED_SEARCH -> null
         }
     }
 }
