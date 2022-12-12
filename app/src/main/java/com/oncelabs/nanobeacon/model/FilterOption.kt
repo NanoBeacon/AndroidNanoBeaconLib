@@ -8,7 +8,7 @@ data class FilterOption(
 
     fun getDescription(): String? {
         // Check if filter is active
-        enabled.takeIf { it } ?: return ""
+        enabled.takeIf { it } ?: return null
 
         val isActive: Boolean = when(filterType) {
             FilterType.NAME -> {

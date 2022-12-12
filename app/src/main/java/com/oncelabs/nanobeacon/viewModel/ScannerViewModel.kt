@@ -165,7 +165,6 @@ class ScannerViewModel @Inject constructor(
         _filters.value?.mapNotNull { it.getDescription() }?.let { filterDescriptions ->
             if(filterDescriptions.isEmpty()) {
                 _currentFiltersDescription.value = "No filters"
-                return
             }
 
             Log.d("desc for filters", filterDescriptions.toString())
