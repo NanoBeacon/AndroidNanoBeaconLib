@@ -1,4 +1,6 @@
-package com.oncelabs.nanobeacon.model
+package com.oncelabs.nanobeacon.enums
+
+import com.oncelabs.nanobeacon.model.BeaconType
 
 enum class FilterType {
     NAME,
@@ -6,8 +8,12 @@ enum class FilterType {
     RSSI,
     HIDE_UNNAMED,
     ONLY_SHOW_CONFIGURATION,
-    BY_TYPE;
+    BY_TYPE,
+    SORT_RSSI;
 
+    /**
+     * The name of the filter/sort option that is shown in the UI
+     */
     fun getName(): String {
         return when(this) {
             ADDRESS -> "address"
@@ -16,9 +22,14 @@ enum class FilterType {
             ONLY_SHOW_CONFIGURATION -> "Only show project configuration matches"
             BY_TYPE -> "Type"
             NAME -> "name"
+            SORT_RSSI -> "Sort by RSSI"
         }
     }
 
+    /**
+     * The name of the filter/sort option that's shown in the filter preview when
+     * it's active
+     */
     fun getDescription(): String {
         return when(this) {
             NAME -> ""
@@ -27,6 +38,7 @@ enum class FilterType {
             HIDE_UNNAMED -> "Hide unnamed"
             ONLY_SHOW_CONFIGURATION -> "Only show configurations"
             BY_TYPE -> ""
+            SORT_RSSI -> "Sort RSSI"
         }
     }
 
@@ -41,6 +53,7 @@ enum class FilterType {
                 BeaconType.EDDYSTONE.description to false,
             )
             NAME -> ""
+            SORT_RSSI -> false
         }
     }
 
@@ -52,6 +65,7 @@ enum class FilterType {
             ONLY_SHOW_CONFIGURATION -> false
             BY_TYPE -> true
             NAME -> true
+            SORT_RSSI -> false
         }
     }
 
@@ -63,6 +77,7 @@ enum class FilterType {
             ONLY_SHOW_CONFIGURATION -> FilterInputType.BINARY
             BY_TYPE -> FilterInputType.OPTIONS
             NAME -> FilterInputType.SEARCH
+            SORT_RSSI -> FilterInputType.BINARY
         }
     }
 
@@ -74,6 +89,7 @@ enum class FilterType {
             ONLY_SHOW_CONFIGURATION -> null
             BY_TYPE -> null
             NAME -> null
+            SORT_RSSI -> null
         }
     }
 }

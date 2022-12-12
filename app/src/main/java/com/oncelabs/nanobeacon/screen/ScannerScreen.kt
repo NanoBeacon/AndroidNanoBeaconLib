@@ -26,16 +26,14 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.*
-import com.oncelabs.nanobeacon.model.BeaconType
-import com.oncelabs.nanobeacon.model.FilterInputType
+import com.oncelabs.nanobeacon.enums.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
-import com.oncelabs.nanobeacon.model.FilterType
+import com.oncelabs.nanobeacon.enums.FilterType
 import com.oncelabs.nanobeacon.ui.theme.*
 import com.oncelabs.nanobeacon.viewModel.ScannerViewModel
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
@@ -126,6 +124,8 @@ private fun ScannerContent(
     Column {
         /**Top bar*/
         InplayTopBar(title = "Scanner")
+
+        /**Filter option*/
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -142,6 +142,7 @@ private fun ScannerContent(
                     }
                     .padding(8.dp)
             )
+
             /**Filter results drop down*/
             FilterButton {
                 filterMenuExpanded = !filterMenuExpanded
