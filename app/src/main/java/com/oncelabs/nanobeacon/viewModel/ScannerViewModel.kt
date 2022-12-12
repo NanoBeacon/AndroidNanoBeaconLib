@@ -168,7 +168,6 @@ class ScannerViewModel @Inject constructor(
                 return
             }
 
-            Log.d("desc for filters", filterDescriptions.toString())
             _currentFiltersDescription.value = filterDescriptions.joinToString(", ")
         }
     }

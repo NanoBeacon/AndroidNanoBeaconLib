@@ -133,25 +133,13 @@ private fun ScannerContent(
                 .height(IntrinsicSize.Max),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            /**Name filter*/
-//            Text("name"
-//                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() })
-//            FilterTextField(
-//                modifier = Modifier.weight(1f),
-//                state = filterByNameText,
-//                placeholder = "Filter by name",
-//            )
-            //SearchView(
-            //    modifier = Modifier.weight(1f),
-            //    state = filterByNameText,
-            //    placeholder = "Filter by name",
-            //    leadingIcon = Icons.Default.Search
-            //)
-
             Text(
                 text = filtersDescription,
                 modifier = Modifier
                     .weight(1f)
+                    .clickable {
+                        filterMenuExpanded = !filterMenuExpanded
+                    }
                     .padding(8.dp)
             )
             /**Filter results drop down*/
