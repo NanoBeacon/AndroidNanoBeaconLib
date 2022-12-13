@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.BeaconDataEntry
 import com.oncelabs.nanobeacon.manager.BeaconManager
+import com.oncelabs.nanobeacon.manager.ConfigDataManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
@@ -26,7 +27,8 @@ import kotlin.concurrent.scheduleAtFixedRate
 class ScannerViewModel @Inject constructor(
     private val beaconManager: BeaconManager,
     application: Application,
-    private val filePickerManager : FilePickerManager
+    private val configDataManager: ConfigDataManager,
+    private val filePickerManager: FilePickerManager
 ): AndroidViewModel(application) {
 
     private val TAG = ScannerViewModel::class.simpleName
@@ -37,7 +39,7 @@ class ScannerViewModel @Inject constructor(
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
     private val _scanningEnabled = MutableLiveData(true)
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
-    private val _savedConfigs = MutableLiveData<List<ConfigData>>(filePickerManager.savedConfigs.value)
+    private val _savedConfigs = MutableLiveData<List<ConfigData>>(configDataManager.savedConfigs.value)
     val savedConfigs : LiveData<List<ConfigData>> = _savedConfigs
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
     val scanningEnabled: LiveData<Boolean> = _scanningEnabled
@@ -85,7 +87,7 @@ class ScannerViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            filePickerManager.savedConfigs.collect {
+            configDataManager.savedConfigs.collect {
                 _savedConfigs.postValue(it)
             }
         }

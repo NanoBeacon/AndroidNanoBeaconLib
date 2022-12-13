@@ -14,6 +14,8 @@ import com.oncelabs.nanobeacon.analyzer.gzipDecompress
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeacon.manager.BeaconManager
+import com.oncelabs.nanobeacon.manager.ConfigDataManager
+import com.oncelabs.nanobeacon.manager.ConfigDataManagerImpl
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.ADXL367Data
 import com.oncelabs.nanobeaconlib.enums.BleState
@@ -30,9 +32,8 @@ import javax.inject.Inject
 @HiltViewModel
 class QrScanViewModel @Inject constructor(
     application: Application,
-    private val filePickerManager : FilePickerManager
-
-): AndroidViewModel(application) {
+    private val configDataManager : ConfigDataManager
+    ): AndroidViewModel(application) {
 
     var pendingQr: String? = null
 
@@ -54,11 +55,12 @@ class QrScanViewModel @Inject constructor(
                 Log.d("JSON", rawValue)
                 Log.d("JSON", decoded.toString())
                 _showModal.postValue(true)
-               /* val parsedData = Klaxon().parse<ConfigData>(decoded)
+                val parsedData = Klaxon().parse<ConfigData>(decoded)
                 parsedData?.let {
                     _stagedConfig.value = it
-                    Log.d("qwdq", "MADE IT")
-                }*/
+                } ?: run {
+                    pendingQr = null
+                }
             } catch (e: KlaxonException) {
                 Log.d(ContentValues.TAG, "Not formatted Correctly")
                 pendingQr = null
@@ -74,7 +76,7 @@ class QrScanViewModel @Inject constructor(
 
     fun confirmConfig() {
         stagedConfig.value?.let {
-            filePickerManager.addConfigToList(it)
+            configDataManager.addConfigToList(it)
         }
         pendingQr = null
         _stagedConfig.value = null

@@ -22,9 +22,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface FilePickerManager {
-    val savedConfigs : StateFlow<List<ConfigData>>
     fun openFilePicker()
     fun createActivity(act : Activity)
     fun onResultFromActivity(requestCode: Int, resultCode: Int, data: Intent?)
-    fun addConfigToList(configData: ConfigData)
 }
