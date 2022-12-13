@@ -11,15 +11,14 @@ data class ParsedConfigData (
 data class ParsedAdvertisementData (
     var id : Int?,
     var bdAddr : String?,
-    var parsedPayloadItems : Array<ParsedPayload>?,
+    var parsedPayloadItems : ParsedPayload?,
 
 )
 
 data class ParsedPayload (
-    var adType: ADType,
-    var deviceName : String?,
-    var txPower : Int?,
-    var manufacturerData : Array<ParsedDynamicData>?,
+    var deviceName : String? = null,
+    var txPower : Int? = null,
+    var manufacturerData : List<ParsedDynamicData>?,
 )
 
 data class ParsedDynamicData (
