@@ -80,7 +80,7 @@ fun AddConfigModal(
                     ) {
                         Spacer(Modifier.weight(0.15f))
                         Row() {
-                            Text(
+                           /* Text(
                                 text = configData?.advSet?.get(0)?.id?.toString() ?: "N/A",
                                 style = cardTextFont,
                                 color = Color.White,
@@ -88,7 +88,7 @@ fun AddConfigModal(
                                 modifier = Modifier.weight(0.2f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
-                            )
+                            )*/
                         }
                         Spacer(Modifier.weight(0.13f))
 

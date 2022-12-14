@@ -9,6 +9,7 @@ import com.oncelabs.nanobeacon.extension.StringExtensions.Companion.decodeHex
 import com.oncelabs.nanobeacon.model.ParsedConfigData
 import com.oncelabs.nanobeacon.model.ParsedDynamicData
 import com.oncelabs.nanobeacon.model.ParsedPayload
+import com.oncelabs.nanobeacon.parser.DynamicDataParsers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,16 +18,17 @@ import javax.inject.Singleton
 
 @OptIn(ExperimentalMaterialApi::class)
 @Singleton
-class ConfigDataManagerImpl @Inject constructor() : ConfigDataManager {
+class ConfigDataManagerImpl
+@Inject constructor() : ConfigDataManager {
     private val _savedConfigs = MutableStateFlow<List<ConfigData>>(listOf())
     override val savedConfigs: StateFlow<List<ConfigData>> = _savedConfigs.asStateFlow()
 
     private val _parsedConfigs = MutableStateFlow<List<ParsedConfigData>>(listOf())
     override val parsedConfigs: StateFlow<List<ParsedConfigData>> = _parsedConfigs.asStateFlow()
-
     override fun init() {
         TODO("Not yet implemented")
     }
+
 
     override fun addConfigToList(configData: ConfigData) {
         var holder : MutableList<ConfigData> = savedConfigs.value?.toMutableList() ?: mutableListOf()
@@ -95,7 +97,6 @@ class ConfigDataManagerImpl @Inject constructor() : ConfigDataManager {
             val len = splitData[0].substring(0,splitData.indexOf("bytes")).toInt()
             val bigEndian = splitData[1].toInt() == 1
             val encrypted = splitData[2].toInt() == 1
-
             dynamicDataType?.let {
                 val data = ParsedDynamicData(len, dynamicDataType, bigEndian, encrypted)
                 parsedList.add(data)

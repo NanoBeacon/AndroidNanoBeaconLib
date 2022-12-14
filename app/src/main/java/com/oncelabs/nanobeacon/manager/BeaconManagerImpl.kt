@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeaconlib.enums.BleState
@@ -88,6 +89,7 @@ class BeaconManagerImpl @Inject constructor(
                     if (nanoBeacon is ADXL367){
                         if (!_discoveredAdxlBeacons.value.contains(nanoBeacon)){
                             _discoveredAdxlBeacons.value += listOf(nanoBeacon)
+                            Log.d("DATA", nanoBeacon.beaconData?.manufacturerData.toString())
                         }
                     }
                 }
@@ -98,6 +100,7 @@ class BeaconManagerImpl @Inject constructor(
             discoveredBeaconFlow.collect{ beacon ->
                 if (!_discoveredBeacons.value.contains(beacon)){
                     _discoveredBeacons.value += listOf(beacon)
+                    Log.d("DATA", beacon.beaconData?.manufacturerData.toString())
                 }
             }
         }
