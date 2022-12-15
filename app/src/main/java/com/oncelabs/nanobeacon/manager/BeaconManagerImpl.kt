@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.device.ADXL367
+import com.oncelabs.nanobeacon.parser.DynamicDataParsers
 import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeaconlib.manager.NanoBeaconManager
@@ -24,7 +25,8 @@ import javax.inject.Singleton
 @ExperimentalMaterialApi
 @Singleton
 class BeaconManagerImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val configDataManager: ConfigDataManager
 ): BeaconManager {
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -89,7 +91,15 @@ class BeaconManagerImpl @Inject constructor(
                     if (nanoBeacon is ADXL367){
                         if (!_discoveredAdxlBeacons.value.contains(nanoBeacon)){
                             _discoveredAdxlBeacons.value += listOf(nanoBeacon)
-                            Log.d("DATA", nanoBeacon.beaconData?.manufacturerData.toString())
+
+                           /* nanoBeacon.beaconData?.manufacturerData?.size?.let {
+                                if (it > 0 && nanoBeacon.beaconData?.name == "Devins") {
+                                    nanoBeacon.beaconData?.let { data ->
+
+                                        configDataManager.processDeviceData(data)
+                                    }
+                                }
+                            }*/
                         }
                     }
                 }
@@ -100,7 +110,13 @@ class BeaconManagerImpl @Inject constructor(
             discoveredBeaconFlow.collect{ beacon ->
                 if (!_discoveredBeacons.value.contains(beacon)){
                     _discoveredBeacons.value += listOf(beacon)
-                    Log.d("DATA", beacon.beaconData?.manufacturerData.toString())
+                    beacon.beaconData?.manufacturerData?.size?.let {
+                        if (it > 0 && beacon.beaconData?.name == "Devins") {
+                            beacon.beaconData?.let { data ->
+                                configDataManager.processDeviceData(data)
+                            }
+                        }
+                    }
                 }
             }
         }

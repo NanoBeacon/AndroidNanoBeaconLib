@@ -1,6 +1,9 @@
 package com.oncelabs.nanobeacon.enum
 
-enum class DynamicDataType (val fullName : String, val abrName : String) {
+enum class DynamicDataType(
+    val fullName: String,
+    val abrName: String,
+) {
 
     VCC_ITEM("VCC", "VCC"),
     TEMP_ITEM("Internal Temperature", "TEMP"),
@@ -30,9 +33,11 @@ enum class DynamicDataType (val fullName : String, val abrName : String) {
     UTF8_ITEM("Characters UTF-8", "utf8");
 
     companion object {
-        fun fromAbr(abr : String) : DynamicDataType? {
+        fun fromAbr(abr: String): DynamicDataType? {
             return values().firstOrNull { it.abrName == abr }
         }
+
+
     }
 }
 

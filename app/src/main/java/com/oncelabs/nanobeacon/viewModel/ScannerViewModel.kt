@@ -39,8 +39,8 @@ class ScannerViewModel @Inject constructor(
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
     private val _scanningEnabled = MutableLiveData(true)
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
-    private val _savedConfigs = MutableLiveData<List<ConfigData>>(configDataManager.savedConfigs.value)
-    val savedConfigs : LiveData<List<ConfigData>> = _savedConfigs
+    private val _savedConfigs = MutableLiveData<ConfigData>(configDataManager.savedConfig.value)
+    val savedConfigs : LiveData<ConfigData> = _savedConfigs
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
     val scanningEnabled: LiveData<Boolean> = _scanningEnabled
     val filters: LiveData<List<FilterOption>> = _filters
@@ -87,7 +87,7 @@ class ScannerViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            configDataManager.savedConfigs.collect {
+            configDataManager.savedConfig.collect {
                 _savedConfigs.postValue(it)
             }
         }

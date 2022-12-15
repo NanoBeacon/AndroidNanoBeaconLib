@@ -13,8 +13,9 @@ import kotlinx.coroutines.flow.StateFlow
 
 @ExperimentalMaterialApi
 interface ConfigDataManager {
-    val savedConfigs : StateFlow<List<ConfigData>>
-    val parsedConfigs : StateFlow<List<ParsedConfigData>>
+    val savedConfig : StateFlow<ConfigData?>
+    val parsedConfig : StateFlow<ParsedConfigData?>
     fun init()
-    fun addConfigToList(configData: ConfigData)
+    fun setConfig(configData: ConfigData)
+    fun processDeviceData(data : NanoBeaconData)
 }

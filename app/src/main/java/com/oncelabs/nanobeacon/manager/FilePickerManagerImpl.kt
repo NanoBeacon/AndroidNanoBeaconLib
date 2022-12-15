@@ -48,7 +48,7 @@ class FilePickerManagerImpl @OptIn(ExperimentalMaterialApi::class)
                 val json = Klaxon().parse<ConfigData>(holder)
                 Log.d("JSON", json.toString())
                 json?.let {
-                    configDataManager.addConfigToList(json)
+                    configDataManager.setConfig(json)
                 }
             }
         }

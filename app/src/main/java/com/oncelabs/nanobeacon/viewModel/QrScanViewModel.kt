@@ -76,7 +76,7 @@ class QrScanViewModel @Inject constructor(
 
     fun confirmConfig() {
         stagedConfig.value?.let {
-            configDataManager.addConfigToList(it)
+            configDataManager.setConfig(it)
         }
         pendingQr = null
         _stagedConfig.value = null

@@ -17,7 +17,7 @@ data class ParsedAdvertisementData (
 
 data class ParsedPayload (
     var deviceName : String? = null,
-    var txPower : Int? = null,
+    var txPower : String? = null,
     var manufacturerData : List<ParsedDynamicData>?,
 )
 

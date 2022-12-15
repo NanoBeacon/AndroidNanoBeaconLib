@@ -3,6 +3,8 @@ package com.oncelabs.nanobeacon.codable
 data class ConfigData(
     val version : String? = null,
     val advSet : Array<AdvSetData>? = null,
+    val vccUnit : Float? = null,
+    val tempUnit : Float? = null
 )
 
 data class AdvSetData (

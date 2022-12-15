@@ -69,7 +69,7 @@ fun ScannerScreen(
             discoveredBeacons,
             listState = listState,
             filters = filters,
-            savedConfigs = savedConfigs ?: listOf(),
+           // savedConfigs = savedConfigs ?: listOf(),
             onFilterChange = viewModel::onFilterChanged,
             onScanButtonClick = if (scanEnabled) viewModel::stopScanning else viewModel::startScanning,
             onRefreshButtonClick = viewModel::refresh,
@@ -86,7 +86,7 @@ private fun ScannerContent(
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
     filters: List<FilterOption>,
-    savedConfigs: List<ConfigData>,
+    //savedConfigs: List<ConfigData>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
     onRefreshButtonClick: () -> Unit,
@@ -537,7 +537,7 @@ fun PreviewLogScreen() {
             discoveredBeacons = listOf(),
             listState = state,
             filters = listOf(),
-            savedConfigs = listOf(),
+            //savedConfigs = listOf(),
             onFilterChange = { _, _, _ ->
 
             },
