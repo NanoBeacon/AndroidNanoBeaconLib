@@ -12,5 +12,4 @@ interface ConfigDataManager {
     val parsedConfig : StateFlow<ParsedConfigData?>
     fun init()
     fun setConfig(configData: ConfigData)
-    fun processDeviceData(data : NanoBeaconData)
 }

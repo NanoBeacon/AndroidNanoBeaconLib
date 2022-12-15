@@ -90,14 +90,7 @@ class BeaconManagerImpl @Inject constructor(
                         if (!_discoveredAdxlBeacons.value.contains(nanoBeacon)){
                             _discoveredAdxlBeacons.value += listOf(nanoBeacon)
 
-                           /* nanoBeacon.beaconData?.manufacturerData?.size?.let {
-                                if (it > 0 && nanoBeacon.beaconData?.name == "Devins") {
-                                    nanoBeacon.beaconData?.let { data ->
 
-                                        configDataManager.processDeviceData(data)
-                                    }
-                                }
-                            }*/
                         }
                     }
                 }
@@ -108,13 +101,6 @@ class BeaconManagerImpl @Inject constructor(
             discoveredBeaconFlow.collect{ beacon ->
                 if (!_discoveredBeacons.value.contains(beacon)){
                     _discoveredBeacons.value += listOf(beacon)
-                    beacon.beaconData?.manufacturerData?.size?.let {
-                        if (it > 0 && beacon.beaconData?.name == "Devins") {
-                            beacon.beaconData?.let { data ->
-                                configDataManager.processDeviceData(data)
-                            }
-                        }
-                    }
                 }
             }
         }

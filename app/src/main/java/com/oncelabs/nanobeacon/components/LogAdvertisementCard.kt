@@ -57,6 +57,7 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
 
     val beaconData by beacon.beaconDataFlow.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
+    val configData by beacon.manufacturerData.collectAsState()
 
     beaconData?.let {
 
@@ -114,6 +115,9 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                         separateData = true
                     )
                     DataLine(title = "Raw", data = data.rawData, maxLines = 3, separateData = true)
+                    for (i in configData.toList()) {
+                        DataLine(title = i.first.name, data = i.second, maxLines = 1)
+                    }
                 }
             }
             // TODO: Not used?

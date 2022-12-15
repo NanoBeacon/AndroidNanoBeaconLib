@@ -37,6 +37,7 @@ class ConfigDataManagerImpl
 
     override fun setConfig(configData: ConfigData) {
         _savedConfig.value = configData
+        parseConfigData(configData)
     }
 
     fun parseConfigData(configData: ConfigData) {
@@ -122,95 +123,6 @@ class ConfigDataManagerImpl
         return null
     }
 
-    override fun processDeviceData(data : NanoBeaconData) {
-        parsedConfig.value?.let {
-            for (adv in it.advSetData) {
-                adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
-                    var currentIndex = 0
-                    Log.d("TESTING", data.manufacturerData.toString())
-                    for (dynamicDataFlag in manufacturerDataFlags) {
-                        val endIndex = currentIndex + dynamicDataFlag.len
-                        if (endIndex <= data.manufacturerData.size) {
-                            val trimmedData = data.manufacturerData.copyOfRange(currentIndex, endIndex)
-                            when (dynamicDataFlag.dynamicType) {
-                                DynamicDataType.VCC_ITEM -> Log.d(
-                                    "VCC",
-                                    DynamicDataParsers.processVcc(trimmedData, savedConfig.value?.vccUnit ?: 0.0F,dynamicDataFlag.bigEndian ?: false, ).toString()
-                                )
-                                DynamicDataType.TEMP_ITEM -> Log.d(
-                                    "TEMP_ITEM",
-                                    DynamicDataParsers.processInternalTemp(trimmedData, savedConfig.value?.tempUnit ?: 0.0F,dynamicDataFlag.bigEndian ?: false, ).toString()
-                                )
-                                DynamicDataType.PULSE_ITEM -> Log.d(
-                                    "PULSE_ITEM",
-                                    DynamicDataParsers.processWireCount(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.GPIO_ITEM -> Log.d(
-                                    "GPIO_ITEM",
-                                    DynamicDataParsers.processGpioStatus(trimmedData).toString()
-                                )
-                                DynamicDataType.AON_GPIO_ITEM -> TODO()
-                                DynamicDataType.EDGE_CNT_ITEM -> Log.d(
-                                    "EDGE_CNT_ITEM",
-                                    DynamicDataParsers.processGpioEdgeCount(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ADC_CH0_ITEM -> Log.d(
-                                    "ADC_CH0_ITEM",
-                                    DynamicDataParsers.processCh01(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ADC_CH1_ITEM -> Log.d(
-                                    "ADC_CH1_ITEM",
-                                    DynamicDataParsers.processCh01(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ADC_CH2_ITEM -> TODO()
-                                DynamicDataType.ADC_CH3_ITEM -> TODO()
-                                DynamicDataType.REG1_ITEM -> TODO()
-                                DynamicDataType.REG2_ITEM -> TODO()
-                                DynamicDataType.REG3_ITEM -> TODO()
-                                DynamicDataType.QDEC_ITEM -> TODO()
-                                DynamicDataType.TS0_ITEM -> Log.d(
-                                    "TS0_ITEM",
-                                    DynamicDataParsers.processTimeStamp(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.TS1_ITEM -> Log.d(
-                                    "TS1_ITEM",
-                                    DynamicDataParsers.processTimeStamp(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ADVCNT_ITEM -> Log.d(
-                                    "ADVCNT_ITEM",
-                                    DynamicDataParsers.processAdv(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.REG_ITEM -> TODO()
-                                DynamicDataType.RANDOM_ITEM -> Log.d(
-                                    "RANDOM_ITEM",
-                                    DynamicDataParsers.processRandomNumber(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.STATIC_RANDOM_ITEM -> Log.d(
-                                    "STATIC_RANDOM_ITEM",
-                                    DynamicDataParsers.processRandomNumber(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ENCRYPT_ITEM -> TODO()
-                                DynamicDataType.SALT_ITEM -> TODO()
-                                DynamicDataType.TAG_ITEM -> TODO()
-                                DynamicDataType.CUSTOM_PRODUCT_ID_ITEM -> Log.d(
-                                    "CUSTOM_PRODUCT_ID_ITEM",
-                                    DynamicDataParsers.processRandomNumber(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.BLUETOOTH_DEVICE_ADDRESS_ITEM -> Log.d(
-                                    "BLUETOOTH_DEVICE_ADDRESS_ITEM",
-                                    DynamicDataParsers.processRandomNumber(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.UTF8_ITEM -> TODO()
-                            }
-                            currentIndex = endIndex
-                        } else {
-                            break
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 

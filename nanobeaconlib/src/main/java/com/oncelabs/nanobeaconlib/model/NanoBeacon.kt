@@ -36,10 +36,10 @@ open class NanoBeacon(
     private val TIMESTAMP_COUNT = 10
     private var advTimestamps: MutableList<Long> = mutableListOf()
 
-    private var matchingConfig: ParsedConfigData? = null
+    override var matchingConfig: ParsedConfigData? = null
 
-    private val _manufacturerData = MutableLiveData<Map<DynamicDataType, String>>(mapOf())
-    private var manufacturerData: LiveData<Map<DynamicDataType, String>> = _manufacturerData
+    private val _manufacturerData = MutableStateFlow<Map<DynamicDataType, String>>(mapOf())
+    override var manufacturerData = _manufacturerData.asStateFlow()
 
     override fun newBeaconData(beaconData: NanoBeaconData) {
         _beaconDataFlow.value = beaconData
