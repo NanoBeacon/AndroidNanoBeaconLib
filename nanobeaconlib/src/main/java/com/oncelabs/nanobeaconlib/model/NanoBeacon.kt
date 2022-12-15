@@ -2,6 +2,8 @@ package com.oncelabs.nanobeaconlib.model
 
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
@@ -36,13 +38,14 @@ open class NanoBeacon(
 
     private var matchingConfig: ParsedConfigData? = null
 
-    private var manufacturerData: Map<DynamicDataType, String> = mapOf()
+    private val _manufacturerData = MutableLiveData<Map<DynamicDataType, String>>(mapOf())
+    private var manufacturerData: LiveData<Map<DynamicDataType, String>> = _manufacturerData
 
     override fun newBeaconData(beaconData: NanoBeaconData) {
         _beaconDataFlow.value = beaconData
         _rssiFlow.value = beaconData.rssi
         updateAdvInterval(beaconData.timeStamp)
-        manufacturerData = processDeviceData(beaconData)
+        _manufacturerData.value = processDeviceData(beaconData)
     }
 
     fun loadConfig(parsedConfigData: ParsedConfigData?) {
