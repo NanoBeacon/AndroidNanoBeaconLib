@@ -32,10 +32,16 @@ open class NanoBeacon(
     private val TIMESTAMP_COUNT = 10
     private var advTimestamps: MutableList<Long> = mutableListOf()
 
+    private var matchingConfig : ParsedConfigData? = null
+
     override fun newBeaconData(beaconData: NanoBeaconData) {
         _beaconDataFlow.value = beaconData
         _rssiFlow.value = beaconData.rssi
         updateAdvInterval(beaconData.timeStamp)
+    }
+
+    fun loadConfig(parsedConfigData: ParsedConfigData?) {
+        matchingConfig = parsedConfigData
     }
 
     private fun updateAdvInterval(timestamp: Long){

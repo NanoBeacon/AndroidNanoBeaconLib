@@ -5,14 +5,15 @@ import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 
 data class ParsedConfigData (
     var advSetData : Array<ParsedAdvertisementData>,
+    var vccUnit : Float,
+    var tempUnit : Float
 )
 
 data class ParsedAdvertisementData (
     var id : Int?,
     var bdAddr : String?,
     var parsedPayloadItems : ParsedPayload?,
-
-    )
+)
 
 data class ParsedPayload (
     var deviceName : String? = null,

@@ -20,6 +20,7 @@ import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconManagerInterface
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.model.ParsedAdvertisementData
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,7 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
+object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     private var newBeaconDataFlow = MutableSharedFlow<NanoBeaconData>()
     private var newBeaconFlow = MutableSharedFlow<NanoBeacon>()
@@ -51,19 +52,21 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private var bluetoothManager: BluetoothManager? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var bluetoothLeScanner: BluetoothLeScanner? = null
-    private var currentConfig : ParsedConfigData? = null
+    private var currentConfig: ParsedConfigData? = null
 
     fun init(getContext: WeakReference<Context>) {
         context = getContext
-        bluetoothManager = (getContext.get()?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
+        bluetoothManager =
+            (getContext.get()?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)
         bluetoothAdapter = bluetoothManager?.adapter
         bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
         setupBluetoothAdapterStateHandler()
         requestBluetoothEnable()
     }
 
-    fun loadConfiguration(parsedConfigData : ParsedConfigData) {
+    fun loadConfiguration(parsedConfigData: ParsedConfigData) {
         currentConfig = parsedConfigData
+        refresh()
     }
 
     fun requestBluetoothEnable() {
@@ -97,7 +100,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         }
     }
 
-    override fun refresh(){
+    override fun refresh() {
         stopScanning()
         leDeviceMap.clear()
     }
@@ -152,7 +155,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     }
 
     @SuppressLint("MissingPermission")
-    override fun startScanning(){
+    override fun startScanning() {
         if (_scanState.value == ScanState.SCANNING) return
         context?.get()?.let {
             if (ActivityCompat.checkSelfPermission(
@@ -183,7 +186,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
 
             _scanState.value = ScanState.SCANNING
             Log.d(TAG, "Starting scan")
-        }  ?: run {
+        } ?: run {
             Log.d(TAG, "Cannot start scanning. Bluetooth adapter is null")
         }
     }
@@ -257,6 +260,16 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         }
     }
 
+    private fun checkAdvMatch(bdAddr : String) : ParsedConfigData? {
+        val configMatch = currentConfig?.advSetData?.firstOrNull { it.bdAddr == bdAddr }
+        configMatch?.let { it ->
+            val parsedConfigData = currentConfig
+            parsedConfigData?.advSetData = arrayOf(it)
+            return parsedConfigData
+        }
+        return null
+    }
+
     private val leScanCallback: ScanCallback by lazy {
         object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
@@ -265,23 +278,30 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                     result?.device?.address?.let { deviceAddress ->
 
                         // Check for exisiting entry
-                        if (!leDeviceMap.containsKey(deviceAddress)){
+                        if (!leDeviceMap.containsKey(deviceAddress)) {
 
                             // Parse scan result
                             val beaconData =
                                 NanoBeaconData(
                                     scanResult = result,
-                                    leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+                                    leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0
+                                )
 
                             var nanoBeacon: NanoBeacon? = null
                             // Check if match for one of the registered types
-                            for (beaconType in registeredBeaconTypes){
+                            for (beaconType in registeredBeaconTypes) {
                                 beaconType.isTypeMatchFor(
                                     beaconData,
                                     context,
                                     this@NanoBeaconManager
                                 )?.let { customBeacon ->
                                     nanoBeacon = customBeacon
+
+                                    //Check for advertisement match and drop irrelevant advertisements
+                                    checkAdvMatch(beaconData.bluetoothAddress)?.let { parsedConfigData ->
+                                        nanoBeacon?.loadConfig(parsedConfigData)
+                                    }
+
                                     leDeviceMap[deviceAddress] = nanoBeacon
                                     beaconScope.launch {
                                         registeredTypeFlow.emit(nanoBeacon)
@@ -291,12 +311,18 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                                     }
                                 }
                             }
-                            nanoBeacon?.let {} ?: run{
+                            nanoBeacon?.let {} ?: run {
                                 nanoBeacon = NanoBeacon(
                                     beaconData,
                                     context,
                                     this@NanoBeaconManager
                                 )
+
+                                //Check for advertisement match and drop irrelevant advertisements
+                                checkAdvMatch(beaconData.bluetoothAddress)?.let { parsedConfigData ->
+                                    nanoBeacon?.loadConfig(parsedConfigData)
+                                }
+
                                 leDeviceMap[deviceAddress] = nanoBeacon
                                 beaconScope.launch {
                                     newBeaconDataFlow.emit(beaconData)
@@ -311,7 +337,8 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
                             val beaconData =
                                 NanoBeaconData(
                                     scanResult = result,
-                                    leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0)
+                                    leDeviceMap[deviceAddress]?.estimatedAdvIntervalFlow?.value ?: 0
+                                )
 
                             leDeviceMap[deviceAddress]?.let {
 
@@ -333,4 +360,5 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
             }
         }
     }
+
 }

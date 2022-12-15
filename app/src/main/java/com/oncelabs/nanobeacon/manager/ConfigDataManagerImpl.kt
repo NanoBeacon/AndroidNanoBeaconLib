@@ -41,7 +41,7 @@ class ConfigDataManagerImpl
 
     fun parseConfigData(configData: ConfigData) {
 
-        configData?.advSet?.let {
+        configData.advSet?.let {
             var parsedAdvertisements = mutableListOf<ParsedAdvertisementData>()
             for (advData in it) {
                 val parsedPayload = parsePayload(advData.payload)
@@ -54,7 +54,9 @@ class ConfigDataManagerImpl
                 )
                 parsedAdvertisements.add(parsedAdvertisementData)
             }
-            NanoBeaconManager.loadConfiguration(ParsedConfigData(parsedAdvertisements.toTypedArray()))
+            if (configData.tempUnit != null && configData.vccUnit != null) {
+                NanoBeaconManager.loadConfiguration(ParsedConfigData(parsedAdvertisements.toTypedArray(), tempUnit = configData.tempUnit, vccUnit = configData.vccUnit))
+            }
         }
     }
 
