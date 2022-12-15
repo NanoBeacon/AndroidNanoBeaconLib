@@ -14,8 +14,11 @@ import com.oncelabs.nanobeacon.manager.ConfigDataManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.model.FilterType
+import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
+import com.oncelabs.nanobeaconlib.model.NanoBeacon
+import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.util.*
@@ -35,15 +38,25 @@ class ScannerViewModel @Inject constructor(
 
     private var filterTimer: TimerTask? = null
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
-    private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
-    private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
-    private val _scanningEnabled = MutableLiveData(true)
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
+
+    private val _scanningEnabled = MutableLiveData(true)
+    val scanningEnabled: LiveData<Boolean> = _scanningEnabled
+
+    private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
+    val filters: LiveData<List<FilterOption>> = _filters
+
+    private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
+    val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
+
     private val _savedConfigs = MutableLiveData<ConfigData>(configDataManager.savedConfig.value)
     val savedConfigs : LiveData<ConfigData> = _savedConfigs
-    val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
-    val scanningEnabled: LiveData<Boolean> = _scanningEnabled
-    val filters: LiveData<List<FilterOption>> = _filters
+
+    private val _showDetailModal = MutableLiveData<Boolean>(false)
+    val showDetailModal = _showDetailModal
+
+    private val _currentDetailBeacon = MutableLiveData<NanoBeaconInterface?>(null)
+    val currentDetailBeacon = _currentDetailBeacon
 
     init {
         addObservers()
@@ -61,6 +74,14 @@ class ScannerViewModel @Inject constructor(
 
     fun refresh(){
         beaconManager.refresh()
+    }
+
+    fun setCurrentDetailData(beacon : NanoBeaconInterface?) {
+        _currentDetailBeacon.value = beacon
+    }
+
+    fun setShowDetailModal(value : Boolean) {
+        _showDetailModal.value = value
     }
 
     private fun addObservers(){

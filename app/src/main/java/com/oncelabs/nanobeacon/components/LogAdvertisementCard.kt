@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -53,7 +54,7 @@ internal fun formatToEntry(nanoBeaconData: NanoBeaconData): BeaconDataEntry {
 }
 
 @Composable
-fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
+fun LogAdvertisementCard(beacon: NanoBeaconInterface, onDetailPressed : (NanoBeaconInterface) -> Unit) {
 
     val beaconData by beacon.beaconDataFlow.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
@@ -73,6 +74,19 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                     isExpanded = !isExpanded
                 }
         ) {
+            if (configData.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .padding(top = 0.dp, bottom = if (isExpanded) 10.dp else 0.dp)
+                        .wrapContentHeight()
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Button({ onDetailPressed(beacon) }) {
+                        Text("Configuration Match", color = topBarBackground, modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp)))
+                    }
+                }
+            }
             Row(
                 modifier = Modifier
                     .padding(top = 0.dp, bottom = if (isExpanded) 10.dp else 0.dp)
@@ -115,9 +129,7 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface) {
                         separateData = true
                     )
                     DataLine(title = "Raw", data = data.rawData, maxLines = 3, separateData = true)
-                    for (i in configData.toList()) {
-                        DataLine(title = i.first.name, data = i.second, maxLines = 1)
-                    }
+
                 }
             }
             // TODO: Not used?
