@@ -11,7 +11,7 @@ import com.oncelabs.nanobeaconlib.model.ParsedAdvertisementData
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 import com.oncelabs.nanobeaconlib.model.ParsedDynamicData
 import com.oncelabs.nanobeaconlib.model.ParsedPayload
-import com.oncelabs.nanobeacon.parser.DynamicDataParsers
+import com.oncelabs.nanobeaconlib.parser.DynamicDataParsers
 import com.oncelabs.nanobeaconlib.manager.NanoBeaconManager
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -147,7 +147,7 @@ class ConfigDataManagerImpl
                                 )
                                 DynamicDataType.GPIO_ITEM -> Log.d(
                                     "GPIO_ITEM",
-                                    DynamicDataParsers.processGpioStatus(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
+                                    DynamicDataParsers.processGpioStatus(trimmedData).toString()
                                 )
                                 DynamicDataType.AON_GPIO_ITEM -> TODO()
                                 DynamicDataType.EDGE_CNT_ITEM -> Log.d(

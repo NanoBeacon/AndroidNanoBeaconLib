@@ -36,7 +36,5 @@ enum class DynamicDataType(
         fun fromAbr(abr: String): DynamicDataType? {
             return values().firstOrNull { it.abrName == abr }
         }
-
-
     }
 }

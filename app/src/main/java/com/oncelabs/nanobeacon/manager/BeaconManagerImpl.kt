@@ -1,10 +1,8 @@
 package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.device.ADXL367
-import com.oncelabs.nanobeacon.parser.DynamicDataParsers
 import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeaconlib.manager.NanoBeaconManager
