@@ -5,13 +5,14 @@ import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.codable.Payload
 import com.oncelabs.nanobeacon.enum.ADType
-import com.oncelabs.nanobeacon.enum.DynamicDataType
+import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 import com.oncelabs.nanobeacon.extension.StringExtensions.Companion.decodeHex
-import com.oncelabs.nanobeacon.model.ParsedAdvertisementData
-import com.oncelabs.nanobeacon.model.ParsedConfigData
-import com.oncelabs.nanobeacon.model.ParsedDynamicData
-import com.oncelabs.nanobeacon.model.ParsedPayload
+import com.oncelabs.nanobeaconlib.model.ParsedAdvertisementData
+import com.oncelabs.nanobeaconlib.model.ParsedConfigData
+import com.oncelabs.nanobeaconlib.model.ParsedDynamicData
+import com.oncelabs.nanobeaconlib.model.ParsedPayload
 import com.oncelabs.nanobeacon.parser.DynamicDataParsers
+import com.oncelabs.nanobeaconlib.manager.NanoBeaconManager
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,10 +37,9 @@ class ConfigDataManagerImpl
 
     override fun setConfig(configData: ConfigData) {
         _savedConfig.value = configData
-        _parsedConfig.value = parseConfigData(configData)
     }
 
-    fun parseConfigData(configData: ConfigData): ParsedConfigData? {
+    fun parseConfigData(configData: ConfigData) {
 
         configData?.advSet?.let {
             var parsedAdvertisements = mutableListOf<ParsedAdvertisementData>()
@@ -54,9 +54,8 @@ class ConfigDataManagerImpl
                 )
                 parsedAdvertisements.add(parsedAdvertisementData)
             }
-            return ParsedConfigData(parsedAdvertisements.toTypedArray())
+            NanoBeaconManager.loadConfiguration(ParsedConfigData(parsedAdvertisements.toTypedArray()))
         }
-        return null
     }
 
     fun parsePayload(payloads: Array<Payload>?): ParsedPayload? {

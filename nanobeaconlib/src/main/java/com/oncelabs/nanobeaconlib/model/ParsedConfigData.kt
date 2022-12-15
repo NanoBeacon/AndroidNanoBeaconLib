@@ -1,8 +1,7 @@
-package com.oncelabs.nanobeacon.model
+package com.oncelabs.nanobeaconlib.model
 
-import com.oncelabs.nanobeacon.codable.Payload
-import com.oncelabs.nanobeacon.enum.ADType
-import com.oncelabs.nanobeacon.enum.DynamicDataType
+import com.oncelabs.nanobeaconlib.enums.DynamicDataType
+
 
 data class ParsedConfigData (
     var advSetData : Array<ParsedAdvertisementData>,
@@ -13,7 +12,7 @@ data class ParsedAdvertisementData (
     var bdAddr : String?,
     var parsedPayloadItems : ParsedPayload?,
 
-)
+    )
 
 data class ParsedPayload (
     var deviceName : String? = null,

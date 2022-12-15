@@ -20,6 +20,7 @@ import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconManagerInterface
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -50,6 +51,7 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
     private var bluetoothManager: BluetoothManager? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var bluetoothLeScanner: BluetoothLeScanner? = null
+    private var currentConfig : ParsedConfigData? = null
 
     fun init(getContext: WeakReference<Context>) {
         context = getContext
@@ -58,6 +60,10 @@ object NanoBeaconManager: NanoBeaconManagerInterface, NanoBeaconDelegate {
         bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
         setupBluetoothAdapterStateHandler()
         requestBluetoothEnable()
+    }
+
+    fun loadConfiguration(parsedConfigData : ParsedConfigData) {
+        currentConfig = parsedConfigData
     }
 
     fun requestBluetoothEnable() {
