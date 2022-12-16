@@ -35,12 +35,13 @@ import com.oncelabs.nanobeacon.components.dialog.DetailViewModal
 import com.oncelabs.nanobeacon.model.BeaconType
 import com.oncelabs.nanobeacon.model.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
-import com.oncelabs.nanobeacon.model.FilterType
+import com.oncelabs.nanobeacon.enums.FilterType
 import com.oncelabs.nanobeacon.ui.theme.*
 import com.oncelabs.nanobeacon.viewModel.ScannerViewModel
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
 
 @ExperimentalMaterialApi
 @Composable
@@ -50,6 +51,7 @@ fun ScannerScreen(
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     val filters by viewModel.filters.observeAsState(initial = listOf())
+    val filtersDescription by viewModel.currentFiltersDescription.observeAsState(initial = "No filters")
     val scanEnabled by viewModel.scanningEnabled.observeAsState(initial = false)
     val discoveredBeacons by viewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
     val savedConfigs by viewModel.savedConfigs.observeAsState()
@@ -72,7 +74,8 @@ fun ScannerScreen(
             discoveredBeacons,
             listState = listState,
             filters = filters,
-           // savedConfigs = savedConfigs ?: listOf(),
+            filtersDescription = filtersDescription ?: "No filters",
+            savedConfigs = savedConfigs ?: listOf(),
             onFilterChange = viewModel::onFilterChanged,
             onScanButtonClick = if (scanEnabled) viewModel::stopScanning else viewModel::startScanning,
             onRefreshButtonClick = viewModel::refresh,
@@ -97,7 +100,8 @@ private fun ScannerContent(
     discoveredBeacons: List<NanoBeaconInterface>,
     listState: LazyListState,
     filters: List<FilterOption>,
-    //savedConfigs: List<ConfigData>,
+    filtersDescription: String,
+    savedConfigs: List<ConfigData>,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
     onRefreshButtonClick: () -> Unit,
@@ -133,18 +137,23 @@ private fun ScannerContent(
     Column {
         /**Top bar*/
         InplayTopBar(title = "Scanner")
+
+        /**Filter option*/
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(logModalItemBackgroundColor)
                 .height(IntrinsicSize.Max),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            /**Name filter*/
-            SearchView(
-                modifier = Modifier.weight(1f),
-                state = filterByNameText,
-                placeholder = "Filter by name",
-                leadingIcon = Icons.Default.Search
+            Text(
+                text = filtersDescription,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable {
+                        filterMenuExpanded = !filterMenuExpanded
+                    }
+                    .padding(8.dp)
             )
 
             /**Filter results drop down*/
@@ -172,17 +181,7 @@ private fun ScannerContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 state = listState
             ) {
-                items(
-                    if (filterByNameText.value.isNotEmpty()) {
-                        discoveredBeacons.filter {
-                            it.beaconDataFlow.value?.name?.contains(
-                                filterByNameText.value,
-                                ignoreCase = true
-                            ) == true
-                        }
-                    } else {
-                        discoveredBeacons
-                    }) {
+                items(discoveredBeacons) {
                     Row(Modifier.fillMaxWidth()) {
                         Spacer(Modifier.weight(0.025f))
                         Column(Modifier.weight(0.95f)) {
@@ -405,11 +404,14 @@ private fun SearchFilterCard(
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SearchView(
-            modifier = Modifier.weight(1f),
+        Text(filter.filterType.getName()
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
+            modifier = Modifier.weight(1f)
+        )
+        FilterTextField(
+            modifier = Modifier.weight(3f),
             state = value,
-            placeholder = filter.filterType.getName(),
-            leadingIcon = null,
+            placeholder = filter.filterType.getPlaceholderName(),
             onValueChange = onChange
         )
     }
@@ -549,7 +551,8 @@ fun PreviewLogScreen() {
             discoveredBeacons = listOf(),
             listState = state,
             filters = listOf(),
-            //savedConfigs = listOf(),
+            filtersDescription = "",
+            savedConfigs = listOf(),
             onFilterChange = { _, _, _ ->
 
             },

@@ -39,12 +39,16 @@ class ScannerViewModel @Inject constructor(
     private var filterTimer: TimerTask? = null
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
-
     private val _scanningEnabled = MutableLiveData(true)
+    private val _savedConfigs = MutableLiveData<List<ConfigData>>(filePickerManager.savedConfigs.value)
+    private val _currentFiltersDescription = MutableLiveData<String?>(null)
+    val savedConfigs : LiveData<List<ConfigData>> = _savedConfigs
+    val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
     val scanningEnabled: LiveData<Boolean> = _scanningEnabled
 
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
     val filters: LiveData<List<FilterOption>> = _filters
+    val currentFiltersDescription: LiveData<String?> = _currentFiltersDescription
 
     private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
@@ -136,6 +140,11 @@ class ScannerViewModel @Inject constructor(
                             (it.beaconDataFlow.value?.bluetoothAddress)?.contains(filter.value as? String ?: "") ?: false
                         }
                     }
+                    FilterType.ADVANCED_SEARCH -> {
+                        filteredList = filteredList.filter {
+                            it.beaconDataFlow.value?.searchableString?.contains(filter.value as? String ?: "", ignoreCase = true) ?: false
+                        }
+                    }
                     FilterType.RSSI -> {
                         filteredList = filteredList.filter {
                             (it.beaconDataFlow.value?.rssi?.toFloat() ?: -127f) > (filter.value as? Float ?: 0f)
@@ -154,6 +163,21 @@ class ScannerViewModel @Inject constructor(
                     FilterType.BY_TYPE -> {
                         Log.e(TAG, "${filter.filterType} not yet implemented")
                     }
+                    FilterType.NAME -> {
+                        (filter.value as? String)?.let { value ->
+                            if (value.isNotEmpty()) {
+                                filteredList = filteredList.filter {
+                                    it.beaconDataFlow.value?.name?.contains(
+                                        value,
+                                        ignoreCase = true
+                                    ) == true
+                                }
+                            }
+                        }
+                    }
+                    FilterType.SORT_RSSI -> {
+                        filteredList = filteredList.sortedBy { it.beaconDataFlow.value?.rssi }
+                    }
                 }
             }
         }
@@ -171,6 +195,15 @@ class ScannerViewModel @Inject constructor(
             filterCopy?.get(index)?.enabled = enabled
             _filters.value = listOf()
             _filters.value = filterCopy
+        }
+
+        _filters.value?.mapNotNull { it.getDescription() }?.let { filterDescriptions ->
+            if(filterDescriptions.isEmpty()) {
+                _currentFiltersDescription.value = "No filters"
+                return
+            }
+
+            _currentFiltersDescription.value = filterDescriptions.joinToString(", ")
         }
     }
 
