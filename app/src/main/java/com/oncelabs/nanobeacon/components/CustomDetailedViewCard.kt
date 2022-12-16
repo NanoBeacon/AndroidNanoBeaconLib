@@ -97,7 +97,7 @@ fun CustomDetailViewCard(beacon: NanoBeaconInterface) {
                                         )
                                     })
                                 }
-
+                                Spacer(Modifier.height(14.dp))
                             }
                         }
 
