@@ -17,7 +17,8 @@ data class AdvSetData (
     val gpioTrigerSrc : Array<Int>? =null,
     val postTrigCtrlMode : Int? = null,
     val postTrigNumAdv : Int? = null,
-    val trigCheckPeriod : Int? = null
+    val trigCheckPeriod : Int? = null,
+    val ui_format : String
 )
 
 data class Payload (

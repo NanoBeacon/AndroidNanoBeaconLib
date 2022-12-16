@@ -10,11 +10,11 @@
       "interval": 1000,
       "authEn": 0,
       "authKey": 0,
-      "authSaltType": 2,
+      "authSaltType": 0,
       "authSaltValue": 0,
       "authEaxCountType": 0,
       "authEaxCountValue": 0,
-      "ui_format": "custom",
+      "ui_format": "ibeacon",
       "uid2tlm_ratio": 0.0,
       "eddystoneTxPower": 0,
       "chCtrl": 0,
@@ -28,95 +28,9 @@
       "payloadVer": 3,
       "payload": [
         {
-          "len": 5,
-          "type": 254,
-          "data": "<EDGE 3byte 0 0><TAG 2byte 0 0>"
-        },
-        {
-          "len": 12,
-          "type": 9,
-          "data": "7177646e717764716b6c64"
-        },
-        {
-          "len": 2,
-          "type": 10,
-          "data": "79" 121
-        }
-      ]
-    },
-    {
-      "id": 1,
-      "bdAddr": "060504030201",
-      "addrType": "public",
-      "addrKey": 0,
-      "addrGenInterval": 90,
-      "interval": 1000,
-      "authEn": 0,
-      "authKey": 0,
-      "authSaltType": 2,
-      "authSaltValue": 0,
-      "authEaxCountType": 0,
-      "authEaxCountValue": 0,
-      "ui_format": "custom",
-      "uid2tlm_ratio": 0.0,
-      "eddystoneTxPower": 0,
-      "chCtrl": 0,
-      "advModeTrigEn": 0,
-      "is1MPhy": 1,
-      "phyRate": "1M",
-      "isStandardBle": 1,
-      "cte": 0,
-      "cteLen": 0,
-      "randomDlyType": 0,
-      "payloadVer": 3,
-      "payload": [
-        {
-          "len": 6,
-          "type": 254,
-          "data": "<VCC 1byte 0 0><VCC 1byte 0 0><TS0 4byte 0 0>"
-        },
-        {
-          "len": 9,
-          "type": 9,
-          "data": "71776f6965776677"
-        }
-      ]
-    },
-    {
-      "id": 2,
-      "bdAddr": "060504030201",
-      "addrType": "public",
-      "addrKey": 0,
-      "addrGenInterval": 90,
-      "interval": 1000,
-      "authEn": 0,
-      "authKey": 0,
-      "authSaltType": 2,
-      "authSaltValue": 0,
-      "authEaxCountType": 0,
-      "authEaxCountValue": 0,
-      "ui_format": "custom",
-      "uid2tlm_ratio": 0.0,
-      "eddystoneTxPower": 0,
-      "chCtrl": 0,
-      "advModeTrigEn": 0,
-      "is1MPhy": 1,
-      "phyRate": "1M",
-      "isStandardBle": 1,
-      "cte": 0,
-      "cteLen": 0,
-      "randomDlyType": 0,
-      "payloadVer": 3,
-      "payload": [
-        {
-          "len": 6,
-          "type": 254,
-          "data": "<ADVCNT 4byte 0 0><SALT 2byte 0 0>"
-        },
-        {
-          "len": 8,
-          "type": 9,
-          "data": "666b7765666c6b"
+          "len": 26,
+          "type": 255,
+          "data": "4c000215E2C56DB5DFFB48D2B060D0F5A71096E01212abab0a"
         }
       ]
     }
@@ -208,8 +122,8 @@
       "maskb": 0
     }
   ],
-  "vccUnit": 0.03125,
-  "tempUnit": 0.01,
+  "vccUnit": 0.001,
+  "tempUnit": 0.00390625,
   "adc": [
     {
       "ch": 0,

@@ -26,7 +26,7 @@ import javax.inject.Singleton
 class ConfigDataManagerImpl
 @Inject constructor() : ConfigDataManager {
     private val _savedConfig = MutableStateFlow<ConfigData?>(null)
-    override val savedConfig : StateFlow<ConfigData?> = _savedConfig.asStateFlow()
+    override val savedConfig: StateFlow<ConfigData?> = _savedConfig.asStateFlow()
 
     private val _parsedConfig = MutableStateFlow<ParsedConfigData?>(null)
     override val parsedConfig: StateFlow<ParsedConfigData?> = _parsedConfig.asStateFlow()
@@ -45,24 +45,32 @@ class ConfigDataManagerImpl
         configData.advSet?.let {
             var parsedAdvertisements = mutableListOf<ParsedAdvertisementData>()
             for (advData in it) {
-                val parsedPayload = parsePayload(advData.payload)
+                val parsedPayload = parsePayload(advData.payload, advData.ui_format)
                 val id = advData.id
                 val bdAddr = advData.bdAddr
                 val parsedAdvertisementData = ParsedAdvertisementData(
                     id = id,
                     bdAddr = bdAddr,
-                    parsedPayloadItems = parsedPayload
+                    parsedPayloadItems = parsedPayload,
+                    ui_format = advData.ui_format
                 )
                 parsedAdvertisements.add(parsedAdvertisementData)
             }
             if (configData.tempUnit != null && configData.vccUnit != null) {
-                NanoBeaconManager.loadConfiguration(ParsedConfigData(parsedAdvertisements.toTypedArray(), tempUnit = configData.tempUnit, vccUnit = configData.vccUnit))
+                Log.d("VCC", configData.vccUnit.toString())
+                NanoBeaconManager.loadConfiguration(
+                    ParsedConfigData(
+                        parsedAdvertisements.toTypedArray(),
+                        tempUnit = configData.tempUnit,
+                        vccUnit = configData.vccUnit,
+                    )
+                )
             }
         }
     }
 
-    fun parsePayload(payloads: Array<Payload>?): ParsedPayload? {
-        var parsedPayload = ParsedPayload(null, null, null)
+    fun parsePayload(payloads: Array<Payload>?, type: String): ParsedPayload? {
+        var parsedPayload = ParsedPayload(null, null, null, null)
 
         if (payloads.isNullOrEmpty()) {
             return null
@@ -74,7 +82,9 @@ class ConfigDataManagerImpl
                 when (adType) {
                     ADType.MANUFACTURER_DATA -> {
                         payload.data?.let { data ->
+
                             parsedPayload.manufacturerData = parseManufacturerData(data)
+
                         }
                     }
                     ADType.TX_POWER -> {
@@ -94,11 +104,11 @@ class ConfigDataManagerImpl
         return parsedPayload
     }
 
-    fun parseManufacturerData(raw: String): List<ParsedDynamicData>? {
-        var splitRaw : List<String> = raw.split("<").toList()
+    private fun parseManufacturerData(raw: String): Map<DynamicDataType, ParsedDynamicData>? {
+        var splitRaw: List<String> = raw.split("<").toList()
         splitRaw = splitRaw.drop(1)
 
-        var parsedList: MutableList<ParsedDynamicData> = mutableListOf()
+        var parsedMap: MutableMap<DynamicDataType, ParsedDynamicData> = mutableMapOf()
 
         for (dynamicRaw in splitRaw) {
             val droppedEnd = dynamicRaw.dropLast(1)
@@ -114,11 +124,11 @@ class ConfigDataManagerImpl
             val encrypted = splitData[2].toInt() == 1
             dynamicDataType?.let {
                 val data = ParsedDynamicData(len, dynamicDataType, bigEndian, encrypted)
-                parsedList.add(data)
+                parsedMap[dynamicDataType] = data
             }
         }
-        if (parsedList.isNotEmpty()) {
-            return parsedList
+        if (parsedMap.isNotEmpty()) {
+            return parsedMap
         }
         return null
     }

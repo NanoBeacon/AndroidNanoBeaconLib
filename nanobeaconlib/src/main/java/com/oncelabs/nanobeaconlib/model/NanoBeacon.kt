@@ -89,7 +89,8 @@ open class NanoBeacon(
             val adv = it.advSetData[0]
             adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
                 var currentIndex = 0
-                for (dynamicDataFlag in manufacturerDataFlags) {
+                for (i in manufacturerDataFlags.toList()) {
+                    val dynamicDataFlag = i.second
                     val endIndex = currentIndex + dynamicDataFlag.len
                     var dataHolder : String? = null
 

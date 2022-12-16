@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +19,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.oncelabs.nanobeacon.components.CustomDetailViewCard
 import com.oncelabs.nanobeacon.components.DataLine
+import com.oncelabs.nanobeacon.components.DetailedViewTopBar
 import com.oncelabs.nanobeacon.ui.theme.cardBackground
 import com.oncelabs.nanobeacon.ui.theme.cardTextFont
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
@@ -30,37 +33,20 @@ fun DetailViewModal(
     onDismiss : () -> Unit = {},
     beacon: NanoBeaconInterface?
 ) {
+    beacon?.let {
+        if (shouldShow) {
 
-
-
-    if (shouldShow) {
-        Dialog(onDismissRequest = {}, DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)) {
-            Box(
-                contentAlignment = Alignment.TopCenter,
+            Column(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = modifier
-                    .height(400.dp)
-                    .background(cardBackground, shape = RoundedCornerShape(12.dp))
+                    .fillMaxSize()
+                    .background(Color.Black)
             ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(45.dp)) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.15f)
-                                .padding(3.dp),
-                            text = "Detailed View",
-                            style = MaterialTheme.typography.h6,
-                            color = Color.White,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+                DetailedViewTopBar(title = "Detailed View") { onDismiss() }
+                Spacer(Modifier.height(7.dp))
+                CustomDetailViewCard(beacon = beacon)
+                /*
                 Column(
                     modifier = Modifier
                         .padding(15.dp)
@@ -91,22 +77,9 @@ fun DetailViewModal(
                         Spacer(Modifier.weight(0.13f))
 
                     }
-                    Row() {
-                        Text(
-                            modifier = Modifier
-                                .weight(0.5f)
-                                .clickable { onDismiss() },
-                            style = cardTextFont,
-                            color = Color.White,
-                            text = "Close",
-                            textAlign = TextAlign.Center
-                        )
 
-
-
-                    }
                 }
-
+*/
             }
         }
     }

@@ -29,6 +29,13 @@ val logItemTitleFont = TextStyle(
     color = logItemTitleColor
 )
 
+val CustomItemSubFont = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Light,
+    fontSize = 12.sp,
+    color = Color.White
+)
+
 val logItemSeparatorFont = TextStyle(
     fontFamily = helveticaNeue,
     fontWeight = FontWeight.Light,
