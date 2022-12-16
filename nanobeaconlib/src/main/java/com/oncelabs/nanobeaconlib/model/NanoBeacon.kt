@@ -47,7 +47,6 @@ open class NanoBeacon(
         updateAdvInterval(beaconData.timeStamp)
         _manufacturerData.value = processDeviceData(beaconData)
     }
-
     fun loadConfig(parsedConfigData: ParsedConfigData?) {
         matchingConfig = parsedConfigData
     }
@@ -168,12 +167,12 @@ open class NanoBeacon(
                             DynamicDataType.SALT_ITEM -> TODO()
                             DynamicDataType.TAG_ITEM -> TODO()
                             DynamicDataType.CUSTOM_PRODUCT_ID_ITEM -> dataHolder =
-                                DynamicDataParsers.processRandomNumber(
+                                DynamicDataParsers.processCustomerProductID(
                                     trimmedData,
                                     dynamicDataFlag.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.BLUETOOTH_DEVICE_ADDRESS_ITEM -> dataHolder =
-                                DynamicDataParsers.processRandomNumber(
+                                DynamicDataParsers.processBluetoothDeviceAddress(
                                     trimmedData,
                                     dynamicDataFlag.bigEndian ?: false
                                 ).toString()

@@ -34,7 +34,6 @@ class ConfigDataManagerImpl
         TODO("Not yet implemented")
     }
 
-
     override fun setConfig(configData: ConfigData) {
         _savedConfig.value = configData
         parseConfigData(configData)
@@ -57,7 +56,6 @@ class ConfigDataManagerImpl
                 parsedAdvertisements.add(parsedAdvertisementData)
             }
             if (configData.tempUnit != null && configData.vccUnit != null) {
-                Log.d("VCC", configData.vccUnit.toString())
                 NanoBeaconManager.loadConfiguration(
                     ParsedConfigData(
                         parsedAdvertisements.toTypedArray(),
@@ -82,9 +80,12 @@ class ConfigDataManagerImpl
                 when (adType) {
                     ADType.MANUFACTURER_DATA -> {
                         payload.data?.let { data ->
-
-                            parsedPayload.manufacturerData = parseManufacturerData(data)
-
+                            if (type == "ibeacon") {
+                                parsedPayload.iBeaconAddr = parseIBeaconAddr(data)
+                            }
+                            if (type == "custom") {
+                                parsedPayload.manufacturerData = parseCustomManufacturerData(data)
+                            }
                         }
                     }
                     ADType.TX_POWER -> {
@@ -104,7 +105,7 @@ class ConfigDataManagerImpl
         return parsedPayload
     }
 
-    private fun parseManufacturerData(raw: String): Map<DynamicDataType, ParsedDynamicData>? {
+    private fun parseCustomManufacturerData(raw: String): Map<DynamicDataType, ParsedDynamicData>? {
         var splitRaw: List<String> = raw.split("<").toList()
         splitRaw = splitRaw.drop(1)
 
@@ -129,6 +130,28 @@ class ConfigDataManagerImpl
         }
         if (parsedMap.isNotEmpty()) {
             return parsedMap
+        }
+        return null
+    }
+
+    private fun parseIBeaconAddr(raw : String): String? {
+        var result = ""
+        if (raw.length >= 41) {
+            result = raw.substring(startIndex = 8, endIndex = 41)
+            if (result.isNotEmpty()) {
+                return result
+            }
+        }
+        return null
+    }
+
+    private fun parseIBeaconData(raw : String) : String? {
+        var result = ""
+        result = raw.substring(startIndex = 41, endIndex = 45)
+        raw.substring(startIndex = 45, 49)
+        raw.substring(49, )
+        if (result.isNotEmpty()) {
+            return result
         }
         return null
     }
