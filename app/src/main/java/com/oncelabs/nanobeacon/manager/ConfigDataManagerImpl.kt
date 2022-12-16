@@ -34,6 +34,7 @@ class ConfigDataManagerImpl
         TODO("Not yet implemented")
     }
 
+
     override fun setConfig(configData: ConfigData) {
         _savedConfig.value = configData
         parseConfigData(configData)
@@ -144,18 +145,6 @@ class ConfigDataManagerImpl
         }
         return null
     }
-
-    private fun parseIBeaconData(raw : String) : String? {
-        var result = ""
-        result = raw.substring(startIndex = 41, endIndex = 45)
-        raw.substring(startIndex = 45, 49)
-        raw.substring(49, )
-        if (result.isNotEmpty()) {
-            return result
-        }
-        return null
-    }
-
 }
 
 
