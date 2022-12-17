@@ -1,4 +1,4 @@
-package com.oncelabs.nanobeacon.enum
+package com.oncelabs.nanobeaconlib.enums
 
 enum class DynamicDataType(
     val fullName: String,
@@ -36,9 +36,5 @@ enum class DynamicDataType(
         fun fromAbr(abr: String): DynamicDataType? {
             return values().firstOrNull { it.abrName == abr }
         }
-
-
     }
 }
-
-

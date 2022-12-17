@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.enum
 
 enum class ADType(val type : Int){
+
     DEVICE_NAME(9),
     TX_POWER(10),
     MANUFACTURER_DATA(255);

@@ -5,13 +5,14 @@ import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.codable.Payload
 import com.oncelabs.nanobeacon.enum.ADType
-import com.oncelabs.nanobeacon.enum.DynamicDataType
+import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 import com.oncelabs.nanobeacon.extension.StringExtensions.Companion.decodeHex
-import com.oncelabs.nanobeacon.model.ParsedAdvertisementData
-import com.oncelabs.nanobeacon.model.ParsedConfigData
-import com.oncelabs.nanobeacon.model.ParsedDynamicData
-import com.oncelabs.nanobeacon.model.ParsedPayload
-import com.oncelabs.nanobeacon.parser.DynamicDataParsers
+import com.oncelabs.nanobeaconlib.model.ParsedAdvertisementData
+import com.oncelabs.nanobeaconlib.model.ParsedConfigData
+import com.oncelabs.nanobeaconlib.model.ParsedDynamicData
+import com.oncelabs.nanobeaconlib.model.ParsedPayload
+import com.oncelabs.nanobeaconlib.parser.DynamicDataParsers
+import com.oncelabs.nanobeaconlib.manager.NanoBeaconManager
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,7 @@ import javax.inject.Singleton
 class ConfigDataManagerImpl
 @Inject constructor() : ConfigDataManager {
     private val _savedConfig = MutableStateFlow<ConfigData?>(null)
-    override val savedConfig : StateFlow<ConfigData?> = _savedConfig.asStateFlow()
+    override val savedConfig: StateFlow<ConfigData?> = _savedConfig.asStateFlow()
 
     private val _parsedConfig = MutableStateFlow<ParsedConfigData?>(null)
     override val parsedConfig: StateFlow<ParsedConfigData?> = _parsedConfig.asStateFlow()
@@ -36,31 +37,39 @@ class ConfigDataManagerImpl
 
     override fun setConfig(configData: ConfigData) {
         _savedConfig.value = configData
-        _parsedConfig.value = parseConfigData(configData)
+        parseConfigData(configData)
     }
 
-    fun parseConfigData(configData: ConfigData): ParsedConfigData? {
+    fun parseConfigData(configData: ConfigData) {
 
-        configData?.advSet?.let {
+        configData.advSet?.let {
             var parsedAdvertisements = mutableListOf<ParsedAdvertisementData>()
             for (advData in it) {
-                val parsedPayload = parsePayload(advData.payload)
+                val parsedPayload = parsePayload(advData.payload, advData.ui_format)
                 val id = advData.id
                 val bdAddr = advData.bdAddr
                 val parsedAdvertisementData = ParsedAdvertisementData(
                     id = id,
                     bdAddr = bdAddr,
-                    parsedPayloadItems = parsedPayload
+                    parsedPayloadItems = parsedPayload,
+                    ui_format = advData.ui_format
                 )
                 parsedAdvertisements.add(parsedAdvertisementData)
             }
-            return ParsedConfigData(parsedAdvertisements.toTypedArray())
+            if (configData.tempUnit != null && configData.vccUnit != null) {
+                NanoBeaconManager.loadConfiguration(
+                    ParsedConfigData(
+                        parsedAdvertisements.toTypedArray(),
+                        tempUnit = configData.tempUnit,
+                        vccUnit = configData.vccUnit,
+                    )
+                )
+            }
         }
-        return null
     }
 
-    fun parsePayload(payloads: Array<Payload>?): ParsedPayload? {
-        var parsedPayload = ParsedPayload(null, null, null)
+    fun parsePayload(payloads: Array<Payload>?, type: String): ParsedPayload? {
+        var parsedPayload = ParsedPayload(null, null, null, null)
 
         if (payloads.isNullOrEmpty()) {
             return null
@@ -72,7 +81,12 @@ class ConfigDataManagerImpl
                 when (adType) {
                     ADType.MANUFACTURER_DATA -> {
                         payload.data?.let { data ->
-                            parsedPayload.manufacturerData = parseManufacturerData(data)
+                            if (type == "ibeacon") {
+                                parsedPayload.iBeaconAddr = parseIBeaconAddr(data)
+                            }
+                            if (type == "custom") {
+                                parsedPayload.manufacturerData = parseCustomManufacturerData(data)
+                            }
                         }
                     }
                     ADType.TX_POWER -> {
@@ -92,11 +106,11 @@ class ConfigDataManagerImpl
         return parsedPayload
     }
 
-    fun parseManufacturerData(raw: String): List<ParsedDynamicData>? {
-        var splitRaw : List<String> = raw.split("<").toList()
+    private fun parseCustomManufacturerData(raw: String): Map<DynamicDataType, ParsedDynamicData>? {
+        var splitRaw: List<String> = raw.split("<").toList()
         splitRaw = splitRaw.drop(1)
 
-        var parsedList: MutableList<ParsedDynamicData> = mutableListOf()
+        var parsedMap: MutableMap<DynamicDataType, ParsedDynamicData> = mutableMapOf()
 
         for (dynamicRaw in splitRaw) {
             val droppedEnd = dynamicRaw.dropLast(1)
@@ -112,103 +126,24 @@ class ConfigDataManagerImpl
             val encrypted = splitData[2].toInt() == 1
             dynamicDataType?.let {
                 val data = ParsedDynamicData(len, dynamicDataType, bigEndian, encrypted)
-                parsedList.add(data)
+                parsedMap[dynamicDataType] = data
             }
         }
-        if (parsedList.isNotEmpty()) {
-            return parsedList
+        if (parsedMap.isNotEmpty()) {
+            return parsedMap
         }
         return null
     }
 
-    override fun processDeviceData(data : NanoBeaconData) {
-        parsedConfig.value?.let {
-            for (adv in it.advSetData) {
-                adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
-                    var currentIndex = 0
-                    Log.d("TESTING", data.manufacturerData.toString())
-                    for (dynamicDataFlag in manufacturerDataFlags) {
-                        val endIndex = currentIndex + dynamicDataFlag.len
-                        if (endIndex <= data.manufacturerData.size) {
-                            val trimmedData = data.manufacturerData.copyOfRange(currentIndex, endIndex)
-                            when (dynamicDataFlag.dynamicType) {
-                                DynamicDataType.VCC_ITEM -> Log.d(
-                                    "VCC",
-                                    DynamicDataParsers.processVcc(trimmedData, savedConfig.value?.vccUnit ?: 0.0F,dynamicDataFlag.bigEndian ?: false, ).toString()
-                                )
-                                DynamicDataType.TEMP_ITEM -> Log.d(
-                                    "TEMP_ITEM",
-                                    DynamicDataParsers.processInternalTemp(trimmedData, savedConfig.value?.tempUnit ?: 0.0F,dynamicDataFlag.bigEndian ?: false, ).toString()
-                                )
-                                DynamicDataType.PULSE_ITEM -> Log.d(
-                                    "PULSE_ITEM",
-                                    DynamicDataParsers.processWireCount(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.GPIO_ITEM -> Log.d(
-                                    "GPIO_ITEM",
-                                    DynamicDataParsers.processGpioStatus(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.AON_GPIO_ITEM -> TODO()
-                                DynamicDataType.EDGE_CNT_ITEM -> Log.d(
-                                    "EDGE_CNT_ITEM",
-                                    DynamicDataParsers.processGpioEdgeCount(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ADC_CH0_ITEM -> Log.d(
-                                    "ADC_CH0_ITEM",
-                                    DynamicDataParsers.processCh01(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ADC_CH1_ITEM -> Log.d(
-                                    "ADC_CH1_ITEM",
-                                    DynamicDataParsers.processCh01(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ADC_CH2_ITEM -> TODO()
-                                DynamicDataType.ADC_CH3_ITEM -> TODO()
-                                DynamicDataType.REG1_ITEM -> TODO()
-                                DynamicDataType.REG2_ITEM -> TODO()
-                                DynamicDataType.REG3_ITEM -> TODO()
-                                DynamicDataType.QDEC_ITEM -> TODO()
-                                DynamicDataType.TS0_ITEM -> Log.d(
-                                    "TS0_ITEM",
-                                    DynamicDataParsers.processTimeStamp(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.TS1_ITEM -> Log.d(
-                                    "TS1_ITEM",
-                                    DynamicDataParsers.processTimeStamp(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ADVCNT_ITEM -> Log.d(
-                                    "ADVCNT_ITEM",
-                                    DynamicDataParsers.processAdv(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.REG_ITEM -> TODO()
-                                DynamicDataType.RANDOM_ITEM -> Log.d(
-                                    "RANDOM_ITEM",
-                                    DynamicDataParsers.processRandomNumber(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.STATIC_RANDOM_ITEM -> Log.d(
-                                    "STATIC_RANDOM_ITEM",
-                                    DynamicDataParsers.processRandomNumber(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.ENCRYPT_ITEM -> TODO()
-                                DynamicDataType.SALT_ITEM -> TODO()
-                                DynamicDataType.TAG_ITEM -> TODO()
-                                DynamicDataType.CUSTOM_PRODUCT_ID_ITEM -> Log.d(
-                                    "CUSTOM_PRODUCT_ID_ITEM",
-                                    DynamicDataParsers.processRandomNumber(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.BLUETOOTH_DEVICE_ADDRESS_ITEM -> Log.d(
-                                    "BLUETOOTH_DEVICE_ADDRESS_ITEM",
-                                    DynamicDataParsers.processRandomNumber(trimmedData, dynamicDataFlag.bigEndian ?: false).toString()
-                                )
-                                DynamicDataType.UTF8_ITEM -> TODO()
-                            }
-                            currentIndex = endIndex
-                        } else {
-                            break
-                        }
-                    }
-                }
+    private fun parseIBeaconAddr(raw : String): String? {
+        var result = ""
+        if (raw.length >= 41) {
+            result = raw.substring(startIndex = 8, endIndex = 41)
+            if (result.isNotEmpty()) {
+                return result
             }
         }
+        return null
     }
 }
 

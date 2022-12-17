@@ -1,24 +1,26 @@
-package com.oncelabs.nanobeacon.model
+package com.oncelabs.nanobeaconlib.model
 
-import com.oncelabs.nanobeacon.codable.Payload
-import com.oncelabs.nanobeacon.enum.ADType
-import com.oncelabs.nanobeacon.enum.DynamicDataType
+import com.oncelabs.nanobeaconlib.enums.DynamicDataType
+
 
 data class ParsedConfigData (
     var advSetData : Array<ParsedAdvertisementData>,
+    var vccUnit : Float,
+    var tempUnit : Float
 )
 
 data class ParsedAdvertisementData (
     var id : Int?,
     var bdAddr : String?,
+    var ui_format : String,
     var parsedPayloadItems : ParsedPayload?,
-
 )
 
 data class ParsedPayload (
     var deviceName : String? = null,
     var txPower : String? = null,
-    var manufacturerData : List<ParsedDynamicData>?,
+    var manufacturerData : Map<DynamicDataType, ParsedDynamicData>?,
+    var iBeaconAddr : String?
 )
 
 data class ParsedDynamicData (

@@ -1,10 +1,8 @@
 package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.device.ADXL367
-import com.oncelabs.nanobeacon.parser.DynamicDataParsers
 import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.NanoBeaconEvent
 import com.oncelabs.nanobeaconlib.manager.NanoBeaconManager
@@ -92,14 +90,7 @@ class BeaconManagerImpl @Inject constructor(
                         if (!_discoveredAdxlBeacons.value.contains(nanoBeacon)){
                             _discoveredAdxlBeacons.value += listOf(nanoBeacon)
 
-                           /* nanoBeacon.beaconData?.manufacturerData?.size?.let {
-                                if (it > 0 && nanoBeacon.beaconData?.name == "Devins") {
-                                    nanoBeacon.beaconData?.let { data ->
 
-                                        configDataManager.processDeviceData(data)
-                                    }
-                                }
-                            }*/
                         }
                     }
                 }
@@ -110,13 +101,6 @@ class BeaconManagerImpl @Inject constructor(
             discoveredBeaconFlow.collect{ beacon ->
                 if (!_discoveredBeacons.value.contains(beacon)){
                     _discoveredBeacons.value += listOf(beacon)
-                    beacon.beaconData?.manufacturerData?.size?.let {
-                        if (it > 0 && beacon.beaconData?.name == "Devins") {
-                            beacon.beaconData?.let { data ->
-                                configDataManager.processDeviceData(data)
-                            }
-                        }
-                    }
                 }
             }
         }
