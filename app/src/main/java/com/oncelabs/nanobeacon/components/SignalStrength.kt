@@ -18,7 +18,7 @@ fun SignalStrength(
 
     fun convertRawSignalToLevel(rawSignal: Int) : Int {
         return when (rawSignal){
-            in -60..-40 -> 5
+            in -60..127 -> 5
             in -70..-60 -> 4
             in -80..-70 -> 3
             in -90..-80 -> 2
