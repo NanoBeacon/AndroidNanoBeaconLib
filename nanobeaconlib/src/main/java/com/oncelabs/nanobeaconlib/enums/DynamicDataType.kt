@@ -30,7 +30,12 @@ enum class DynamicDataType(
     TAG_ITEM("Auth Tag", "TAG"),
     CUSTOM_PRODUCT_ID_ITEM("Customer Product ID", "CustID"),
     BLUETOOTH_DEVICE_ADDRESS_ITEM("Bluetooth Device Address", "BDADDR"),
-    UTF8_ITEM("Characters UTF-8", "utf8");
+    UTF8_ITEM("Characters UTF-8", "utf8"),
+    UUID("UUID", "UUID"),
+    MAJOR("Major", "Major"),
+    MINOR("Minor", "Minor"),
+    TX_POWER("TX Power", "TX Power"),
+    IBEACON_ADDR("IBeacon Address", "IBeacon Addr");
 
     companion object {
         fun fromAbr(abr: String): DynamicDataType? {

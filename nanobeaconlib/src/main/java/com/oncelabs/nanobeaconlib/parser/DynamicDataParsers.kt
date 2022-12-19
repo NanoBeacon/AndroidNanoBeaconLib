@@ -156,6 +156,21 @@ class DynamicDataParsers {
             return if(bigEndian) { hexString.reversed()} else { hexString }
         }
 
+        fun processIBeaconUUID(byteArray: ByteArray) : String {
+            return byteArray.toHexString("")
+        }
+
+        fun processMajor(byteArray: ByteArray) : String {
+            return byteArray.toHexString("")
+        }
+
+        fun processMinor(byteArray: ByteArray) : String {
+            return byteArray.toHexString("")
+        }
+
+        fun processIBeaconTxPower(byteArray: ByteArray) : Int {
+            return byteArray[0].toInt()
+        }
 
     }
 }

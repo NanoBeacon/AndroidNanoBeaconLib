@@ -264,12 +264,10 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     private fun checkAdvMatch(bdAddr : String) : ParsedConfigData? {
         val cleanedbdAddr = bdAddr.replace(":", "").lowercase(Locale.getDefault())
         val configMatch = currentConfig?.advSetData?.firstOrNull {
-            Log.d("CONFIG", "$cleanedbdAddr ${it.bdAddr}")
             it.bdAddr == cleanedbdAddr }
         configMatch?.let { it ->
             val parsedConfigData = currentConfig
             parsedConfigData?.advSetData = arrayOf(it)
-            Log.d("CHECKADV", parsedConfigData.toString())
             return parsedConfigData
         }
         return null

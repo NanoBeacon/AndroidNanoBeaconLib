@@ -1,36 +1,28 @@
 package com.oncelabs.nanobeacon.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.ui.theme.*
+import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 
 
 @Composable
-fun CustomDetailViewCard(beacon: NanoBeaconInterface) {
+fun DetailedViewCard(beacon: NanoBeaconInterface) {
 
     val beaconData by beacon.beaconDataFlow.collectAsState()
-
     beaconData?.let {
 
         val data = formatToEntry(it)
@@ -57,56 +49,20 @@ fun CustomDetailViewCard(beacon: NanoBeaconInterface) {
                         )
                         Spacer(modifier = Modifier.weight(.05f))
                         Row {
-                            Text(text = "Custom", style = logCardTitleAccentFont)
+                            Text(text = beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format?.label ?: ConfigType.NOT_RECOGNIZED.label, style = logCardTitleAccentFont)
                         }
                         Spacer(modifier = Modifier.weight(1f))
                     }
-                    CustomDataLine(title = "Device Name", data = data.localName, maxLines = 1)
-                    CustomDataLine(title = "TX Power", data = data.txPower, maxLines = 1)
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Row(
-                        modifier = Modifier
-                            .wrapContentHeight()
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(text = "Manufacturer Data", style = logCardTitleAccentFont)
-                    }
-                    Column(
-                        Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Row() {
-                            beacon?.let { nanoBeaconInterface ->
-                                val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
-                                LazyColumn(Modifier.fillMaxWidth()) {
-                                    items(items = beaconData.toList(), itemContent = { item ->
-                                        Spacer(modifier = Modifier.height(14.dp))
-                                        CustomDataItem(
-                                            title = item.first.abrName,
-                                            data = item.second,
-                                            bigEndian = nanoBeaconInterface?.matchingConfig?.advSetData?.get(
-                                                0
-                                            )?.parsedPayloadItems?.manufacturerData?.get(item.first)?.bigEndian,
-                                            encrypted =nanoBeaconInterface?.matchingConfig?.advSetData?.get(
-                                                    0
-                                                    )?.parsedPayloadItems?.manufacturerData?.get(item.first)?.encrypted
-                                        )
-                                    })
-                                }
-                                Spacer(Modifier.height(14.dp))
-                            }
+
+                    when(beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format ?: ConfigType.NOT_RECOGNIZED) {
+                        ConfigType.CUSTOM -> { CustomTypeView(beacon = beacon, data = data) }
+                        ConfigType.EDDYSTONE -> { }
+                        ConfigType.IBEACON -> {
+                            IBeaconTypeView(beacon = beacon)
                         }
-
+                        ConfigType.NOT_RECOGNIZED -> {  }
                     }
 
-                    // TODO: Not used?
-//            Text("Sensor Trigger Source: ${advertisement.sensorTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-//            Text("GPIO Trigger Source: ${advertisement.gpioTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-//            Text("Data Encryption: ${advertisement.dataEncryption}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
 
             }
@@ -211,6 +167,80 @@ fun CustomDataItem(
     }
 }
 
+@Composable
+fun CustomTypeView(beacon: NanoBeaconInterface, data : BeaconDataEntry) {
+
+    val matchingConfig by beacon.matchingConfig.collectAsState()
+    CustomDataLine(title = "Device Name", data = data.localName, maxLines = 1)
+    CustomDataLine(title = "TX Power", data = data.txPower, maxLines = 1)
+    Spacer(modifier = Modifier.height(2.dp))
+    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
+    Spacer(modifier = Modifier.height(2.dp))
+    Row(
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = "Manufacturer Data", style = logCardTitleAccentFont)
+    }
+    Column(
+        Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row() {
+            beacon?.let { nanoBeaconInterface ->
+                val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
+                LazyColumn(Modifier.fillMaxWidth()) {
+                    items(items = beaconData.toList(), itemContent = { item ->
+                        Spacer(modifier = Modifier.height(14.dp))
+                        CustomDataItem(
+                            title = item.first.abrName,
+                            data = item.second,
+                            bigEndian = matchingConfig?.advSetData?.get(
+                                0
+                            )?.parsedPayloadItems?.manufacturerData?.get(item.first)?.bigEndian,
+                            encrypted = matchingConfig?.advSetData?.get(
+                                0
+                            )?.parsedPayloadItems?.manufacturerData?.get(item.first)?.encrypted
+                        )
+                    })
+                }
+                Spacer(Modifier.height(14.dp))
+            }
+        }
+
+    }
+}
+
+@Composable
+fun IBeaconTypeView(beacon: NanoBeaconInterface) {
+    Column(
+        Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row() {
+            beacon?.let { nanoBeaconInterface ->
+                val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
+                LazyColumn(Modifier.fillMaxWidth()) {
+                    items(items = beaconData.toList(), itemContent = { item ->
+                        Spacer(modifier = Modifier.height(14.dp))
+                        CustomDataLine(title = item.first.fullName, data = item.second, maxLines = 1)
+                    })
+                }
+                Spacer(Modifier.height(14.dp))
+            }
+        }
+
+    }
+}
+
+@Composable
+fun EddyStoneTypeView() {
+
+}
 
 @Preview
 @Preview(name = "NEXUS_7", device = Devices.NEXUS_7)

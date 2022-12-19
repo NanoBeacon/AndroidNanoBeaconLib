@@ -36,7 +36,8 @@ open class NanoBeacon(
     private val TIMESTAMP_COUNT = 10
     private var advTimestamps: MutableList<Long> = mutableListOf()
 
-    override var matchingConfig: ParsedConfigData? = null
+    private val _matchingConfig = MutableStateFlow<ParsedConfigData?>(null)
+    override val matchingConfig = _matchingConfig.asStateFlow()
 
     private val _manufacturerData = MutableStateFlow<Map<DynamicDataType, String>>(mapOf())
     override var manufacturerData = _manufacturerData.asStateFlow()
@@ -48,7 +49,7 @@ open class NanoBeacon(
         _manufacturerData.value = processDeviceData(beaconData)
     }
     fun loadConfig(parsedConfigData: ParsedConfigData?) {
-        matchingConfig = parsedConfigData
+        _matchingConfig.value = parsedConfigData
     }
 
     private fun updateAdvInterval(timestamp: Long) {
@@ -84,7 +85,7 @@ open class NanoBeacon(
 
     private fun processDeviceData(data: NanoBeaconData): Map<DynamicDataType, String> {
         val map: MutableMap<DynamicDataType, String> = mutableMapOf()
-        matchingConfig?.let {
+        matchingConfig.value?.let {
             val adv = it.advSetData[0]
             adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
                 var currentIndex = 0
@@ -99,13 +100,13 @@ open class NanoBeacon(
                             DynamicDataType.VCC_ITEM -> dataHolder =
                                 DynamicDataParsers.processVcc(
                                     trimmedData,
-                                    matchingConfig?.vccUnit ?: 0.0F,
+                                    matchingConfig.value?.vccUnit ?: 0.0F,
                                     dynamicDataFlag.bigEndian ?: false,
                                 ).toString()
                             DynamicDataType.TEMP_ITEM -> dataHolder =
                                 DynamicDataParsers.processInternalTemp(
                                     trimmedData,
-                                    matchingConfig?.tempUnit ?: 0.0F,
+                                    matchingConfig.value?.tempUnit ?: 0.0F,
                                     dynamicDataFlag.bigEndian ?: false,
                                 ).toString()
                             DynamicDataType.PULSE_ITEM -> dataHolder =
@@ -177,6 +178,19 @@ open class NanoBeacon(
                                     dynamicDataFlag.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.UTF8_ITEM -> TODO()
+                            DynamicDataType.UUID -> { dataHolder =
+                                DynamicDataParsers.processIBeaconUUID(trimmedData)
+                            }
+                            DynamicDataType.MAJOR -> { dataHolder =
+                                DynamicDataParsers.processMajor(trimmedData)
+                            }
+                            DynamicDataType.MINOR -> { dataHolder =
+                                DynamicDataParsers.processMinor(trimmedData)
+                            }
+                            DynamicDataType.TX_POWER -> { dataHolder =
+                                DynamicDataParsers.processIBeaconTxPower(trimmedData).toString()
+                            }
+                            DynamicDataType.IBEACON_ADDR -> { }
                         }
                         currentIndex = endIndex
                     } else {

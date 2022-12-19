@@ -19,8 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.oncelabs.nanobeacon.components.CustomDetailViewCard
 import com.oncelabs.nanobeacon.components.DataLine
+import com.oncelabs.nanobeacon.components.DetailedViewCard
 import com.oncelabs.nanobeacon.components.DetailedViewTopBar
 import com.oncelabs.nanobeacon.ui.theme.cardBackground
 import com.oncelabs.nanobeacon.ui.theme.cardTextFont
@@ -45,41 +45,8 @@ fun DetailViewModal(
             ) {
                 DetailedViewTopBar(title = "Detailed View") { onDismiss() }
                 Spacer(Modifier.height(7.dp))
-                CustomDetailViewCard(beacon = beacon)
-                /*
-                Column(
-                    modifier = Modifier
-                        .padding(15.dp)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Spacer(modifier = Modifier.weight(0.1f))
-                    Column(
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(0.8f),
-                        horizontalAlignment = Alignment.Start,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Spacer(Modifier.weight(0.15f))
-                        Row() {
-                            beacon?.let {
-                                val beaconData by it.manufacturerData.collectAsState()
-                                LazyColumn(Modifier.fillMaxSize()) {
-                                    items(items = beaconData.toList(), itemContent = { item ->
-                                        DataLine(title = item.first.abrName, data = item.second, maxLines = 1)
-                                    })
-                                }
+                DetailedViewCard(beacon = beacon)
 
-                            }
-                        }
-                        Spacer(Modifier.weight(0.13f))
-
-                    }
-
-                }
-*/
             }
         }
     }
