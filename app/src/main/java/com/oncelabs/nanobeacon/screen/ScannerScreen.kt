@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.*
+import com.oncelabs.nanobeacon.components.dialog.DetailViewModal
 import com.oncelabs.nanobeacon.enums.FilterInputType
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.enums.FilterType
@@ -52,8 +53,10 @@ fun ScannerScreen(
     val filtersDescription by viewModel.currentFiltersDescription.observeAsState(initial = "No filters")
     val scanEnabled by viewModel.scanningEnabled.observeAsState(initial = false)
     val discoveredBeacons by viewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
-    val savedConfigs by viewModel.savedConfigs.observeAsState()
+    val savedConfig by viewModel.savedConfig.observeAsState()
     var refreshing by remember { mutableStateOf(false) }
+    val currentDetailBeacon by viewModel.currentDetailBeacon.observeAsState()
+    val showDetailModal by viewModel.showDetailModal.observeAsState()
 
     fun refresh() = scope.launch {
         refreshing = true
@@ -71,13 +74,21 @@ fun ScannerScreen(
             listState = listState,
             filters = filters,
             filtersDescription = filtersDescription ?: "No filters",
-            savedConfigs = savedConfigs ?: listOf(),
+            savedConfig = savedConfig ?: null,
             onFilterChange = viewModel::onFilterChanged,
             onScanButtonClick = if (scanEnabled) viewModel::stopScanning else viewModel::startScanning,
             onRefreshButtonClick = viewModel::refresh,
-            openFilePickerManager = { viewModel.openFilePickerManager() }
+            openFilePickerManager = { viewModel.openFilePickerManager() },
+            setCurrentDetail = {
+                viewModel.setCurrentDetailData(it)
+                viewModel.setShowDetailModal(true)
+            },
         )
         PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
+        DetailViewModal(shouldShow = showDetailModal ?: false, beacon = currentDetailBeacon, onDismiss = {
+            viewModel.setShowDetailModal(false)
+            viewModel.setCurrentDetailData(null)
+        })
     }
 }
 
@@ -89,11 +100,12 @@ private fun ScannerContent(
     listState: LazyListState,
     filters: List<FilterOption>,
     filtersDescription: String,
-    savedConfigs: List<ConfigData>,
+    savedConfig : ConfigData?,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
     onRefreshButtonClick: () -> Unit,
-    openFilePickerManager: () -> Unit
+    openFilePickerManager: () -> Unit,
+    setCurrentDetail : (NanoBeaconInterface) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(true) }
@@ -172,7 +184,7 @@ private fun ScannerContent(
                     Row(Modifier.fillMaxWidth()) {
                         Spacer(Modifier.weight(0.025f))
                         Column(Modifier.weight(0.95f)) {
-                            LogAdvertisementCard(beacon = it)
+                            LogAdvertisementCard(beacon = it) { setCurrentDetail(it) }
                         }
                         Spacer(Modifier.weight(0.025f))
                     }
@@ -539,7 +551,7 @@ fun PreviewLogScreen() {
             listState = state,
             filters = listOf(),
             filtersDescription = "",
-            savedConfigs = listOf(),
+            savedConfig = null,
             onFilterChange = { _, _, _ ->
 
             },
@@ -551,7 +563,8 @@ fun PreviewLogScreen() {
             },
             openFilePickerManager = {
 
-            }
+            },
+            {}
         )
     }
 }

@@ -10,11 +10,14 @@ import androidx.lifecycle.viewModelScope
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.components.BeaconDataEntry
 import com.oncelabs.nanobeacon.manager.BeaconManager
+import com.oncelabs.nanobeacon.manager.ConfigDataManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterOption
 import com.oncelabs.nanobeacon.enums.FilterType
 import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
+import com.oncelabs.nanobeaconlib.model.NanoBeacon
+import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.util.*
@@ -26,24 +29,35 @@ import kotlin.concurrent.scheduleAtFixedRate
 class ScannerViewModel @Inject constructor(
     private val beaconManager: BeaconManager,
     application: Application,
-    private val filePickerManager : FilePickerManager
+    private val configDataManager: ConfigDataManager,
+    private val filePickerManager: FilePickerManager
 ): AndroidViewModel(application) {
 
     private val TAG = ScannerViewModel::class.simpleName
 
     private var filterTimer: TimerTask? = null
     private val _beaconDataEntries = MutableLiveData<List<BeaconDataEntry>>()
-    private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
-    private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
-    private val _scanningEnabled = MutableLiveData(true)
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
-    private val _savedConfigs = MutableLiveData<List<ConfigData>>(filePickerManager.savedConfigs.value)
+
+    private val _scanningEnabled = MutableLiveData(true)
     private val _currentFiltersDescription = MutableLiveData<String?>(null)
-    val savedConfigs : LiveData<List<ConfigData>> = _savedConfigs
-    val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
     val scanningEnabled: LiveData<Boolean> = _scanningEnabled
+
+    private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
     val filters: LiveData<List<FilterOption>> = _filters
     val currentFiltersDescription: LiveData<String?> = _currentFiltersDescription
+
+    private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
+    val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
+
+    private val _savedConfig = MutableLiveData<ConfigData>(configDataManager.savedConfig.value)
+    val savedConfig : LiveData<ConfigData> = _savedConfig
+
+    private val _showDetailModal = MutableLiveData<Boolean>(false)
+    val showDetailModal = _showDetailModal
+
+    private val _currentDetailBeacon = MutableLiveData<NanoBeaconInterface?>(null)
+    val currentDetailBeacon = _currentDetailBeacon
 
     init {
         addObservers()
@@ -61,6 +75,14 @@ class ScannerViewModel @Inject constructor(
 
     fun refresh(){
         beaconManager.refresh()
+    }
+
+    fun setCurrentDetailData(beacon : NanoBeaconInterface?) {
+        _currentDetailBeacon.value = beacon
+    }
+
+    fun setShowDetailModal(value : Boolean) {
+        _showDetailModal.value = value
     }
 
     private fun addObservers(){
@@ -87,8 +109,8 @@ class ScannerViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            filePickerManager.savedConfigs.collect {
-                _savedConfigs.postValue(it)
+            configDataManager.savedConfig.collect {
+                _savedConfig.postValue(it)
             }
         }
     }
@@ -131,7 +153,9 @@ class ScannerViewModel @Inject constructor(
                         }
                     }
                     FilterType.ONLY_SHOW_CONFIGURATION -> {
-                        Log.e(TAG, "${filter.filterType} not yet implemented")
+                        filteredList = filteredList.filter {
+                            it.matchingConfig != null
+                        }
                     }
                     FilterType.BY_TYPE -> {
                         Log.e(TAG, "${filter.filterType} not yet implemented")
@@ -149,7 +173,7 @@ class ScannerViewModel @Inject constructor(
                         }
                     }
                     FilterType.SORT_RSSI -> {
-                        filteredList = filteredList.sortedBy { it.beaconDataFlow.value?.rssi }
+                        filteredList = filteredList.sortedByDescending { it.beaconDataFlow.value?.rssi }
                     }
                 }
             }
@@ -179,6 +203,8 @@ class ScannerViewModel @Inject constructor(
             _currentFiltersDescription.value = filterDescriptions.joinToString(", ")
         }
     }
+
+
 
     fun openFilePickerManager() {
         filePickerManager.openFilePicker()

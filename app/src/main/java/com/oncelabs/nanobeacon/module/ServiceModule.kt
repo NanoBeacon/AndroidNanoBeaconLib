@@ -1,10 +1,7 @@
 package com.oncelabs.nanobeacon.module
 
 import androidx.compose.material.ExperimentalMaterialApi
-import com.oncelabs.nanobeacon.manager.BeaconManager
-import com.oncelabs.nanobeacon.manager.BeaconManagerImpl
-import com.oncelabs.nanobeacon.manager.FilePickerManager
-import com.oncelabs.nanobeacon.manager.FilePickerManagerImpl
+import com.oncelabs.nanobeacon.manager.*
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,5 +15,6 @@ abstract class ServiceModule {
     abstract fun provideBeaconManager(impl: BeaconManagerImpl): BeaconManager
     @Binds
     abstract fun provideFilePickerManager(impl : FilePickerManagerImpl) : FilePickerManager
-
+    @Binds
+    abstract fun provideConfigDataManager(impl : ConfigDataManagerImpl) : ConfigDataManager
 }

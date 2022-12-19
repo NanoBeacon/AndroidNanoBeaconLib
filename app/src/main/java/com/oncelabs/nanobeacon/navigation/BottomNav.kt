@@ -20,7 +20,8 @@ import com.oncelabs.nanobeacon.ui.theme.iconSelected
 fun BottomNav(navController: NavController) {
     val items = listOf(
         Screen.ScannerScreen,
-        Screen.LiveDataScreen
+        Screen.LiveDataScreen,
+        Screen.QrScanScreen
     )
 
     BottomNavigation(
@@ -38,8 +39,8 @@ fun BottomNav(navController: NavController) {
                     onClick = {
                         navController.navigate(item.route) {
                             navController.graph.startDestinationRoute?.let { screen_route ->
-                                popUpTo(screen_route) {
-                                    saveState = true
+                                popUpTo(0) {
+                                    //saveState = true
                                 }
                             }
                             launchSingleTop = true

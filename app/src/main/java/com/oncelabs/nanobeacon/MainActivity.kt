@@ -10,6 +10,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.app.ActivityCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.oncelabs.nanobeacon.manager.BeaconManager
+import com.oncelabs.nanobeacon.manager.ConfigDataManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.permission.PermissionType
 import com.oncelabs.nanobeacon.permission.RequestAllPermissions
@@ -26,6 +27,9 @@ import javax.inject.Inject
 @ExperimentalMaterialApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+  @Inject
+    lateinit var configDataManager: ConfigDataManager
 
    @Inject
    lateinit var filePickerManager : FilePickerManager

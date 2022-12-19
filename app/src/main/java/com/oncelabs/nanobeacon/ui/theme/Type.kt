@@ -14,11 +14,26 @@ val helveticaNeue = FontFamily(
     Font(R.font.helvetica_neue)
 )
 
+val cardTextFont = TextStyle(
+    color = Color.White,
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Medium,
+    fontSize = 20.sp
+)
+
+
 val logItemTitleFont = TextStyle(
     fontFamily = helveticaNeue,
     fontWeight = FontWeight.Light,
     fontSize = 14.sp,
     color = logItemTitleColor
+)
+
+val CustomItemSubFont = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Light,
+    fontSize = 12.sp,
+    color = Color.White
 )
 
 val logItemSeparatorFont = TextStyle(

@@ -29,6 +29,12 @@ enum class PermissionType(
         "This permission is required to scan for nearby devices.",
         31,
         false),
+    CAMERA(
+        Manifest.permission.CAMERA,
+        "Camera",
+        "This permission is required to scan qr codes for configurations",
+        31,
+        false),
     BLUETOOTH_CONNECT(
         Manifest.permission.BLUETOOTH_CONNECT,
         "Bluetooth Connect",

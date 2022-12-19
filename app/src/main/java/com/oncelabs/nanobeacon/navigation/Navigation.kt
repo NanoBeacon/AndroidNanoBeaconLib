@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.oncelabs.nanobeacon.screen.LiveDataScreen
+import com.oncelabs.nanobeacon.screen.QrScanScreen
 import com.oncelabs.nanobeacon.screen.ScannerScreen
 
 /**
@@ -21,6 +22,10 @@ fun Navigation(navController : NavHostController) {
 
         composable(route = Screen.LiveDataScreen.route) {
             LiveDataScreen()
+        }
+
+        composable(route = Screen.QrScanScreen.route) {
+            QrScanScreen()
         }
     }
 }

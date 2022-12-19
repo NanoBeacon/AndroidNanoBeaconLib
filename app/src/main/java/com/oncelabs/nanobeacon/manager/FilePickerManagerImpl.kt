@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.Intent
 import android.util.Log
 import android.webkit.MimeTypeMap
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.lifecycle.MutableLiveData
 import com.beust.klaxon.Klaxon
@@ -19,14 +20,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class FilePickerManagerImpl @Inject constructor() : FilePickerManager {
+class FilePickerManagerImpl @OptIn(ExperimentalMaterialApi::class)
+@Inject constructor(private val configDataManager: ConfigDataManager
+) : FilePickerManager {
 
     val PICK_CFG_FILE = 1
     private var activity : Activity? = null
 
-    private val _savedConfigs = MutableStateFlow<List<ConfigData>>(listOf())
-    override val savedConfigs: StateFlow<List<ConfigData>> = _savedConfigs.asStateFlow()
-
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onResultFromActivity(requestCode: Int, resultCode: Int, data: Intent?) {
         activity?.let {
             val cR: ContentResolver = it.contentResolver
@@ -46,10 +47,8 @@ class FilePickerManagerImpl @Inject constructor() : FilePickerManager {
                 Log.d("Filer", holder)
                 val json = Klaxon().parse<ConfigData>(holder)
                 Log.d("JSON", json.toString())
-                var listHolder = savedConfigs.value.toMutableList()
                 json?.let {
-                    listHolder.add(json)
-                    _savedConfigs.value = listHolder
+                    configDataManager.setConfig(json)
                 }
             }
         }
@@ -62,12 +61,12 @@ class FilePickerManagerImpl @Inject constructor() : FilePickerManager {
             // Optionally, specify a URI for the file that should appear in the
             // system file picker when it loads.
         }
-
         activity?.startActivityForResult(intent, PICK_CFG_FILE)
     }
 
     override fun createActivity(act : Activity) {
         activity?.let {} ?: run { activity = act }
     }
+
 
 }

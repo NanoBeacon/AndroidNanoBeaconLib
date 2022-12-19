@@ -23,7 +23,8 @@ import javax.inject.Singleton
 @ExperimentalMaterialApi
 @Singleton
 class BeaconManagerImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val configDataManager: ConfigDataManager
 ): BeaconManager {
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -88,6 +89,8 @@ class BeaconManagerImpl @Inject constructor(
                     if (nanoBeacon is ADXL367){
                         if (!_discoveredAdxlBeacons.value.contains(nanoBeacon)){
                             _discoveredAdxlBeacons.value += listOf(nanoBeacon)
+
+
                         }
                     }
                 }
