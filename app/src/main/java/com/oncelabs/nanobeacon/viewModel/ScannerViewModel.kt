@@ -173,7 +173,7 @@ class ScannerViewModel @Inject constructor(
                         }
                     }
                     FilterType.SORT_RSSI -> {
-                        filteredList = filteredList.sortedBy { it.beaconDataFlow.value?.rssi }
+                        filteredList = filteredList.sortedByDescending { it.beaconDataFlow.value?.rssi }
                     }
                 }
             }
