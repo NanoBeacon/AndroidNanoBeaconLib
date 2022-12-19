@@ -139,11 +139,11 @@ class ConfigDataManagerImpl
     private fun parseIBeaconManufacturerData(raw : String): Map<DynamicDataType, ParsedDynamicData>? {
         var result : MutableMap<DynamicDataType, ParsedDynamicData> = mutableMapOf()
         if (raw.length >= 50) {
-            result[DynamicDataType.IBEACON_ADDR] = ParsedDynamicData(len = 8, dynamicType = DynamicDataType.IBEACON_ADDR, bigEndian = false , encrypted = false)
-            result[DynamicDataType.UUID] = ParsedDynamicData(len = 32, dynamicType = DynamicDataType.UUID, bigEndian = false , encrypted = false)
-            result[DynamicDataType.MAJOR] = ParsedDynamicData(len = 4, dynamicType = DynamicDataType.MAJOR, bigEndian = false , encrypted = false)
-            result[DynamicDataType.MINOR] = ParsedDynamicData(len = 4, dynamicType = DynamicDataType.MINOR, bigEndian = false , encrypted = false)
-            result[DynamicDataType.TX_POWER] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.TX_POWER, bigEndian = false , encrypted = false)
+            result[DynamicDataType.IBEACON_ADDR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.IBEACON_ADDR, bigEndian = false , encrypted = false)
+            result[DynamicDataType.UUID] = ParsedDynamicData(len = 16, dynamicType = DynamicDataType.UUID, bigEndian = false , encrypted = false)
+            result[DynamicDataType.MAJOR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.MAJOR, bigEndian = false , encrypted = false)
+            result[DynamicDataType.MINOR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.MINOR, bigEndian = false , encrypted = false)
+            result[DynamicDataType.TX_POWER] = ParsedDynamicData(len = 1, dynamicType = DynamicDataType.TX_POWER, bigEndian = false , encrypted = false)
 
             return result
         }

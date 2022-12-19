@@ -222,11 +222,10 @@ fun IBeaconTypeView(beacon: NanoBeaconInterface) {
         verticalArrangement = Arrangement.Center
     ) {
         Row() {
-            beacon?.let { nanoBeaconInterface ->
+            beacon.let { nanoBeaconInterface ->
                 val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(items = beaconData.toList(), itemContent = { item ->
-                        Spacer(modifier = Modifier.height(14.dp))
                         CustomDataLine(title = item.first.fullName, data = item.second, maxLines = 1)
                     })
                 }

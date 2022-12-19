@@ -93,7 +93,6 @@ open class NanoBeacon(
                     val dynamicDataFlag = i.second
                     val endIndex = currentIndex + dynamicDataFlag.len
                     var dataHolder : String? = null
-
                     if (endIndex <= data.manufacturerData.size) {
                         val trimmedData = data.manufacturerData.copyOfRange(currentIndex, endIndex)
                         when (dynamicDataFlag.dynamicType) {

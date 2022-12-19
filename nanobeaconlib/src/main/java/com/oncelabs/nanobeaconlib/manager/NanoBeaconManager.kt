@@ -104,6 +104,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     override fun refresh() {
         stopScanning()
         leDeviceMap.clear()
+        startScanning()
     }
 
     fun on(event: NanoBeaconEvent) {
@@ -262,7 +263,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     }
 
     private fun checkAdvMatch(bdAddr : String) : ParsedConfigData? {
-        val cleanedbdAddr = bdAddr.replace(":", "").lowercase(Locale.getDefault())
+        val cleanedbdAddr = bdAddr.replace(":", "").lowercase()
         val configMatch = currentConfig?.advSetData?.firstOrNull {
             it.bdAddr == cleanedbdAddr }
         configMatch?.let { it ->
