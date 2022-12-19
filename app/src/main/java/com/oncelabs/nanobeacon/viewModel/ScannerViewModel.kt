@@ -13,8 +13,7 @@ import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.ConfigDataManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.FilterOption
-import com.oncelabs.nanobeacon.model.FilterType
-import com.oncelabs.nanobeaconlib.enums.DynamicDataType
+import com.oncelabs.nanobeacon.enums.FilterType
 import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
@@ -41,16 +40,18 @@ class ScannerViewModel @Inject constructor(
     private val _discoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
 
     private val _scanningEnabled = MutableLiveData(true)
+    private val _currentFiltersDescription = MutableLiveData<String?>(null)
     val scanningEnabled: LiveData<Boolean> = _scanningEnabled
 
     private val _filters = MutableLiveData(FilterOption.getDefaultOptions())
     val filters: LiveData<List<FilterOption>> = _filters
+    val currentFiltersDescription: LiveData<String?> = _currentFiltersDescription
 
     private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
 
-    private val _savedConfigs = MutableLiveData<ConfigData>(configDataManager.savedConfig.value)
-    val savedConfigs : LiveData<ConfigData> = _savedConfigs
+    private val _savedConfig = MutableLiveData<ConfigData>(configDataManager.savedConfig.value)
+    val savedConfig : LiveData<ConfigData> = _savedConfig
 
     private val _showDetailModal = MutableLiveData<Boolean>(false)
     val showDetailModal = _showDetailModal
@@ -109,7 +110,7 @@ class ScannerViewModel @Inject constructor(
 
         viewModelScope.launch {
             configDataManager.savedConfig.collect {
-                _savedConfigs.postValue(it)
+                _savedConfig.postValue(it)
             }
         }
     }
@@ -136,6 +137,11 @@ class ScannerViewModel @Inject constructor(
                             (it.beaconDataFlow.value?.bluetoothAddress)?.contains(filter.value as? String ?: "") ?: false
                         }
                     }
+                    FilterType.ADVANCED_SEARCH -> {
+                        filteredList = filteredList.filter {
+                            it.beaconDataFlow.value?.searchableString?.contains(filter.value as? String ?: "", ignoreCase = true) ?: false
+                        }
+                    }
                     FilterType.RSSI -> {
                         filteredList = filteredList.filter {
                             (it.beaconDataFlow.value?.rssi?.toFloat() ?: -127f) > (filter.value as? Float ?: 0f)
@@ -154,6 +160,21 @@ class ScannerViewModel @Inject constructor(
                     FilterType.BY_TYPE -> {
                         Log.e(TAG, "${filter.filterType} not yet implemented")
                     }
+                    FilterType.NAME -> {
+                        (filter.value as? String)?.let { value ->
+                            if (value.isNotEmpty()) {
+                                filteredList = filteredList.filter {
+                                    it.beaconDataFlow.value?.name?.contains(
+                                        value,
+                                        ignoreCase = true
+                                    ) == true
+                                }
+                            }
+                        }
+                    }
+                    FilterType.SORT_RSSI -> {
+                        filteredList = filteredList.sortedBy { it.beaconDataFlow.value?.rssi }
+                    }
                 }
             }
         }
@@ -171,6 +192,15 @@ class ScannerViewModel @Inject constructor(
             filterCopy?.get(index)?.enabled = enabled
             _filters.value = listOf()
             _filters.value = filterCopy
+        }
+
+        _filters.value?.mapNotNull { it.getDescription() }?.let { filterDescriptions ->
+            if(filterDescriptions.isEmpty()) {
+                _currentFiltersDescription.value = "No filters"
+                return
+            }
+
+            _currentFiltersDescription.value = filterDescriptions.joinToString(", ")
         }
     }
 

@@ -19,17 +19,17 @@ data class NanoBeaconData(
     var advInterval = scanResult.periodicAdvertisingInterval
     var connectable = scanResult.isConnectable
     var manufacturerData = parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).first
-    var manufacturerId =
+    var manufacturerId: String? =
         if (parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).second != 0){
             "%04X".format(parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).second.toShort())
         } else {
-            "Not Set"
+            null
         }
-    var company =
+    var company: String? =
         if (parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).second != 0){
             CompanyString(parseManufacturerData(scanResult.scanRecord?.manufacturerSpecificData).second)
         } else {
-            "Not Set"
+            null
         }
     var timeStamp = scanResult.timestampNanos
     val timeStampFormatted: String
@@ -39,12 +39,12 @@ data class NanoBeaconData(
             return SimpleDateFormat("HH:mm:ss.sss", Locale.US).format(rxDate)
         }
     var name = scanResult.scanRecord?.deviceName ?: ""
-    var flags = if (scanResult.scanRecord?.advertiseFlags == -1) "Not Set" else "%02X".format(scanResult.scanRecord?.advertiseFlags?.toByte())
+    var flags: String? = if (scanResult.scanRecord?.advertiseFlags == -1) null else "%02X".format(scanResult.scanRecord?.advertiseFlags?.toByte())
     var serviceUuids = scanResult.scanRecord?.serviceUuids
     var serviceData = scanResult.scanRecord?.serviceData
-    var transmitPowerObserved = if (scanResult.txPower == ScanResult.TX_POWER_NOT_PRESENT) "Not Set"  else scanResult.txPower
+    var transmitPowerObserved: Int? = if (scanResult.txPower == ScanResult.TX_POWER_NOT_PRESENT) null else scanResult.txPower
 
-    var txPowerClaimed = if (scanResult.scanRecord?.txPowerLevel == Integer.MIN_VALUE) "Not Set" else scanResult.scanRecord?.txPowerLevel
+    var txPowerClaimed: Int? = if (scanResult.scanRecord?.txPowerLevel == Integer.MIN_VALUE) null else scanResult.scanRecord?.txPowerLevel
     var rssi = scanResult.rssi
     var serviceSolicitationUuids = if (Build.VERSION.SDK_INT >= 29) scanResult.scanRecord?.serviceSolicitationUuids else null
     var estimatedAdvInterval = estAdvInterval

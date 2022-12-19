@@ -1,4 +1,4 @@
-package com.oncelabs.nanobeacon.model
+package com.oncelabs.nanobeacon.enums
 
 /**
  * Types of filter options
