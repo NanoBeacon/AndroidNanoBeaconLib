@@ -61,8 +61,8 @@ fun CustomDetailViewCard(beacon: NanoBeaconInterface) {
                         }
                         Spacer(modifier = Modifier.weight(1f))
                     }
-                    DataLine(title = "Device Name", data = data.localName, maxLines = 1)
-                    DataLine(title = "TX Power", data = data.txPower, maxLines = 1)
+                    CustomDataLine(title = "Device Name", data = data.localName, maxLines = 1)
+                    CustomDataLine(title = "TX Power", data = data.txPower, maxLines = 1)
                     Spacer(modifier = Modifier.height(2.dp))
                     Divider(thickness = 1.dp, color = logModalDoneButtonColor)
                     Spacer(modifier = Modifier.height(2.dp))
@@ -111,6 +111,67 @@ fun CustomDetailViewCard(beacon: NanoBeaconInterface) {
 
             }
             Spacer(Modifier.weight(0.025f))
+        }
+    }
+}
+
+@Composable
+fun CustomDataLine(
+    title: String,
+    data: String?,
+    maxLines: Int,
+    separateData: Boolean = false
+) {
+    // Hide unset properties
+    if(data.isNullOrEmpty()) {
+        return
+    }
+
+    if (!separateData || data.isEmpty()){
+        Row(modifier =
+        Modifier
+            .padding(bottom = 2.dp, top = 1.dp)
+        ) {
+            Text(
+                if (title.isNotEmpty()) "$title:  " else "",
+                style = logItemTitleFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                data.ifEmpty { "Not Set" },
+                style = logTextFont,
+                maxLines = maxLines,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    } else {
+        Column(modifier =
+        Modifier
+            //.padding(bottom = 1.dp, top = 1.dp)
+        ) {
+            Text(
+                if (title.isNotEmpty()) "$title:  " else "",
+                style = logItemTitleFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (data.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.padding(bottom = 2.dp),
+                    text = data,
+                    style = logTextFont,
+                    maxLines = maxLines,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                Text(
+                    "Not Set",
+                    style = logTextFont,
+                    maxLines = maxLines,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
