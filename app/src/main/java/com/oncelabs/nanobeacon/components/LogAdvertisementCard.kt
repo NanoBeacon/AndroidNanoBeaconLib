@@ -55,7 +55,7 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface, onDetailPressed : (NanoBea
 
     val beaconData by beacon.beaconDataFlow.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-    val configData by beacon.manufacturerData.collectAsState()
+    val configData by beacon.matchingConfig.collectAsState()
 
     beaconData?.let {
 
@@ -71,7 +71,7 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface, onDetailPressed : (NanoBea
                     isExpanded = !isExpanded
                 }
         ) {
-            if (configData.isNotEmpty()) {
+            if (configData != null) {
                 Row(
                     modifier = Modifier
                         .padding(top = 0.dp, bottom = if (isExpanded) 10.dp else 0.dp)

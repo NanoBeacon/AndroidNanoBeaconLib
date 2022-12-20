@@ -7,6 +7,7 @@ import com.oncelabs.nanobeacon.codable.Payload
 import com.oncelabs.nanobeacon.enum.ADType
 import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 import com.oncelabs.nanobeacon.extension.StringExtensions.Companion.decodeHex
+import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.model.ParsedAdvertisementData
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 import com.oncelabs.nanobeaconlib.model.ParsedDynamicData
@@ -40,7 +41,7 @@ class ConfigDataManagerImpl
         parseConfigData(configData)
     }
 
-    fun parseConfigData(configData: ConfigData) {
+    private fun parseConfigData(configData: ConfigData) {
 
         configData.advSet?.let {
             var parsedAdvertisements = mutableListOf<ParsedAdvertisementData>()
@@ -52,7 +53,7 @@ class ConfigDataManagerImpl
                     id = id,
                     bdAddr = bdAddr,
                     parsedPayloadItems = parsedPayload,
-                    ui_format = advData.ui_format
+                    ui_format = ConfigType.fromLabel(advData.ui_format)
                 )
                 parsedAdvertisements.add(parsedAdvertisementData)
             }
@@ -69,7 +70,7 @@ class ConfigDataManagerImpl
     }
 
     fun parsePayload(payloads: Array<Payload>?, type: String): ParsedPayload? {
-        var parsedPayload = ParsedPayload(null, null, null, null)
+        var parsedPayload = ParsedPayload(null, null, null)
 
         if (payloads.isNullOrEmpty()) {
             return null
@@ -82,7 +83,7 @@ class ConfigDataManagerImpl
                     ADType.MANUFACTURER_DATA -> {
                         payload.data?.let { data ->
                             if (type == "ibeacon") {
-                                parsedPayload.iBeaconAddr = parseIBeaconAddr(data)
+                                parsedPayload.manufacturerData = parseIBeaconManufacturerData(data)
                             }
                             if (type == "custom") {
                                 parsedPayload.manufacturerData = parseCustomManufacturerData(data)
@@ -135,13 +136,16 @@ class ConfigDataManagerImpl
         return null
     }
 
-    private fun parseIBeaconAddr(raw : String): String? {
-        var result = ""
-        if (raw.length >= 41) {
-            result = raw.substring(startIndex = 8, endIndex = 41)
-            if (result.isNotEmpty()) {
-                return result
-            }
+    private fun parseIBeaconManufacturerData(raw : String): Map<DynamicDataType, ParsedDynamicData>? {
+        var result : MutableMap<DynamicDataType, ParsedDynamicData> = mutableMapOf()
+        if (raw.length >= 50) {
+            result[DynamicDataType.IBEACON_ADDR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.IBEACON_ADDR, bigEndian = false , encrypted = false)
+            result[DynamicDataType.UUID] = ParsedDynamicData(len = 16, dynamicType = DynamicDataType.UUID, bigEndian = false , encrypted = false)
+            result[DynamicDataType.MAJOR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.MAJOR, bigEndian = false , encrypted = false)
+            result[DynamicDataType.MINOR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.MINOR, bigEndian = false , encrypted = false)
+            result[DynamicDataType.TX_POWER] = ParsedDynamicData(len = 1, dynamicType = DynamicDataType.TX_POWER, bigEndian = false , encrypted = false)
+
+            return result
         }
         return null
     }

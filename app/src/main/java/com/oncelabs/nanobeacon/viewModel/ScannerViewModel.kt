@@ -154,7 +154,7 @@ class ScannerViewModel @Inject constructor(
                     }
                     FilterType.ONLY_SHOW_CONFIGURATION -> {
                         filteredList = filteredList.filter {
-                            it.matchingConfig != null
+                            it.matchingConfig.value != null
                         }
                     }
                     FilterType.BY_TYPE -> {
@@ -199,12 +199,9 @@ class ScannerViewModel @Inject constructor(
                 _currentFiltersDescription.value = "No filters"
                 return
             }
-
             _currentFiltersDescription.value = filterDescriptions.joinToString(", ")
         }
     }
-
-
 
     fun openFilePickerManager() {
         filePickerManager.openFilePicker()

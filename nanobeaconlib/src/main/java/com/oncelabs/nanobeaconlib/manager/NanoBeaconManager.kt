@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
@@ -103,6 +104,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     override fun refresh() {
         stopScanning()
         leDeviceMap.clear()
+        startScanning()
     }
 
     fun on(event: NanoBeaconEvent) {
@@ -261,13 +263,16 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     }
 
     private fun checkAdvMatch(bdAddr : String) : ParsedConfigData? {
-        val cleanedbdAddr = bdAddr.replace(":", "")
+        val cleanedbdAddr = bdAddr.replace(":", "").lowercase()
 
-        val configMatch = currentConfig?.advSetData?.firstOrNull { it.bdAddr == cleanedbdAddr }
+        currentConfig?.advSetData?.forEach {
+            Log.d(TAG, "MATCH FOUND: ${it.bdAddr}")
+        }
 
-        configMatch?.let { it ->
-            val parsedConfigData = currentConfig
-            parsedConfigData?.advSetData = arrayOf(it)
+        currentConfig?.advSetData?.firstOrNull { it.bdAddr == cleanedbdAddr }?.also {
+            Log.d(TAG, "MATCH FOUND")
+            val parsedConfigData = currentConfig!!.copy()
+            parsedConfigData.advSetData = arrayOf(it)
             return parsedConfigData
         }
         return null
@@ -327,6 +332,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
                                 }
 
                                 leDeviceMap[deviceAddress] = nanoBeacon
+
                                 beaconScope.launch {
                                     newBeaconDataFlow.emit(beaconData)
                                     nanoBeacon?.let { nb ->

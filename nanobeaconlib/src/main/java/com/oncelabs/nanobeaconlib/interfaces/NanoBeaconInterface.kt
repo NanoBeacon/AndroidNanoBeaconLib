@@ -12,7 +12,7 @@ interface NanoBeaconInterface {
     val beaconDataFlow: StateFlow<NanoBeaconData?>
     val rssiFlow: StateFlow<Int?>
     val estimatedAdvIntervalFlow: StateFlow<Int?>
-    val matchingConfig : ParsedConfigData?
+    val matchingConfig : StateFlow<ParsedConfigData?>
     val address:String?
     val manufacturerData : StateFlow<Map<DynamicDataType, String>>
 }

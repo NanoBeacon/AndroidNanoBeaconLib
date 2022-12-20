@@ -1,5 +1,6 @@
 package com.oncelabs.nanobeaconlib.model
 
+import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 
 
@@ -12,7 +13,7 @@ data class ParsedConfigData (
 data class ParsedAdvertisementData (
     var id : Int?,
     var bdAddr : String?,
-    var ui_format : String,
+    var ui_format : ConfigType,
     var parsedPayloadItems : ParsedPayload?,
 )
 
@@ -20,7 +21,6 @@ data class ParsedPayload (
     var deviceName : String? = null,
     var txPower : String? = null,
     var manufacturerData : Map<DynamicDataType, ParsedDynamicData>?,
-    var iBeaconAddr : String?
 )
 
 data class ParsedDynamicData (
