@@ -196,8 +196,8 @@ fun CustomTypeView(beacon: NanoBeaconInterface, data : BeaconDataEntry) {
                     items(items = beaconData.toList(), itemContent = { item ->
                         Spacer(modifier = Modifier.height(14.dp))
                         CustomDataItem(
-                            title = item.first.abrName,
-                            data = item.second,
+                            title = item.first.fullName,
+                            data = item.second + item.first.units,
                             bigEndian = matchingConfig?.advSetData?.get(
                                 0
                             )?.parsedPayloadItems?.manufacturerData?.get(item.first)?.bigEndian,

@@ -264,11 +264,15 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     private fun checkAdvMatch(bdAddr : String) : ParsedConfigData? {
         val cleanedbdAddr = bdAddr.replace(":", "").lowercase()
-        val configMatch = currentConfig?.advSetData?.firstOrNull {
-            it.bdAddr == cleanedbdAddr }
-        configMatch?.let { it ->
-            val parsedConfigData = currentConfig
-            parsedConfigData?.advSetData = arrayOf(it)
+
+        currentConfig?.advSetData?.forEach {
+            Log.d(TAG, "MATCH FOUND: ${it.bdAddr}")
+        }
+
+        currentConfig?.advSetData?.firstOrNull { it.bdAddr == cleanedbdAddr }?.also {
+            Log.d(TAG, "MATCH FOUND")
+            val parsedConfigData = currentConfig!!.copy()
+            parsedConfigData.advSetData = arrayOf(it)
             return parsedConfigData
         }
         return null
@@ -328,6 +332,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
                                 }
 
                                 leDeviceMap[deviceAddress] = nanoBeacon
+
                                 beaconScope.launch {
                                     newBeaconDataFlow.emit(beaconData)
                                     nanoBeacon?.let { nb ->

@@ -98,7 +98,7 @@ class DynamicDataParsers {
             return base
         }
 
-        fun processTimeStamp(byteArray: ByteArray, bigEndian : Boolean) : Int? {
+        fun processTimeStamp(byteArray: ByteArray, bigEndian : Boolean, multiplier: Int = 1) : Int? {
             var base : Int? = null
             val byteOrder = if (bigEndian) {
                 ByteOrder.BIG_ENDIAN
@@ -111,7 +111,7 @@ class DynamicDataParsers {
                 3 -> base = ByteBuffer.wrap(byteArrayOf(0x00) + byteArray).order(byteOrder).int
                 4 -> base = ByteBuffer.wrap(byteArray).order(byteOrder).int
             }
-            return base
+            return base?.times(multiplier)
         }
 
         fun processAdv(byteArray: ByteArray, bigEndian : Boolean) : Int? {
@@ -152,8 +152,8 @@ class DynamicDataParsers {
         }
 
         fun processBluetoothDeviceAddress(byteArray: ByteArray, bigEndian : Boolean) : String? {
-            val hexString = byteArray.toHexString("")
-            return if(bigEndian) { hexString.reversed()} else { hexString }
+            val hexString = byteArray.toHexString(":")
+            return if(bigEndian) { byteArray.reversed().toByteArray().toHexString(":")} else { hexString }
         }
 
         fun processIBeaconUUID(byteArray: ByteArray) : String {
