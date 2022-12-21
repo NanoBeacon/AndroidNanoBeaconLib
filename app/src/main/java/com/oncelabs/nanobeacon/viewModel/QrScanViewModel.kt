@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.ContentValues
 import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -19,6 +20,8 @@ import com.oncelabs.nanobeacon.manager.ConfigDataManagerImpl
 import com.oncelabs.nanobeacon.manager.FilePickerManager
 import com.oncelabs.nanobeacon.model.ADXL367Data
 import com.oncelabs.nanobeaconlib.enums.BleState
+import com.oncelabs.nanobeaconlib.enums.ScanState
+import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -32,21 +35,32 @@ import javax.inject.Inject
 @HiltViewModel
 class QrScanViewModel @Inject constructor(
     application: Application,
-    private val configDataManager : ConfigDataManager
+    private val configDataManager : ConfigDataManager,
     ): AndroidViewModel(application) {
 
     var pendingQr: String? = null
 
-    private val _showModal : MutableLiveData<Boolean> = MutableLiveData(false)
-    val showModal : LiveData<Boolean> = _showModal
+    private val _showQrScanner : MutableLiveData<Boolean> = MutableLiveData(
+        configDataManager.parsedConfig.value == null
+    )
+    val showQrScanner : LiveData<Boolean> = _showQrScanner
 
-    private val _stagedConfig : MutableLiveData<ConfigData?> = MutableLiveData(null)
-    val stagedConfig : LiveData<ConfigData?> = _stagedConfig
+    private val _currentConfig : MutableLiveData<ParsedConfigData?> = MutableLiveData(configDataManager.parsedConfig.value)
+    val currentConfig : LiveData<ParsedConfigData?> = _currentConfig
 
+    init {
+        observeFields()
+    }
 
+    fun observeFields() {
+        viewModelScope.launch {
+            configDataManager.parsedConfig.collect {
+                _currentConfig.value = it
+            }
+        }
+    }
 
     fun submitQrConfig(rawValue : String) {
-
         if (pendingQr != rawValue) {
             pendingQr = rawValue
             try {
@@ -54,10 +68,11 @@ class QrScanViewModel @Inject constructor(
                 val decoded = Base64.getDecoder().decode(rawValue).gzipDecompress()
                 Log.d("JSON", rawValue)
                 Log.d("JSON", decoded.toString())
-                _showModal.postValue(true)
                 val parsedData = Klaxon().parse<ConfigData>(decoded)
                 parsedData?.let {
-                    _stagedConfig.value = it
+                    _showQrScanner.value = false
+                    pendingQr = null
+                    configDataManager.setConfig(it)
                 } ?: run {
                     pendingQr = null
                 }
@@ -68,18 +83,8 @@ class QrScanViewModel @Inject constructor(
         }
     }
 
-    fun declineConfig() {
-        _showModal.value = false
-        pendingQr = null
-        _stagedConfig.value = null
+    fun openScanner() {
+        _showQrScanner.value = true
     }
 
-    fun confirmConfig() {
-        stagedConfig.value?.let {
-            configDataManager.setConfig(it)
-        }
-        pendingQr = null
-        _stagedConfig.value = null
-        _showModal.value = false
-    }
 }

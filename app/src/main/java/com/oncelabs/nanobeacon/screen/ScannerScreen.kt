@@ -53,7 +53,6 @@ fun ScannerScreen(
     val filtersDescription by viewModel.currentFiltersDescription.observeAsState(initial = "No filters")
     val scanEnabled by viewModel.scanningEnabled.observeAsState(initial = false)
     val discoveredBeacons by viewModel.filteredDiscoveredBeacons.observeAsState(initial = listOf())
-    val savedConfig by viewModel.savedConfig.observeAsState()
     var refreshing by remember { mutableStateOf(false) }
     val currentDetailBeacon by viewModel.currentDetailBeacon.observeAsState()
     val showDetailModal by viewModel.showDetailModal.observeAsState()
@@ -74,7 +73,6 @@ fun ScannerScreen(
             listState = listState,
             filters = filters,
             filtersDescription = filtersDescription ?: "No filters",
-            savedConfig = savedConfig ?: null,
             onFilterChange = viewModel::onFilterChanged,
             onScanButtonClick = if (scanEnabled) viewModel::stopScanning else viewModel::startScanning,
             onRefreshButtonClick = viewModel::refresh,
@@ -100,7 +98,6 @@ private fun ScannerContent(
     listState: LazyListState,
     filters: List<FilterOption>,
     filtersDescription: String,
-    savedConfig : ConfigData?,
     onFilterChange: (FilterType, Any?, Boolean) -> Unit,
     onScanButtonClick: () -> Unit,
     onRefreshButtonClick: () -> Unit,
@@ -551,7 +548,6 @@ fun PreviewLogScreen() {
             listState = state,
             filters = listOf(),
             filtersDescription = "",
-            savedConfig = null,
             onFilterChange = { _, _, _ ->
 
             },
