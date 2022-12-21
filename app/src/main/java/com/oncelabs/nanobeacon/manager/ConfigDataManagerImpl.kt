@@ -97,7 +97,7 @@ class ConfigDataManagerImpl
                     }
                     ADType.TX_POWER -> {
                         payload.data?.let { data ->
-                            parsedPayload.txPower = data.decodeHex()
+                            parsedPayload.txPower = data
                         }
                     }
                     ADType.DEVICE_NAME -> {

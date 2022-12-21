@@ -41,7 +41,7 @@ class QrScanViewModel @Inject constructor(
     var pendingQr: String? = null
 
     private val _showQrScanner : MutableLiveData<Boolean> = MutableLiveData(
-        configDataManager.parsedConfig.value == null
+        false
     )
     val showQrScanner : LiveData<Boolean> = _showQrScanner
 
