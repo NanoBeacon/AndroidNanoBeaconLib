@@ -3,10 +3,11 @@ package com.oncelabs.nanobeaconlib.enums
 enum class DynamicDataType(
     val fullName: String,
     val abrName: String,
+    val units: String = ""
 ) {
 
-    VCC_ITEM("VCC", "VCC"),
-    TEMP_ITEM("Internal Temperature", "TEMP"),
+    VCC_ITEM("VCC", "VCC", units = " V"),
+    TEMP_ITEM("Internal Temperature", "TEMP", units = " C"),
     PULSE_ITEM("1-Wire Count", "1-WIRE"),
     GPIO_ITEM("GPIO Status", "GPIO"),
     AON_GPIO_ITEM("AON GPIO Status", "AON-GPIO"),
@@ -19,8 +20,8 @@ enum class DynamicDataType(
     REG2_ITEM("I2C Slave #2 Read Data", "I2C2R"),
     REG3_ITEM("I2C Slave #3 Read Data", "I2C3R"),
     QDEC_ITEM("Quadrature Decode Value", "QDEC"),
-    TS0_ITEM("Time Stamp 0", "TS0"),
-    TS1_ITEM("Time Stamp 1", "TS1"),
+    TS0_ITEM("Time Stamp 0", "TS0", units = " milliseconds"),
+    TS1_ITEM("Time Stamp 1", "TS1", units = " seconds"),
     ADVCNT_ITEM("ADV Count", "ADVCNT"),
     REG_ITEM("Register Read Data", "REG"),
     RANDOM_ITEM("Random Number", "RANDOM"),
@@ -34,7 +35,7 @@ enum class DynamicDataType(
     UUID("UUID", "UUID"),
     MAJOR("Major", "Major"),
     MINOR("Minor", "Minor"),
-    TX_POWER("TX Power", "TX Power"),
+    TX_POWER("TX Power", "TX Power", units = "dBm"),
     IBEACON_ADDR("IBeacon Address", "IBeacon Addr");
 
     companion object {

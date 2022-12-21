@@ -140,7 +140,8 @@ open class NanoBeacon(
                             DynamicDataType.TS0_ITEM -> dataHolder =
                                 DynamicDataParsers.processTimeStamp(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    dynamicDataFlag.bigEndian ?: false,
+                                    multiplier = 100
                                 ).toString()
                             DynamicDataType.TS1_ITEM -> dataHolder =
                                 DynamicDataParsers.processTimeStamp(

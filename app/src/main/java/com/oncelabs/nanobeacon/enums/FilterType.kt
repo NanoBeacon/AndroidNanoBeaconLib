@@ -30,7 +30,7 @@ enum class FilterType {
 
     fun getPlaceholderName(): String {
         return when(this) {
-            ADDRESS -> "Filter by address"
+            ADDRESS -> "Filter by address XX:XX:XX:XX:XX:XX"
             RSSI -> ""
             HIDE_UNNAMED -> ""
             ONLY_SHOW_CONFIGURATION -> ""

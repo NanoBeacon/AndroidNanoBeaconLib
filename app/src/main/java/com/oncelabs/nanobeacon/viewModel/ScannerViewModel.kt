@@ -194,12 +194,9 @@ class ScannerViewModel @Inject constructor(
                 _currentFiltersDescription.value = "No filters"
                 return
             }
-
             _currentFiltersDescription.value = filterDescriptions.joinToString(", ")
         }
     }
-
-
 
     fun openFilePickerManager() {
         filePickerManager.openFilePicker()
