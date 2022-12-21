@@ -39,7 +39,7 @@ open class NanoBeacon(
     private val _matchingConfig = MutableStateFlow<ParsedConfigData?>(null)
     override val matchingConfig = _matchingConfig.asStateFlow()
 
-    private val _manufacturerData = MutableStateFlow<Map<DynamicDataType, String>>(mapOf())
+    private val _manufacturerData = MutableStateFlow<List<ProcessedData>>(listOf())
     override var manufacturerData = _manufacturerData.asStateFlow()
 
     override fun newBeaconData(beaconData: NanoBeaconData) {
@@ -48,6 +48,7 @@ open class NanoBeacon(
         updateAdvInterval(beaconData.timeStamp)
         _manufacturerData.value = processDeviceData(beaconData)
     }
+
     fun loadConfig(parsedConfigData: ParsedConfigData?) {
         _matchingConfig.value = parsedConfigData
     }
@@ -83,35 +84,34 @@ open class NanoBeacon(
         }
     }
 
-    private fun processDeviceData(data: NanoBeaconData): Map<DynamicDataType, String> {
-        val map: MutableMap<DynamicDataType, String> = mutableMapOf()
+    private fun processDeviceData(data: NanoBeaconData): List<ProcessedData> {
+        val list: MutableList<ProcessedData> = mutableListOf()
         matchingConfig.value?.let {
             val adv = it.advSetData[0]
             adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
                 var currentIndex = 0
                 for (i in manufacturerDataFlags.toList()) {
-                    val dynamicDataFlag = i.second
-                    val endIndex = currentIndex + dynamicDataFlag.len
-                    var dataHolder : String? = null
+                    val endIndex = currentIndex + i.len
+                    var dataHolder: String? = null
                     if (endIndex <= data.manufacturerData.size) {
                         val trimmedData = data.manufacturerData.copyOfRange(currentIndex, endIndex)
-                        when (dynamicDataFlag.dynamicType) {
+                        when (i.dynamicType) {
                             DynamicDataType.VCC_ITEM -> dataHolder =
                                 DynamicDataParsers.processVcc(
                                     trimmedData,
                                     matchingConfig.value?.vccUnit ?: 0.0F,
-                                    dynamicDataFlag.bigEndian ?: false,
+                                    i.bigEndian ?: false,
                                 ).toString()
                             DynamicDataType.TEMP_ITEM -> dataHolder =
                                 DynamicDataParsers.processInternalTemp(
                                     trimmedData,
                                     matchingConfig.value?.tempUnit ?: 0.0F,
-                                    dynamicDataFlag.bigEndian ?: false,
+                                    i.bigEndian ?: false,
                                 ).toString()
                             DynamicDataType.PULSE_ITEM -> dataHolder =
                                 DynamicDataParsers.processWireCount(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.GPIO_ITEM -> dataHolder =
                                 DynamicDataParsers.processGpioStatus(trimmedData).toString()
@@ -119,17 +119,17 @@ open class NanoBeacon(
                             DynamicDataType.EDGE_CNT_ITEM -> dataHolder =
                                 DynamicDataParsers.processGpioEdgeCount(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.ADC_CH0_ITEM -> dataHolder =
                                 DynamicDataParsers.processCh01(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.ADC_CH1_ITEM -> dataHolder =
                                 DynamicDataParsers.processCh01(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.ADC_CH2_ITEM -> TODO()
                             DynamicDataType.ADC_CH3_ITEM -> TODO()
@@ -140,29 +140,29 @@ open class NanoBeacon(
                             DynamicDataType.TS0_ITEM -> dataHolder =
                                 DynamicDataParsers.processTimeStamp(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false,
+                                    i.bigEndian ?: false,
                                     multiplier = 100
                                 ).toString()
                             DynamicDataType.TS1_ITEM -> dataHolder =
                                 DynamicDataParsers.processTimeStamp(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.ADVCNT_ITEM -> dataHolder =
                                 DynamicDataParsers.processAdv(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.REG_ITEM -> TODO()
                             DynamicDataType.RANDOM_ITEM -> dataHolder =
                                 DynamicDataParsers.processRandomNumber(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.STATIC_RANDOM_ITEM -> dataHolder =
                                 DynamicDataParsers.processRandomNumber(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.ENCRYPT_ITEM -> TODO()
                             DynamicDataType.SALT_ITEM -> TODO()
@@ -170,39 +170,50 @@ open class NanoBeacon(
                             DynamicDataType.CUSTOM_PRODUCT_ID_ITEM -> dataHolder =
                                 DynamicDataParsers.processCustomerProductID(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.BLUETOOTH_DEVICE_ADDRESS_ITEM -> dataHolder =
                                 DynamicDataParsers.processBluetoothDeviceAddress(
                                     trimmedData,
-                                    dynamicDataFlag.bigEndian ?: false
+                                    i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.UTF8_ITEM -> TODO()
-                            DynamicDataType.UUID -> { dataHolder =
-                                DynamicDataParsers.processIBeaconUUID(trimmedData)
+                            DynamicDataType.UUID -> {
+                                dataHolder =
+                                    DynamicDataParsers.processIBeaconUUID(trimmedData)
                             }
-                            DynamicDataType.MAJOR -> { dataHolder =
-                                DynamicDataParsers.processMajor(trimmedData)
+                            DynamicDataType.MAJOR -> {
+                                dataHolder =
+                                    DynamicDataParsers.processMajor(trimmedData)
                             }
-                            DynamicDataType.MINOR -> { dataHolder =
-                                DynamicDataParsers.processMinor(trimmedData)
+                            DynamicDataType.MINOR -> {
+                                dataHolder =
+                                    DynamicDataParsers.processMinor(trimmedData)
                             }
-                            DynamicDataType.TX_POWER -> { dataHolder =
-                                DynamicDataParsers.processIBeaconTxPower(trimmedData).toString()
+                            DynamicDataType.TX_POWER -> {
+                                dataHolder =
+                                    DynamicDataParsers.processIBeaconTxPower(trimmedData).toString()
                             }
-                            DynamicDataType.IBEACON_ADDR -> { }
+                            DynamicDataType.IBEACON_ADDR -> {}
                         }
                         currentIndex = endIndex
                     } else {
                         break
                     }
                     dataHolder?.let { processedData ->
-                        map[dynamicDataFlag.dynamicType] = processedData
+                        list.add(
+                            ProcessedData(
+                                dynamicDataType = i.dynamicType,
+                                processedData = processedData,
+                                bigEndian = i.bigEndian,
+                                encrypted = i.encrypted
+                            )
+                        )
                     }
                 }
             }
 
         }
-        return map
+        return list.toList()
     }
 }
