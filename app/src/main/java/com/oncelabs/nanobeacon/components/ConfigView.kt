@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.ui.theme.*
+import com.oncelabs.nanobeaconlib.enums.ChannelMode
 import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 
@@ -74,11 +75,11 @@ fun ConfigView(parsedConfigData: ParsedConfigData?) {
                                 }
                             }
                             for (i in clearedConfigData.advSetData.indices) {
-                                var adv = clearedConfigData.advSetData[i]
+                                val adv = clearedConfigData.advSetData[i]
                                 SectionTitle(title = "Advertising Set #${i + 1}")
                                 Row(Modifier.fillMaxWidth()) {
                                     Spacer(Modifier.weight(0.05f))
-                                    Column(Modifier.weight(0.95f)) {
+                                    Column(Modifier.weight(0.90f)) {
 
                                         AdvDataItem(
                                                 title = "UI Format",
@@ -100,9 +101,14 @@ fun ConfigView(parsedConfigData: ParsedConfigData?) {
                                             AdvDataItem(
                                                 title = "Bluetooth Address",
                                                 data = it,
-                                                prefix = "0x"
+                                                prefix = ""
                                             )
                                         }
+
+                                        AdvDataItem(
+                                            title = "Channels",
+                                            data = ChannelMode.values()[adv.chCtrl].channels
+                                        )
 
                                         adv.parsedPayloadItems?.let { parsedPayload ->
                                             parsedPayload.deviceName?.let {
@@ -113,6 +119,7 @@ fun ConfigView(parsedConfigData: ParsedConfigData?) {
                                                 AdvDataItem(title = "Tx Power", data = it)
                                             }
                                             parsedPayload.manufacturerData?.let { manufacturerData ->
+                                                SubSectionTitle(title = "Manufacturer Data Fields")
                                                 for (dataItem in manufacturerData.toList()) {
                                                     if (adv.ui_format == ConfigType.IBEACON) {
                                                         AdvDataItem(
@@ -120,11 +127,12 @@ fun ConfigView(parsedConfigData: ParsedConfigData?) {
                                                             data = dataItem.second.rawData
                                                         )
                                                     } else {
-                                                        AdvDataItem(title = dataItem.first.fullName,
+                                                        AdvDataEntryItem(title = dataItem.first.fullName,
                                                             bigEndian = dataItem.second.bigEndian
                                                                 ?: false,
                                                             encrypted = dataItem.second.encrypted
-                                                                ?: false
+                                                                ?: false,
+                                                            prefix = " - "
                                                         )
                                                     }
                                                 }
@@ -132,11 +140,11 @@ fun ConfigView(parsedConfigData: ParsedConfigData?) {
                                         }
                                     }
                                 }
+                                Spacer(modifier = Modifier.height(14.dp))
                             }
                         }
-
                     }
-                    Spacer(Modifier.weight(0.025f))
+                    Spacer(Modifier.weight(0.05f))
                 }
             }
 
@@ -180,7 +188,7 @@ fun AdvDataItem(
         Text(
             modifier = Modifier.padding(bottom = 2.dp),
             text = title,
-            style = logItemTitleFont,
+            style = configTitleFont,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -206,9 +214,54 @@ fun AdvDataItem(
     Spacer(modifier = Modifier.height(14.dp))
 }
 
+@Composable
+fun AdvDataEntryItem(
+    title: String,
+    data: String? = null,
+    unit: String? = null,
+    bigEndian: Boolean = false,
+    encrypted: Boolean = false,
+    prefix: String? = null
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            modifier = Modifier.padding(bottom = 0.dp, start = 0.dp),
+            text = (prefix ?: "") + title,
+            style = configTitleFont,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (!data.isNullOrBlank()) {
+            Text(
+                modifier = Modifier.padding(bottom = 2.dp),
+                text = "${prefix ?: ""}$data ${unit ?: ""}",
+                style = logTextFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Row(Modifier.fillMaxWidth()) {
+            if (bigEndian) {
+                Text("big-endian", style = CustomItemSubFont)
+                Spacer(Modifier.width(5.dp))
+            }
+            if (encrypted) {
+                Text("encrypted", style = CustomItemSubFont)
+            }
+        }
+    }
+    Spacer(modifier = Modifier.height(4.dp))
+}
+
 
 @Composable
 fun SectionTitle(title: String) {
-    Text(text = title, style = logCardTitleAccentFont)
+    Text(text = title, style = configurationSectionTitle)
     Spacer(modifier = Modifier.height(14.dp))
+}
+
+@Composable
+fun SubSectionTitle(title: String) {
+    Text(text = title, style = configurationSubSectionTitle)
+    Spacer(modifier = Modifier.height(7.dp))
 }

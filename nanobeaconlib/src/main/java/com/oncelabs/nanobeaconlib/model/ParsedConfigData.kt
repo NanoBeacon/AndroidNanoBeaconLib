@@ -22,7 +22,8 @@ data class ParsedAdvertisementData (
     var ui_format : ConfigType,
     var parsedPayloadItems : ParsedPayload?,
     var interval : Int?,
-    var advModeTrigEn : AdvMode?
+    var advModeTrigEn : AdvMode?,
+    var chCtrl: Int
 )
 
 data class ParsedPayload (

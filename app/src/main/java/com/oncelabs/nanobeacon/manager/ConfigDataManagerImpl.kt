@@ -47,6 +47,7 @@ class ConfigDataManagerImpl
                 val parsedPayload = parsePayload(advData.payload, advData.ui_format)
                 val id = advData.id
                 val bdAddr = advData.bdAddr
+                val chCtrl = advData
                 val parsedAdvertisementData = ParsedAdvertisementData(
                     id = id,
                     bdAddr = bdAddr,
@@ -54,6 +55,7 @@ class ConfigDataManagerImpl
                     ui_format = ConfigType.fromLabel(advData.ui_format),
                     interval = advData.interval,
                     advModeTrigEn = AdvMode.fromMode(advData.advModeTrigEn),
+                    chCtrl = advData.chCtrl
                 )
                 parsedAdvertisements.add(parsedAdvertisementData)
             }
@@ -75,7 +77,7 @@ class ConfigDataManagerImpl
     }
 
     fun parsePayload(payloads: Array<Payload>?, type: String): ParsedPayload? {
-        var parsedPayload = ParsedPayload(null, null, null)
+        val parsedPayload = ParsedPayload(null, null, null)
 
         if (payloads.isNullOrEmpty()) {
             return null
@@ -97,7 +99,8 @@ class ConfigDataManagerImpl
                     }
                     ADType.TX_POWER -> {
                         payload.data?.let { data ->
-                            parsedPayload.txPower = data.decodeHex()
+                            val dbm: String = data
+                            parsedPayload.txPower = "${dbm.toInt()}"
                         }
                     }
                     ADType.DEVICE_NAME -> {

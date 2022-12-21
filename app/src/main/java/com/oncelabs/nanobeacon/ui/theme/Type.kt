@@ -28,6 +28,12 @@ val logItemTitleFont = TextStyle(
     fontSize = 14.sp,
     color = logItemTitleColor
 )
+val configTitleFont = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Light,
+    fontSize = 16.sp,
+    color = logItemTitleColor
+)
 
 val CustomItemSubFont = TextStyle(
     fontFamily = helveticaNeue,
@@ -109,6 +115,20 @@ val logCardTitleFont = TextStyle(
 val logCardTitleAccentFont = TextStyle(
     fontFamily = helveticaNeue,
     fontWeight = FontWeight.Light,
+    fontSize = 18.sp,
+    color = logItemTitleColor
+)
+
+val configurationSectionTitle = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Normal,
+    fontSize = 22.sp,
+    color = logItemTitleColor
+)
+
+val configurationSubSectionTitle = TextStyle(
+    fontFamily = helveticaNeue,
+    fontWeight = FontWeight.Normal,
     fontSize = 18.sp,
     color = logItemTitleColor
 )

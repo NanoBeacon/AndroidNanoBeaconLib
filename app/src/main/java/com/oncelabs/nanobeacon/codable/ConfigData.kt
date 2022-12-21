@@ -20,7 +20,8 @@ data class AdvSetData (
     val postTrigCtrlMode : Int? = null,
     val postTrigNumAdv : Int? = null,
     val trigCheckPeriod : Int? = null,
-    val ui_format : String
+    val ui_format : String,
+    val chCtrl: Int
 )
 
 data class TxPower (
