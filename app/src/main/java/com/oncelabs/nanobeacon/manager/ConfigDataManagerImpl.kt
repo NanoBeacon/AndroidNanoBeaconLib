@@ -115,11 +115,11 @@ class ConfigDataManagerImpl
         return parsedPayload
     }
 
-    private fun parseCustomManufacturerData(raw: String): Map<DynamicDataType, ParsedDynamicData>? {
+    private fun parseCustomManufacturerData(raw: String): List<ParsedDynamicData>? {
         var splitRaw: List<String> = raw.split("<").toList()
         splitRaw = splitRaw.drop(1)
 
-        var parsedMap: MutableMap<DynamicDataType, ParsedDynamicData> = mutableMapOf()
+        var parsedMap: MutableList<ParsedDynamicData> = mutableListOf()
 
         for (dynamicRaw in splitRaw) {
             val droppedEnd = dynamicRaw.dropLast(1)
@@ -135,7 +135,7 @@ class ConfigDataManagerImpl
             val encrypted = splitData[2].toInt() == 1
             dynamicDataType?.let {
                 val data = ParsedDynamicData(len, dynamicDataType, bigEndian, encrypted, null)
-                parsedMap[dynamicDataType] = data
+                parsedMap.add(data)
             }
         }
         if (parsedMap.isNotEmpty()) {
@@ -144,44 +144,44 @@ class ConfigDataManagerImpl
         return null
     }
 
-    private fun parseIBeaconManufacturerData(raw: String): Map<DynamicDataType, ParsedDynamicData>? {
-        var result: MutableMap<DynamicDataType, ParsedDynamicData> = mutableMapOf()
+    private fun parseIBeaconManufacturerData(raw: String): List<ParsedDynamicData>? {
+        var result: MutableList<ParsedDynamicData> = mutableListOf()
         if (raw.length >= 50) {
-            result[DynamicDataType.IBEACON_ADDR] = ParsedDynamicData(
+            result.add(ParsedDynamicData(
                 len = 2,
                 dynamicType = DynamicDataType.IBEACON_ADDR,
                 bigEndian = false,
                 encrypted = false,
                 rawData = raw.substring(0, 8)
-            )
-            result[DynamicDataType.UUID] = ParsedDynamicData(
+            ))
+            result.add(ParsedDynamicData(
                 len = 16,
                 dynamicType = DynamicDataType.UUID,
                 bigEndian = false,
                 encrypted = false,
                 rawData = raw.substring(8, 40)
-            )
-            result[DynamicDataType.MAJOR] = ParsedDynamicData(
+            ))
+            result.add(ParsedDynamicData(
                 len = 2,
                 dynamicType = DynamicDataType.MAJOR,
                 bigEndian = false,
                 encrypted = false,
                 rawData = raw.substring(40, 44)
-            )
-            result[DynamicDataType.MINOR] = ParsedDynamicData(
+            ))
+            result.add(ParsedDynamicData(
                 len = 2,
                 dynamicType = DynamicDataType.MINOR,
                 bigEndian = false,
                 encrypted = false,
                 rawData = raw.substring(44, 48)
-            )
-            result[DynamicDataType.TX_POWER] = ParsedDynamicData(
+            ))
+            result.add(ParsedDynamicData(
                 len = 1,
                 dynamicType = DynamicDataType.TX_POWER,
                 bigEndian = false,
                 encrypted = false,
                 rawData = raw.substring(48, 50)
-            )
+            ))
 
             return result
         }

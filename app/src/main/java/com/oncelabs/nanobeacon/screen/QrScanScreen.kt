@@ -44,7 +44,7 @@ fun QrScanScreenContent(
     showModal: Boolean?,
     configData: ParsedConfigData?,
     onQrCodeScanned: (String) -> Unit,
-    buttonClicked : () -> Unit
+    buttonClicked: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         if (showModal == false) {
@@ -55,7 +55,9 @@ fun QrScanScreenContent(
             }
         }
         Column(
-            Modifier.fillMaxSize().padding(bottom = 50.dp, end = 20.dp),
+            Modifier
+                .fillMaxSize()
+                .padding(bottom = 50.dp, end = 20.dp),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.End
         ) {
@@ -66,10 +68,9 @@ fun QrScanScreenContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
-                    CameraButton {
-                        buttonClicked()
-                    }
-
+                CameraButton {
+                    buttonClicked()
+                }
             }
         }
 

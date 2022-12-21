@@ -29,7 +29,7 @@ data class ParsedAdvertisementData (
 data class ParsedPayload (
     var deviceName : String? = null,
     var txPower : String? = null,
-    var manufacturerData : Map<DynamicDataType, ParsedDynamicData>?,
+    var manufacturerData : List<ParsedDynamicData>?,
 )
 
 data class ParsedDynamicData (
