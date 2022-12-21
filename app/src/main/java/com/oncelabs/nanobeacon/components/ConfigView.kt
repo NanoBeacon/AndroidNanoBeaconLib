@@ -114,15 +114,15 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                         for (dataItem in manufacturerData.toList()) {
                             if (adv.ui_format == ConfigType.IBEACON) {
                                 AdvDataItem(
-                                    title = dataItem.first.fullName,
-                                    data = dataItem.second.rawData,
+                                    title = dataItem.dynamicType.fullName,
+                                    data = dataItem.rawData,
                                     prefix = "0x"
                                 )
                             } else {
-                                AdvDataItem(title = dataItem.first.fullName,
-                                    bigEndian = dataItem.second.bigEndian
+                                AdvDataItem(title = dataItem.dynamicType.fullName,
+                                    bigEndian = dataItem.bigEndian
                                         ?: false,
-                                    encrypted = dataItem.second.encrypted
+                                    encrypted = dataItem.encrypted
                                         ?: false,
                                     showFlags = true
                                 )

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
+import com.oncelabs.nanobeaconlib.model.ProcessedData
 import kotlinx.coroutines.flow.StateFlow
 
 interface NanoBeaconInterface {
@@ -14,5 +15,5 @@ interface NanoBeaconInterface {
     val estimatedAdvIntervalFlow: StateFlow<Int?>
     val matchingConfig : StateFlow<ParsedConfigData?>
     val address:String?
-    val manufacturerData : StateFlow<Map<DynamicDataType, String>>
+    val manufacturerData : StateFlow<List<ProcessedData>>
 }

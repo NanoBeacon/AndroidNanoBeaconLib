@@ -196,14 +196,10 @@ fun CustomTypeView(beacon: NanoBeaconInterface, data : BeaconDataEntry) {
                     items(items = beaconData.toList(), itemContent = { item ->
                         Spacer(modifier = Modifier.height(14.dp))
                         CustomDataItem(
-                            title = item.first.fullName,
-                            data = item.second + item.first.units,
-                            bigEndian = matchingConfig?.advSetData?.get(
-                                0
-                            )?.parsedPayloadItems?.manufacturerData?.get(item.first)?.bigEndian,
-                            encrypted = matchingConfig?.advSetData?.get(
-                                0
-                            )?.parsedPayloadItems?.manufacturerData?.get(item.first)?.encrypted
+                            title = item.dynamicDataType.fullName,
+                            data = item.processedData + item.dynamicDataType.units,
+                            bigEndian = item.bigEndian,
+                            encrypted = item.encrypted
                         )
                     })
                 }
@@ -226,7 +222,7 @@ fun IBeaconTypeView(beacon: NanoBeaconInterface) {
                 val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(items = beaconData.toList(), itemContent = { item ->
-                        CustomDataLine(title = item.first.fullName, data = item.second, maxLines = 1)
+                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData, maxLines = 1)
                     })
                 }
                 Spacer(Modifier.height(14.dp))
