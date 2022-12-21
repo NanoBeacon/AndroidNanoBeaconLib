@@ -7,6 +7,7 @@ import com.oncelabs.nanobeacon.codable.Payload
 import com.oncelabs.nanobeacon.enum.ADType
 import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 import com.oncelabs.nanobeacon.extension.StringExtensions.Companion.decodeHex
+import com.oncelabs.nanobeaconlib.enums.AdvMode
 import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.model.ParsedAdvertisementData
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
@@ -26,18 +27,15 @@ import javax.inject.Singleton
 @Singleton
 class ConfigDataManagerImpl
 @Inject constructor() : ConfigDataManager {
-    private val _savedConfig = MutableStateFlow<ConfigData?>(null)
-    override val savedConfig: StateFlow<ConfigData?> = _savedConfig.asStateFlow()
-
     private val _parsedConfig = MutableStateFlow<ParsedConfigData?>(null)
     override val parsedConfig: StateFlow<ParsedConfigData?> = _parsedConfig.asStateFlow()
+
     override fun init() {
         TODO("Not yet implemented")
     }
 
 
     override fun setConfig(configData: ConfigData) {
-        _savedConfig.value = configData
         parseConfigData(configData)
     }
 
@@ -53,18 +51,25 @@ class ConfigDataManagerImpl
                     id = id,
                     bdAddr = bdAddr,
                     parsedPayloadItems = parsedPayload,
-                    ui_format = ConfigType.fromLabel(advData.ui_format)
+                    ui_format = ConfigType.fromLabel(advData.ui_format),
+                    interval = advData.interval,
+                    advModeTrigEn = AdvMode.fromMode(advData.advModeTrigEn),
                 )
                 parsedAdvertisements.add(parsedAdvertisementData)
             }
             if (configData.tempUnit != null && configData.vccUnit != null) {
-                NanoBeaconManager.loadConfiguration(
-                    ParsedConfigData(
-                        parsedAdvertisements.toTypedArray(),
-                        tempUnit = configData.tempUnit,
-                        vccUnit = configData.vccUnit,
-                    )
+                val configData = ParsedConfigData(
+                    parsedAdvertisements.toTypedArray(),
+                    tempUnit = configData.tempUnit,
+                    vccUnit = configData.vccUnit,
+                    txPower = configData.txSetting?.txPower,
+                    sleepAftTx = configData.txSetting?.sleepAftTx == 1,
+                    ch0 = configData.txSetting?.ch0,
+                    ch1 = configData.txSetting?.ch1,
+                    ch2 = configData.txSetting?.ch2
                 )
+                NanoBeaconManager.loadConfiguration(configData)
+                _parsedConfig.value = configData
             }
         }
     }
@@ -126,7 +131,7 @@ class ConfigDataManagerImpl
             val bigEndian = splitData[1].toInt() == 1
             val encrypted = splitData[2].toInt() == 1
             dynamicDataType?.let {
-                val data = ParsedDynamicData(len, dynamicDataType, bigEndian, encrypted)
+                val data = ParsedDynamicData(len, dynamicDataType, bigEndian, encrypted, null)
                 parsedMap[dynamicDataType] = data
             }
         }
@@ -136,14 +141,44 @@ class ConfigDataManagerImpl
         return null
     }
 
-    private fun parseIBeaconManufacturerData(raw : String): Map<DynamicDataType, ParsedDynamicData>? {
-        var result : MutableMap<DynamicDataType, ParsedDynamicData> = mutableMapOf()
+    private fun parseIBeaconManufacturerData(raw: String): Map<DynamicDataType, ParsedDynamicData>? {
+        var result: MutableMap<DynamicDataType, ParsedDynamicData> = mutableMapOf()
         if (raw.length >= 50) {
-            result[DynamicDataType.IBEACON_ADDR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.IBEACON_ADDR, bigEndian = false , encrypted = false)
-            result[DynamicDataType.UUID] = ParsedDynamicData(len = 16, dynamicType = DynamicDataType.UUID, bigEndian = false , encrypted = false)
-            result[DynamicDataType.MAJOR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.MAJOR, bigEndian = false , encrypted = false)
-            result[DynamicDataType.MINOR] = ParsedDynamicData(len = 2, dynamicType = DynamicDataType.MINOR, bigEndian = false , encrypted = false)
-            result[DynamicDataType.TX_POWER] = ParsedDynamicData(len = 1, dynamicType = DynamicDataType.TX_POWER, bigEndian = false , encrypted = false)
+            result[DynamicDataType.IBEACON_ADDR] = ParsedDynamicData(
+                len = 2,
+                dynamicType = DynamicDataType.IBEACON_ADDR,
+                bigEndian = false,
+                encrypted = false,
+                rawData = raw.substring(0, 8)
+            )
+            result[DynamicDataType.UUID] = ParsedDynamicData(
+                len = 16,
+                dynamicType = DynamicDataType.UUID,
+                bigEndian = false,
+                encrypted = false,
+                rawData = raw.substring(8, 40)
+            )
+            result[DynamicDataType.MAJOR] = ParsedDynamicData(
+                len = 2,
+                dynamicType = DynamicDataType.MAJOR,
+                bigEndian = false,
+                encrypted = false,
+                rawData = raw.substring(40, 44)
+            )
+            result[DynamicDataType.MINOR] = ParsedDynamicData(
+                len = 2,
+                dynamicType = DynamicDataType.MINOR,
+                bigEndian = false,
+                encrypted = false,
+                rawData = raw.substring(44, 48)
+            )
+            result[DynamicDataType.TX_POWER] = ParsedDynamicData(
+                len = 1,
+                dynamicType = DynamicDataType.TX_POWER,
+                bigEndian = false,
+                encrypted = false,
+                rawData = raw.substring(48, 50)
+            )
 
             return result
         }

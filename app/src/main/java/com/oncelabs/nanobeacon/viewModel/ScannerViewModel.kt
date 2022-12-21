@@ -18,6 +18,7 @@ import com.oncelabs.nanobeaconlib.enums.ScanState
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.util.*
@@ -50,8 +51,7 @@ class ScannerViewModel @Inject constructor(
     private val _filteredDiscoveredBeacons = MutableLiveData<List<NanoBeaconInterface>>()
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
 
-    private val _savedConfig = MutableLiveData<ConfigData>(configDataManager.savedConfig.value)
-    val savedConfig : LiveData<ConfigData> = _savedConfig
+
 
     private val _showDetailModal = MutableLiveData<Boolean>(false)
     val showDetailModal = _showDetailModal
@@ -108,11 +108,6 @@ class ScannerViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch {
-            configDataManager.savedConfig.collect {
-                _savedConfig.postValue(it)
-            }
-        }
     }
 
     /**

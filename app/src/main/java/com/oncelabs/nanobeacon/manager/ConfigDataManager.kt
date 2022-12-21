@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 @ExperimentalMaterialApi
 interface ConfigDataManager {
-    val savedConfig : StateFlow<ConfigData?>
     val parsedConfig : StateFlow<ParsedConfigData?>
     fun init()
     fun setConfig(configData: ConfigData)

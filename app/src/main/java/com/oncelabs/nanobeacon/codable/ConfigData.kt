@@ -4,12 +4,14 @@ data class ConfigData(
     val version : String? = null,
     val advSet : Array<AdvSetData>? = null,
     val vccUnit : Float? = null,
-    val tempUnit : Float? = null
+    val tempUnit : Float? = null,
+    val txSetting : TxPower? = null
 )
 
 data class AdvSetData (
     val id : Int?= null,
     val bdAddr : String?= null,
+    val interval : Int? = null,
     val addrType : String?= null,
     val advModeTrigEn : Int?= null,
     val payloadVer : Int?= null,
@@ -19,6 +21,14 @@ data class AdvSetData (
     val postTrigNumAdv : Int? = null,
     val trigCheckPeriod : Int? = null,
     val ui_format : String
+)
+
+data class TxPower (
+    val txPower : Int?,
+    val sleepAftTx : Int?,
+    val ch0 : Int?,
+    val ch1 : Int?,
+    val ch2 : Int?
 )
 
 data class Payload (

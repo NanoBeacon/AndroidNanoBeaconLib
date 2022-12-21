@@ -267,8 +267,8 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
         val configMatch = currentConfig?.advSetData?.firstOrNull {
             it.bdAddr == cleanedbdAddr }
         configMatch?.let { it ->
-            val parsedConfigData = currentConfig
-            parsedConfigData?.advSetData = arrayOf(it)
+            val parsedConfigData = currentConfig!!.copy()
+            parsedConfigData.advSetData = arrayOf(it)
             return parsedConfigData
         }
         return null
