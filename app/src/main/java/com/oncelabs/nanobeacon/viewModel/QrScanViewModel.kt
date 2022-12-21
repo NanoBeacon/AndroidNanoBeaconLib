@@ -36,6 +36,7 @@ import javax.inject.Inject
 class QrScanViewModel @Inject constructor(
     application: Application,
     private val configDataManager : ConfigDataManager,
+    private val beaconManager: BeaconManager
     ): AndroidViewModel(application) {
 
     var pendingQr: String? = null
@@ -73,6 +74,7 @@ class QrScanViewModel @Inject constructor(
                     _showQrScanner.value = false
                     pendingQr = null
                     configDataManager.setConfig(it)
+                    beaconManager.refresh()
                 } ?: run {
                     pendingQr = null
                 }
