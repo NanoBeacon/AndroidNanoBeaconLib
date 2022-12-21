@@ -20,7 +20,7 @@ import com.oncelabs.nanobeacon.ui.theme.iconSelected
 fun BottomNav(navController: NavController) {
     val items = listOf(
         Screen.ScannerScreen,
-        Screen.LiveDataScreen,
+        //Screen.LiveDataScreen,
         Screen.QrScanScreen
     )
 

@@ -20,9 +20,9 @@ fun Navigation(navController : NavHostController) {
             ScannerScreen()
         }
 
-        composable(route = Screen.LiveDataScreen.route) {
-            LiveDataScreen()
-        }
+//        composable(route = Screen.LiveDataScreen.route) {
+//            LiveDataScreen()
+//        }
 
         composable(route = Screen.QrScanScreen.route) {
             QrScanScreen()

@@ -63,7 +63,7 @@ fun EmptyConfigCard() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("No configuration added", style = cardTextFont)
+                Text("No configuration", style = cardTextFont)
             }
         }
         Spacer(Modifier.weight(0.025f))
@@ -91,6 +91,11 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                     )
                 }
 
+                AdvDataItem(
+                    title = "Channels",
+                    data = ChannelMode.values()[adv.chCtrl].channels
+                )
+
                 adv.advModeTrigEn?.let {
                     AdvDataItem(title = "Advertising Mode", data = it.label)
                 }
@@ -99,7 +104,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                     AdvDataItem(
                         title = "Bluetooth Address",
                         data = it,
-                        prefix = "0x"
+                        prefix = ""
                     )
                 }
 
