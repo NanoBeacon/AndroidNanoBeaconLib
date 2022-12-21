@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.ui.theme.*
+import com.oncelabs.nanobeaconlib.enums.ChannelMode
 import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 
@@ -37,7 +38,7 @@ fun ConfigView(parsedConfigData: ParsedConfigData?) {
                             AdvView(clearedConfigData = clearedConfigData)
                         }
                     }
-                    Spacer(Modifier.weight(0.025f))
+                    Spacer(Modifier.weight(0.05f))
                 }
             }
         }
@@ -221,7 +222,7 @@ fun AdvDataItem(
         Text(
             modifier = Modifier.padding(bottom = 2.dp),
             text = title,
-            style = logItemTitleFont,
+            style = configTitleFont,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -247,9 +248,54 @@ fun AdvDataItem(
     Spacer(modifier = Modifier.height(14.dp))
 }
 
+@Composable
+fun AdvDataEntryItem(
+    title: String,
+    data: String? = null,
+    unit: String? = null,
+    bigEndian: Boolean = false,
+    encrypted: Boolean = false,
+    prefix: String? = null
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            modifier = Modifier.padding(bottom = 0.dp, start = 0.dp),
+            text = (prefix ?: "") + title,
+            style = configTitleFont,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (!data.isNullOrBlank()) {
+            Text(
+                modifier = Modifier.padding(bottom = 2.dp),
+                text = "${prefix ?: ""}$data ${unit ?: ""}",
+                style = logTextFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Row(Modifier.fillMaxWidth()) {
+            if (bigEndian) {
+                Text("big-endian", style = CustomItemSubFont)
+                Spacer(Modifier.width(5.dp))
+            }
+            if (encrypted) {
+                Text("encrypted", style = CustomItemSubFont)
+            }
+        }
+    }
+    Spacer(modifier = Modifier.height(4.dp))
+}
+
 
 @Composable
 fun SectionTitle(title: String) {
-    Text(text = title, style = logCardTitleAccentFont)
+    Text(text = title, style = configurationSectionTitle)
     Spacer(modifier = Modifier.height(14.dp))
+}
+
+@Composable
+fun SubSectionTitle(title: String) {
+    Text(text = title, style = configurationSubSectionTitle)
+    Spacer(modifier = Modifier.height(7.dp))
 }
