@@ -20,7 +20,6 @@ import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconManagerInterface
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
-import com.oncelabs.nanobeaconlib.model.ParsedAdvertisementData
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +47,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
     private var registeredBeaconTypes: MutableList<CustomBeaconInterface> = mutableListOf()
+
 
     private var context: WeakReference<Context>? = null
     private var bluetoothManager: BluetoothManager? = null
@@ -101,7 +101,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
         }
     }
 
-    override fun refresh() {
+    fun refresh() {
         stopScanning()
         leDeviceMap.clear()
         startScanning()
@@ -125,6 +125,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
             is NanoBeaconEvent.NewBeacon -> {
                 newBeaconFlow = event.flow
             }
+
         }
     }
 
@@ -155,6 +156,8 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     override fun register(customBeacon: CustomBeaconInterface) {
         registeredBeaconTypes.add(customBeacon)
     }
+
+
 
     @SuppressLint("MissingPermission")
     override fun startScanning() {
