@@ -4,10 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.ui.theme.*
@@ -75,7 +77,9 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
     for (i in clearedConfigData.advSetData.indices) {
         var adv = clearedConfigData.advSetData[i]
         SectionTitle(title = "Advertising Set #${i + 1}")
-        Row(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth()
+        ) {
             Spacer(Modifier.weight(0.05f))
             Column(Modifier.weight(0.95f)) {
 
@@ -117,27 +121,34 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                         AdvDataItem(title = "Tx Power", data = it)
                     }
                     parsedPayload.manufacturerData?.let { manufacturerData ->
-                        for (dataItem in manufacturerData.toList()) {
-                            if (adv.ui_format == ConfigType.IBEACON) {
-                                AdvDataItem(
-                                    title = dataItem.dynamicType.fullName,
-                                    data = dataItem.rawData,
-                                    prefix = "0x"
-                                )
-                            } else {
-                                AdvDataItem(title = dataItem.dynamicType.fullName,
-                                    bigEndian = dataItem.bigEndian
-                                        ?: false,
-                                    encrypted = dataItem.encrypted
-                                        ?: false,
-                                    showFlags = true
-                                )
+                        SubSectionTitle(title = "Manufacturer Data Items:")
+                        Column(modifier = Modifier
+                            .padding(start = 12.dp)
+                        ) {
+                            for (dataItem in manufacturerData.toList()) {
+                                if (adv.ui_format == ConfigType.IBEACON) {
+                                    AdvDataItem(
+                                        title = dataItem.dynamicType.fullName,
+                                        data = dataItem.rawData,
+                                        prefix = "0x"
+                                    )
+                                } else {
+                                    AdvDataItem(title = dataItem.dynamicType.fullName + " ( ${dataItem.len} Byte )",
+                                        bigEndian = dataItem.bigEndian
+                                            ?: false,
+                                        encrypted = dataItem.encrypted
+                                            ?: false,
+                                        showFlags = true
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        Divider(color = logModalItemBackgroundColor, modifier = Modifier.fillMaxWidth().width(1.dp))
+        Spacer(modifier = Modifier.height(14.dp))
     }
 }
 
@@ -190,6 +201,8 @@ fun GlobalView(clearedConfigData : ParsedConfigData) {
              */
         }
     }
+    Divider(color = logModalItemBackgroundColor, modifier = Modifier.fillMaxWidth().width(1.dp))
+    Spacer(modifier = Modifier.height(14.dp))
 }
 
 @Composable
@@ -302,5 +315,5 @@ fun SectionTitle(title: String) {
 @Composable
 fun SubSectionTitle(title: String) {
     Text(text = title, style = configurationSubSectionTitle)
-    Spacer(modifier = Modifier.height(7.dp))
+    Spacer(modifier = Modifier.height(10.dp))
 }

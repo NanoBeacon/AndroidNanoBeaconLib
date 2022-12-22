@@ -129,7 +129,7 @@ val configurationSectionTitle = TextStyle(
 val configurationSubSectionTitle = TextStyle(
     fontFamily = helveticaNeue,
     fontWeight = FontWeight.Normal,
-    fontSize = 18.sp,
+    fontSize = 20.sp,
     color = logItemTitleColor
 )
 
