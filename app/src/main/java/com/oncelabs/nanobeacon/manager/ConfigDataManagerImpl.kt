@@ -100,7 +100,7 @@ class ConfigDataManagerImpl
                     ADType.TX_POWER -> {
                         payload.data?.let { data ->
                             val dbm: String = data
-                            parsedPayload.txPower = "${dbm.toInt()}"
+                            parsedPayload.txPower = "${Integer.parseInt(dbm, 16)}"
                         }
                     }
                     ADType.DEVICE_NAME -> {
