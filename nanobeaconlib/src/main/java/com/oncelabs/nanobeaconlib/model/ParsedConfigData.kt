@@ -1,8 +1,6 @@
 package com.oncelabs.nanobeaconlib.model
 
-import com.oncelabs.nanobeaconlib.enums.AdvMode
-import com.oncelabs.nanobeaconlib.enums.ConfigType
-import com.oncelabs.nanobeaconlib.enums.DynamicDataType
+import com.oncelabs.nanobeaconlib.enums.*
 
 
 data class ParsedConfigData (
@@ -13,7 +11,9 @@ data class ParsedConfigData (
     var sleepAftTx : Boolean?,
     var ch0 : Int?,
     var ch1 : Int?,
-    var ch2 : Int?
+    var ch2 : Int?,
+    var globalTrigSettings : Map<SensorTriggerSource, GlobalTriggerSettings>?,
+    var globalGpioTriggerSrc : Map<Int, GlobalGpio>?
 )
 
 data class ParsedAdvertisementData (
@@ -22,8 +22,13 @@ data class ParsedAdvertisementData (
     var ui_format : ConfigType,
     var parsedPayloadItems : ParsedPayload?,
     var interval : Int?,
+    var chCtrl: Int,
     var advModeTrigEn : AdvMode?,
-    var chCtrl: Int
+    var postTrigCtrlMode : PostTriggerControlMode?,
+    var postTrigNumAdv : Int?,
+    var trigCheckPeriod : Int?,
+    var triggers : List<SensorTriggerSource>?,
+    var gpioTriggers : List<Int>?,
 )
 
 data class ParsedPayload (
@@ -40,3 +45,16 @@ data class ParsedDynamicData (
     var rawData : String?
 )
 
+data class GlobalTriggerSettings (
+    var threshold : Int,
+    var src : String
+)
+
+data class GlobalGpio (
+    var id : Int?,
+    var digital : String?,
+    var wakeup : String?,
+    var advTrig : String?,
+    var latch : Int?,
+    var maskb : Int?
+)

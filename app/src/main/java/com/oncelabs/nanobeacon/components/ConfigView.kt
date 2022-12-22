@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.ui.theme.*
+import com.oncelabs.nanobeaconlib.enums.AdvMode
 import com.oncelabs.nanobeaconlib.enums.ChannelMode
 import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
@@ -122,8 +123,9 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                     }
                     parsedPayload.manufacturerData?.let { manufacturerData ->
                         SubSectionTitle(title = "Manufacturer Data Items:")
-                        Column(modifier = Modifier
-                            .padding(start = 12.dp)
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 12.dp)
                         ) {
                             for (dataItem in manufacturerData.toList()) {
                                 if (adv.ui_format == ConfigType.IBEACON) {
@@ -133,7 +135,8 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                         prefix = "0x"
                                     )
                                 } else {
-                                    AdvDataItem(title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
+                                    AdvDataItem(
+                                        title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
                                         bigEndian = dataItem.bigEndian
                                             ?: false,
                                         encrypted = dataItem.encrypted
@@ -145,15 +148,54 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                         }
                     }
                 }
+
+                adv.advModeTrigEn?.let { triggerMode ->
+                    if (triggerMode == AdvMode.TRIGGERED) {
+                        SubSectionTitle(title = "Triggered Adv Settings:")
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                        ) {
+                            adv.postTrigNumAdv?.let {
+                                AdvDataItem(
+                                    title = "Adv Event Count",
+                                    data = it.toString()
+                                )
+                            }
+                            adv.postTrigCtrlMode?.let {
+                                AdvDataItem(
+                                    title = "Trigger Event Reset",
+                                    data = it.trigerResetsCount.toString(),
+                                )
+                                AdvDataItem(
+                                    title = "Trigger Setting",
+                                    data = it.label
+                                )
+                            }
+                            adv.triggers?.let {
+                                for (trigger in it) {
+                                    if (clearedConfigData.globalTrigSettings?.contains(trigger) == true) {
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-        Divider(color = logModalItemBackgroundColor, modifier = Modifier.fillMaxWidth().width(1.dp))
+        Divider(
+            color = logModalItemBackgroundColor, modifier = Modifier
+                .fillMaxWidth()
+                .width(1.dp)
+        )
         Spacer(modifier = Modifier.height(14.dp))
     }
 }
 
+
 @Composable
-fun GlobalView(clearedConfigData : ParsedConfigData) {
+fun GlobalView(clearedConfigData: ParsedConfigData) {
     Spacer(modifier = Modifier.height(5.dp))
     //Global
     SectionTitle(title = "Global")
@@ -201,7 +243,11 @@ fun GlobalView(clearedConfigData : ParsedConfigData) {
              */
         }
     }
-    Divider(color = logModalItemBackgroundColor, modifier = Modifier.fillMaxWidth().width(1.dp))
+    Divider(
+        color = logModalItemBackgroundColor, modifier = Modifier
+            .fillMaxWidth()
+            .width(1.dp)
+    )
     Spacer(modifier = Modifier.height(14.dp))
 }
 
@@ -234,7 +280,7 @@ fun AdvDataItem(
     bigEndian: Boolean = false,
     encrypted: Boolean = false,
     prefix: String? = null,
-    showFlags : Boolean = false
+    showFlags: Boolean = false
 ) {
     Column(Modifier.fillMaxWidth()) {
         Text(

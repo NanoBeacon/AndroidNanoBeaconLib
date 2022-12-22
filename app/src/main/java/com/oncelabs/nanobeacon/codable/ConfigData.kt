@@ -5,8 +5,10 @@ data class ConfigData(
     val advSet : Array<AdvSetData>? = null,
     val vccUnit : Float? = null,
     val tempUnit : Float? = null,
-    val txSetting : TxPower? = null
-)
+    val txSetting : TxPower? = null,
+    val gpio : Array<Gpio>? = null,
+    val globalTrigSetting : GlobalTrigSetting? = null,
+    )
 
 data class AdvSetData (
     val id : Int?= null,
@@ -19,9 +21,10 @@ data class AdvSetData (
     val gpioTrigerSrc : Array<Int>? =null,
     val postTrigCtrlMode : Int? = null,
     val postTrigNumAdv : Int? = null,
+    val sensorTrigerSrc : Array<String>? = null,
     val trigCheckPeriod : Int? = null,
     val ui_format : String,
-    val chCtrl: Int
+    val chCtrl: Int,
 )
 
 data class TxPower (
@@ -38,4 +41,27 @@ data class Payload (
     val data : String? = null
 )
 
+data class GlobalTrigSetting (
+    val trig1Low : Int?,
+    val trig2Low : Int?,
+    val trig3Low : Int?,
+    val trig4Low : Int?,
+    val trig2High : Int?,
+    val trig3High : Int?,
+    val trig4High : Int?,
+    val trig1Src : String?,
+    val trig2Src : String?,
+    val trig3Src : String?,
+    val trig4Src : String?,
+    val triggerEn : Array<Int>?
+)
+
+data class Gpio (
+    val id : Int?,
+    val digital : String?,
+    val wakeup : String?,
+    val advTrig : String?,
+    val latch : Int?,
+    val maskb : Int?
+)
 
