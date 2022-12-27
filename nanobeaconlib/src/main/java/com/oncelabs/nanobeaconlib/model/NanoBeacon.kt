@@ -114,7 +114,7 @@ open class NanoBeacon(
                                     i.bigEndian ?: false
                                 ).toString()
                             DynamicDataType.GPIO_ITEM -> dataHolder =
-                                DynamicDataParsers.processGpioStatus(trimmedData).toString()
+                                DynamicDataParsers.processGpioStatus(trimmedData)
                             DynamicDataType.AON_GPIO_ITEM -> TODO()
                             DynamicDataType.EDGE_CNT_ITEM -> dataHolder =
                                 DynamicDataParsers.processGpioEdgeCount(

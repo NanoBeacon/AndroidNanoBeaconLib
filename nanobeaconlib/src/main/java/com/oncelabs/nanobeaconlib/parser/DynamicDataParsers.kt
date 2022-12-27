@@ -60,10 +60,11 @@ class DynamicDataParsers {
             return base
         }
 
-        fun processGpioStatus(byteArray: ByteArray) : Int? {
-            var base : Int? = null
+        fun processGpioStatus(byteArray: ByteArray) : String? {
+            var base : String? = null
             if (byteArray.isNotEmpty()) {
-                base = byteArray[0].toInt()
+                base = byteArray[0].toUInt().toString(radix = 2)
+                base = base.substring(base.length - 8, base.length)
             }
 
             return base

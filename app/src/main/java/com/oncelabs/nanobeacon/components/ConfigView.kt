@@ -174,6 +174,12 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                     data = it.label
                                 )
                             }
+                            adv.trigCheckPeriod?.let {
+                                AdvDataItem(
+                                    title = "Trigger Check Period",
+                                    data = it.toString()
+                                )
+                            }
                             adv.triggers?.let {
                                 for (trigger in it) {
                                     if (clearedConfigData.globalTrigSettings?.contains(trigger) == true) {
@@ -192,7 +198,8 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                             adv.gpioTriggers?.let {
                                 for (trigger in it) {
                                     if (clearedConfigData.globalGpioTriggerSrc?.contains(trigger) == true) {
-                                        val triggerData = clearedConfigData.globalGpioTriggerSrc?.get(trigger)
+                                        val triggerData =
+                                            clearedConfigData.globalGpioTriggerSrc?.get(trigger)
                                         triggerData?.let {
                                             GlobalGpioTriggerItem(it)
                                         }
@@ -300,7 +307,10 @@ fun GlobalGpioTriggerItem(globalGpio: GlobalGpio) {
             )
             SingleDataLine(title = "Digital", data = DigitalInputName.fromAbrv(globalGpio.digital))
             SingleDataLine(title = "Wakeup", data = WakeupName.fromAbrv(globalGpio.wakeup))
-            SingleDataLine(title = "Advertisement Trigger", data = AdvTriggerName.fromAbrv(globalGpio.advTrig))
+            SingleDataLine(
+                title = "Advertisement Trigger",
+                data = AdvTriggerName.fromAbrv(globalGpio.advTrig)
+            )
             SingleDataLine(title = "Latch", data = LatchName.fromAbrv(globalGpio.latch))
         }
         Spacer(modifier = Modifier.height(14.dp))
