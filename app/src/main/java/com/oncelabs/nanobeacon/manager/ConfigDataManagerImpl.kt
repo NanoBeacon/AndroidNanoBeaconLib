@@ -58,7 +58,8 @@ class ConfigDataManagerImpl
                     ),
                     postTrigNumAdv = advData.postTrigNumAdv,
                     trigCheckPeriod = advData.trigCheckPeriod,
-                    triggers = parseSensorTriggerSources(advData.sensorTrigerSrc)
+                    triggers = parseSensorTriggerSources(advData.sensorTrigerSrc),
+                    randDlyType = advData.randomDlyType
                 )
                 parsedAdvertisements.add(parsedAdvertisementData)
             }

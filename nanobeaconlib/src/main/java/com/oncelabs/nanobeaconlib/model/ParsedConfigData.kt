@@ -29,6 +29,7 @@ data class ParsedAdvertisementData (
     var trigCheckPeriod : Int?,
     var triggers : List<SensorTriggerSource>?,
     var gpioTriggers : List<Int>?,
+    var randDlyType : Int
 )
 
 data class ParsedPayload (

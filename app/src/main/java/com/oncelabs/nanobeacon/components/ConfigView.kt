@@ -123,6 +123,14 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                     parsedPayload.txPower?.let {
                         AdvDataItem(title = "Tx Power", data = it)
                     }
+
+                    AdvRandomDelayType.fromCode(adv.randDlyType)?.let {
+                        AdvDataItem(
+                            title = "Advertising Random Delay",
+                            data = it
+                        )
+                    }
+
                     parsedPayload.manufacturerData?.let { manufacturerData ->
                         SubSectionTitle(title = "Manufacturer Data Items:")
                         Column(
@@ -177,9 +185,11 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                             adv.trigCheckPeriod?.let {
                                 AdvDataItem(
                                     title = "Trigger Check Period",
-                                    data = it.toString()
+                                    data = it.toString(),
+                                    unit = "ms"
                                 )
                             }
+
                             adv.triggers?.let {
                                 for (trigger in it) {
                                     if (clearedConfigData.globalTrigSettings?.contains(trigger) == true) {
