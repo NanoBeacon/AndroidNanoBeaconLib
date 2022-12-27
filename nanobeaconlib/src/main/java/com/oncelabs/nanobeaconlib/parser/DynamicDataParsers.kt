@@ -130,18 +130,18 @@ class DynamicDataParsers {
             return base
         }
 
-        fun processRandomNumber(byteArray: ByteArray, bigEndian : Boolean) : Int? {
-            var base : Int? = null
+        fun processRandomNumber(byteArray: ByteArray, bigEndian : Boolean) : UInt? {
+            var base : UInt? = null
             val byteOrder = if (bigEndian) {
                 ByteOrder.BIG_ENDIAN
             } else {
                 ByteOrder.LITTLE_ENDIAN
             }
             when(byteArray.size) {
-                1 -> base = byteArray[0].toInt()
-                2 -> base = ByteBuffer.wrap(byteArray).order(byteOrder).short.toInt()
-                3 -> base = ByteBuffer.wrap(byteArrayOf(0x00) + byteArray).order(byteOrder).int
-                4 -> base = ByteBuffer.wrap(byteArray).order(byteOrder).int
+                1 -> base = byteArray[0].toUInt()
+                2 -> base = ByteBuffer.wrap(byteArray).order(byteOrder).short.toUInt()
+                3 -> base = ByteBuffer.wrap(byteArrayOf(0x00) + byteArray).order(byteOrder).int.toUInt()
+                4 -> base = ByteBuffer.wrap(byteArray).order(byteOrder).int.toUInt()
             }
             return base
         }
