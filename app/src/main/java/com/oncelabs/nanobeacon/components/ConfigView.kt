@@ -94,7 +94,8 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                 adv.interval?.let {
                     AdvDataItem(
                         title = "Advertising Interval",
-                        data = it.toString()
+                        data = it.toString(),
+                        unit = "ms"
                     )
                 }
 
