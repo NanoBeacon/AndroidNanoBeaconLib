@@ -2,6 +2,7 @@ package com.oncelabs.nanobeacon.manager
 
 import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.ui.text.toUpperCase
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.codable.GlobalTrigSetting
 import com.oncelabs.nanobeacon.codable.Gpio
@@ -45,7 +46,7 @@ class ConfigDataManagerImpl
                 val bdAddr = advData.bdAddr
                 val parsedAdvertisementData = ParsedAdvertisementData(
                     id = id,
-                    bdAddr = bdAddr,
+                    bdAddr = bdAddr?.uppercase(),
                     parsedPayloadItems = parsedPayload,
                     ui_format = ConfigType.fromLabel(advData.ui_format),
                     interval = advData.interval,
