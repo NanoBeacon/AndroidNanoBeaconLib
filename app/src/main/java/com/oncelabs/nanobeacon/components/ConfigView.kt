@@ -87,7 +87,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
             Column(Modifier.weight(0.95f)) {
 
                 AdvDataItem(
-                    title = "UI Format",
+                    title = "Advertising Data Format",
                     data = adv.ui_format.label
                 )
 
