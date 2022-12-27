@@ -12,10 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.oncelabs.nanobeacon.enum.*
 import com.oncelabs.nanobeacon.ui.theme.*
 import com.oncelabs.nanobeaconlib.enums.AdvMode
 import com.oncelabs.nanobeaconlib.enums.ChannelMode
 import com.oncelabs.nanobeaconlib.enums.ConfigType
+import com.oncelabs.nanobeaconlib.model.GlobalGpio
 import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 
 @Composable
@@ -175,7 +177,25 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                             adv.triggers?.let {
                                 for (trigger in it) {
                                     if (clearedConfigData.globalTrigSettings?.contains(trigger) == true) {
-
+                                        val triggerData =
+                                            clearedConfigData.globalTrigSettings?.get(trigger)
+                                        TriggerDataItem(
+                                            title = trigger.fullName,
+                                            data = GlobalTriggerSourceName.fullNameFromAbrv(
+                                                triggerData?.src
+                                            ),
+                                            triggerData?.threshold
+                                        )
+                                    }
+                                }
+                            }
+                            adv.gpioTriggers?.let {
+                                for (trigger in it) {
+                                    if (clearedConfigData.globalGpioTriggerSrc?.contains(trigger) == true) {
+                                        val triggerData = clearedConfigData.globalGpioTriggerSrc?.get(trigger)
+                                        triggerData?.let {
+                                            GlobalGpioTriggerItem(it)
+                                        }
                                     }
                                 }
                             }
@@ -184,11 +204,6 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                 }
             }
         }
-        Divider(
-            color = logModalItemBackgroundColor, modifier = Modifier
-                .fillMaxWidth()
-                .width(1.dp)
-        )
         Spacer(modifier = Modifier.height(14.dp))
     }
 }
@@ -273,6 +288,52 @@ fun GlobalDataItem(title: String, data: String, unit: String?) {
 }
 
 @Composable
+fun GlobalGpioTriggerItem(globalGpio: GlobalGpio) {
+    GlobalGpioTriggerName.nameFromId(globalGpio.id)?.let {
+        Column(Modifier.fillMaxWidth()) {
+            Text(
+                modifier = Modifier.padding(bottom = 2.dp),
+                text = it,
+                style = logItemTitleFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            SingleDataLine(title = "Digital", data = DigitalInputName.fromAbrv(globalGpio.digital))
+            SingleDataLine(title = "Wakeup", data = WakeupName.fromAbrv(globalGpio.wakeup))
+            SingleDataLine(title = "Advertisement Trigger", data = AdvTriggerName.fromAbrv(globalGpio.advTrig))
+            SingleDataLine(title = "Latch", data = LatchName.fromAbrv(globalGpio.latch))
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+    }
+}
+
+@Composable
+fun SingleDataLine(
+    title: String,
+    data: String?,
+) {
+    data?.let {
+        Row(
+            modifier =
+            Modifier.padding(bottom = 2.dp, top = 1.dp)
+        ) {
+            Text(
+                if (title.isNotEmpty()) "$title:  " else "",
+                style = logItemTitleFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                data.ifEmpty { "Not Set" },
+                style = logTextFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
 fun AdvDataItem(
     title: String,
     data: String? = null,
@@ -307,6 +368,42 @@ fun AdvDataItem(
                 Spacer(Modifier.width(5.dp))
                 Text(encryptedness, style = CustomItemSubFont)
             }
+        }
+    }
+    Spacer(modifier = Modifier.height(14.dp))
+}
+
+@Composable
+fun TriggerDataItem(
+    title: String,
+    data: String? = null,
+    threshold: Int? = null
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(
+            modifier = Modifier.padding(bottom = 2.dp),
+            text = title,
+            style = configTitleFont,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        if (!data.isNullOrBlank()) {
+            Text(
+                modifier = Modifier.padding(bottom = 2.dp),
+                text = "$data",
+                style = logTextFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        threshold?.let {
+            Text(
+                modifier = Modifier.padding(bottom = 2.dp),
+                text = "$it",
+                style = logTextFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
     Spacer(modifier = Modifier.height(14.dp))

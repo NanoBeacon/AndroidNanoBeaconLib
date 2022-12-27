@@ -10,9 +10,6 @@ enum class PostTriggerControlMode(val label : String, val trigerResetsCount : Bo
 
     companion object  {
         fun fromCodes(code : Int?, trigCount : Int?) : PostTriggerControlMode? {
-            if (code == 0 || trigCount == 0) {
-                return null
-            }
             when(code) {
                 0 -> {
                     return if (trigCount == 0) {
