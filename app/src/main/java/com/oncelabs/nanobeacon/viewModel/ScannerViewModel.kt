@@ -32,7 +32,7 @@ class ScannerViewModel @Inject constructor(
     application: Application,
     private val configDataManager: ConfigDataManager,
     private val filePickerManager: FilePickerManager
-): AndroidViewModel(application) {
+) : AndroidViewModel(application) {
 
     private val TAG = ScannerViewModel::class.simpleName
 
@@ -52,7 +52,6 @@ class ScannerViewModel @Inject constructor(
     val filteredDiscoveredBeacons: LiveData<List<NanoBeaconInterface>> = _filteredDiscoveredBeacons
 
 
-
     private val _showDetailModal = MutableLiveData<Boolean>(false)
     val showDetailModal = _showDetailModal
 
@@ -65,27 +64,27 @@ class ScannerViewModel @Inject constructor(
         beaconManager.startScanning()
     }
 
-    fun startScanning(){
+    fun startScanning() {
         beaconManager.startScanning()
     }
 
-    fun stopScanning(){
+    fun stopScanning() {
         beaconManager.stopScanning()
     }
 
-    fun refresh(){
+    fun refresh() {
         beaconManager.refresh()
     }
 
-    fun setCurrentDetailData(beacon : NanoBeaconInterface?) {
+    fun setCurrentDetailData(beacon: NanoBeaconInterface?) {
         _currentDetailBeacon.value = beacon
     }
 
-    fun setShowDetailModal(value : Boolean) {
+    fun setShowDetailModal(value: Boolean) {
         _showDetailModal.value = value
     }
 
-    private fun addObservers(){
+    private fun addObservers() {
 
         viewModelScope.launch {
             beaconManager.newBeaconDataFlow.collect {
@@ -116,7 +115,11 @@ class ScannerViewModel @Inject constructor(
     private fun startFilterTimer() {
         filterTimer?.cancel()
         filterTimer = Timer().scheduleAtFixedRate(0, 1000) {
-            _filteredDiscoveredBeacons.postValue(filterResults(unfilteredBeacons = _discoveredBeacons.value ?: listOf()))
+            _filteredDiscoveredBeacons.postValue(
+                filterResults(
+                    unfilteredBeacons = _discoveredBeacons.value ?: listOf()
+                )
+            )
         }
     }
 
@@ -124,22 +127,29 @@ class ScannerViewModel @Inject constructor(
         var filteredList = unfilteredBeacons
 
         _filters.value?.let { filters ->
-            for(filter in filters) {
-                if(!filter.enabled) { continue }
-                when(filter.filterType) {
+            for (filter in filters) {
+                if (!filter.enabled) {
+                    continue
+                }
+                when (filter.filterType) {
                     FilterType.ADDRESS -> {
                         filteredList = filteredList.filter {
-                            (it.beaconDataFlow.value?.bluetoothAddress)?.contains(filter.value as? String ?: "") ?: false
+                            (it.beaconDataFlow.value?.bluetoothAddress)?.contains(
+                                filter.value as? String ?: ""
+                            ) ?: false
                         }
                     }
                     FilterType.ADVANCED_SEARCH -> {
                         filteredList = filteredList.filter {
-                            it.beaconDataFlow.value?.searchableString?.contains(filter.value as? String ?: "", ignoreCase = true) ?: false
+                            it.beaconDataFlow.value?.searchableString?.contains(
+                                filter.value as? String ?: "", ignoreCase = true
+                            ) ?: false
                         }
                     }
                     FilterType.RSSI -> {
                         filteredList = filteredList.filter {
-                            (it.beaconDataFlow.value?.rssi?.toFloat() ?: -127f) > (filter.value as? Float ?: 0f)
+                            (it.beaconDataFlow.value?.rssi?.toFloat()
+                                ?: -127f) > (filter.value as? Float ?: 0f)
                         }
                     }
                     FilterType.HIDE_UNNAMED -> {
@@ -153,7 +163,30 @@ class ScannerViewModel @Inject constructor(
                         }
                     }
                     FilterType.BY_TYPE -> {
-                        Log.e(TAG, "${filter.filterType} not yet implemented")
+                        val holderMap = (filter.value as? MutableMap<String, Boolean>)?.toList()
+                        //(value as? MutableMap<String, Boolean>)?.values?.any { it } ?: false
+
+                        holderMap?.let {
+                            for (type in holderMap) {
+                                if (type.second) {
+                                    if (type.first == "iBeacon") {
+                                        filteredList = filteredList.filter {
+                                            it.beaconDataFlow.value?.raw?.let { rawData ->
+                                                val raw = rawData.replace("-", "")
+                                                if (raw.length >= 10) {
+                                                    val trimmed = raw.substring(4,10)
+                                                    trimmed == "4c0002"
+                                                } else {
+                                                    false
+                                                }
+                                            } ?: false
+                                        }
+                                    } else if (type.first == "Eddystone") {
+
+                                    }
+                                }
+                            }
+                        }
                     }
                     FilterType.NAME -> {
                         (filter.value as? String)?.let { value ->
@@ -168,7 +201,8 @@ class ScannerViewModel @Inject constructor(
                         }
                     }
                     FilterType.SORT_RSSI -> {
-                        filteredList = filteredList.sortedByDescending { it.beaconDataFlow.value?.rssi }
+                        filteredList =
+                            filteredList.sortedByDescending { it.beaconDataFlow.value?.rssi }
                     }
                 }
             }
@@ -181,7 +215,7 @@ class ScannerViewModel @Inject constructor(
      */
     fun onFilterChanged(type: FilterType, value: Any?, enabled: Boolean) {
         val index = _filters.value?.indexOfFirst { it.filterType == type }
-        if(index != -1 && index != null) {
+        if (index != -1 && index != null) {
             val filterCopy = _filters.value?.toMutableList()
             filterCopy?.get(index)?.value = value
             filterCopy?.get(index)?.enabled = enabled
@@ -190,7 +224,7 @@ class ScannerViewModel @Inject constructor(
         }
 
         _filters.value?.mapNotNull { it.getDescription() }?.let { filterDescriptions ->
-            if(filterDescriptions.isEmpty()) {
+            if (filterDescriptions.isEmpty()) {
                 _currentFiltersDescription.value = "No filters"
                 return
             }
