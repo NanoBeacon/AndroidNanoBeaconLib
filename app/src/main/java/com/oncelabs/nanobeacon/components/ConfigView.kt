@@ -87,14 +87,15 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
             Column(Modifier.weight(0.95f)) {
 
                 AdvDataItem(
-                    title = "UI Format",
+                    title = "Advertising Data Format",
                     data = adv.ui_format.label
                 )
 
                 adv.interval?.let {
                     AdvDataItem(
                         title = "Advertising Interval",
-                        data = it.toString()
+                        data = it.toString(),
+                        unit = "ms"
                     )
                 }
 
@@ -123,6 +124,14 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                     parsedPayload.txPower?.let {
                         AdvDataItem(title = "Tx Power", data = it)
                     }
+
+                    AdvRandomDelayType.fromCode(adv.randDlyType)?.let {
+                        AdvDataItem(
+                            title = "Advertising Random Delay",
+                            data = it
+                        )
+                    }
+
                     parsedPayload.manufacturerData?.let { manufacturerData ->
                         SubSectionTitle(title = "Manufacturer Data Items:")
                         Column(
@@ -174,6 +183,14 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                     data = it.label
                                 )
                             }
+                            adv.trigCheckPeriod?.let {
+                                AdvDataItem(
+                                    title = "Trigger Check Period",
+                                    data = it.toString(),
+                                    unit = "ms"
+                                )
+                            }
+
                             adv.triggers?.let {
                                 for (trigger in it) {
                                     if (clearedConfigData.globalTrigSettings?.contains(trigger) == true) {
@@ -192,7 +209,8 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                             adv.gpioTriggers?.let {
                                 for (trigger in it) {
                                     if (clearedConfigData.globalGpioTriggerSrc?.contains(trigger) == true) {
-                                        val triggerData = clearedConfigData.globalGpioTriggerSrc?.get(trigger)
+                                        val triggerData =
+                                            clearedConfigData.globalGpioTriggerSrc?.get(trigger)
                                         triggerData?.let {
                                             GlobalGpioTriggerItem(it)
                                         }
@@ -300,7 +318,10 @@ fun GlobalGpioTriggerItem(globalGpio: GlobalGpio) {
             )
             SingleDataLine(title = "Digital", data = DigitalInputName.fromAbrv(globalGpio.digital))
             SingleDataLine(title = "Wakeup", data = WakeupName.fromAbrv(globalGpio.wakeup))
-            SingleDataLine(title = "Advertisement Trigger", data = AdvTriggerName.fromAbrv(globalGpio.advTrig))
+            SingleDataLine(
+                title = "Advertisement Trigger",
+                data = AdvTriggerName.fromAbrv(globalGpio.advTrig)
+            )
             SingleDataLine(title = "Latch", data = LatchName.fromAbrv(globalGpio.latch))
         }
         Spacer(modifier = Modifier.height(14.dp))
