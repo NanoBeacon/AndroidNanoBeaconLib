@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.ui.theme.*
 import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
+import java.util.*
 
 
 @Composable
@@ -53,6 +54,10 @@ fun DetailedViewCard(beacon: NanoBeaconInterface) {
                         }
                         Spacer(modifier = Modifier.weight(1f))
                     }
+                    CustomDataLine(title = "Timestamp", data = it.timeStampFormatted, maxLines = 1)
+                    CustomDataLine(title = "RSSI", data = it.rssi.toString(), maxLines = 1)
+                    CustomDataLine(title = "Estimated", data = it.estimatedAdvInterval.toString(), maxLines = 1)
+
 
                     when(beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format ?: ConfigType.NOT_RECOGNIZED) {
                         ConfigType.CUSTOM -> { CustomTypeView(beacon = beacon, data = data) }
