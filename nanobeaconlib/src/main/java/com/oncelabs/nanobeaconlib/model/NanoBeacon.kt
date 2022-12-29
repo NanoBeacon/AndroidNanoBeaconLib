@@ -94,16 +94,7 @@ open class NanoBeacon(
         matchingConfig.value?.let {
             val adv = it.advSetData[0]
             if (adv.advModeTrigEn == AdvMode.TRIGGERED) {
-                if(!check) {
-                    NanoNotificationService.startService(
-                        NanoNotificationManager.appContext,
-                        "Advertisement Triggered",
-                        "Inplay Alert",
-                        shouldSound = true,
-                        shouldVibrate = true
-                    ) //Trigger notification
-                }
-                check = true
+                NanoNotificationManager.submitNotification()
             }
             adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
                 var currentIndex = 0
