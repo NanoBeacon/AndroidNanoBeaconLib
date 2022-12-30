@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VerticalAlignTop
@@ -13,6 +14,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.codable.ConfigData
@@ -35,7 +37,8 @@ fun QrScanScreen(qrScanViewModel: QrScanViewModel = hiltViewModel()) {
         showModal = showModal.value,
         configData = currentConfig.value,
         onQrCodeScanned = { qrScanViewModel.submitQrConfig(it) },
-        buttonClicked = { qrScanViewModel.openScanner() })
+        buttonClicked = { qrScanViewModel.openScanner() },
+        deleteConfig = { qrScanViewModel.deleteConfig() })
 }
 
 
@@ -44,7 +47,8 @@ fun QrScanScreenContent(
     showModal: Boolean?,
     configData: ParsedConfigData?,
     onQrCodeScanned: (String) -> Unit,
-    buttonClicked: () -> Unit
+    buttonClicked: () -> Unit,
+    deleteConfig : () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         if (showModal == false) {
@@ -68,10 +72,31 @@ fun QrScanScreenContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
-                CameraButton {
-                    buttonClicked()
+                FloatingButton(
+                    {
+                        buttonClicked()
+                    },
+                    Icons.Default.QrCodeScanner
+                )
+            }
+            if(configData != null) {
+                Spacer(Modifier.height(25.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Max),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    FloatingButton(
+                        {
+                            deleteConfig()
+                        },
+                        Icons.Default.Delete
+                    )
                 }
             }
+
         }
 
         Column(Modifier.fillMaxSize()) {
@@ -81,8 +106,9 @@ fun QrScanScreenContent(
 }
 
 @Composable
-fun CameraButton(
-    onClick: () -> Unit
+fun FloatingButton(
+    onClick: () -> Unit,
+    icon: ImageVector
 ) {
     FloatingActionButton(
         onClick = {
@@ -92,7 +118,7 @@ fun CameraButton(
         contentColor = Color.White,
     ) {
         Icon(
-            Icons.Default.QrCodeScanner,
+            icon,
             "Top",
             modifier = Modifier.size(36.dp)
         )

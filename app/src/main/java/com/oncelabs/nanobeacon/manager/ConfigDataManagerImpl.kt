@@ -36,6 +36,10 @@ class ConfigDataManagerImpl
         parseConfigData(configData)
     }
 
+    override fun deleteConfig() {
+        _parsedConfig.value = null
+    }
+
     private fun parseConfigData(configData: ConfigData) {
 
         configData.advSet?.let {

@@ -87,6 +87,13 @@ class QrScanViewModel @Inject constructor(
         }
     }
 
+    fun deleteConfig() {
+        SettingsManager.setSavedConfig("")
+        configDataManager.deleteConfig()
+        beaconManager.refresh()
+
+    }
+
     fun openScanner() {
         _showQrScanner.value = true
     }
