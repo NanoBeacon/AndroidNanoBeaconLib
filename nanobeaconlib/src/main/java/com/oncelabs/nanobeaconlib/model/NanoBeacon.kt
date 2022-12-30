@@ -4,9 +4,12 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.oncelabs.nanobeaconlib.enums.AdvMode
 import com.oncelabs.nanobeaconlib.enums.DynamicDataType
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
+import com.oncelabs.nanobeaconlib.manager.NanoNotificationManager
+import com.oncelabs.nanobeaconlib.manager.NanoNotificationService
 import com.oncelabs.nanobeaconlib.parser.DynamicDataParsers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +44,8 @@ open class NanoBeacon(
 
     private val _manufacturerData = MutableStateFlow<List<ProcessedData>>(listOf())
     override var manufacturerData = _manufacturerData.asStateFlow()
+
+    private var check = false
 
     override fun newBeaconData(beaconData: NanoBeaconData) {
         _beaconDataFlow.value = beaconData
@@ -88,6 +93,9 @@ open class NanoBeacon(
         val list: MutableList<ProcessedData> = mutableListOf()
         matchingConfig.value?.let {
             val adv = it.advSetData[0]
+            if (adv.advModeTrigEn == AdvMode.TRIGGERED) {
+                NanoNotificationManager.submitNotification()
+            }
             adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
                 var currentIndex = 0
                 for (i in manufacturerDataFlags.toList()) {
