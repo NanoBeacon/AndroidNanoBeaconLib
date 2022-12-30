@@ -98,4 +98,8 @@ class QrScanViewModel @Inject constructor(
         _showQrScanner.value = true
     }
 
+    fun closeScanner() {
+        _showQrScanner.value = false
+    }
+
 }

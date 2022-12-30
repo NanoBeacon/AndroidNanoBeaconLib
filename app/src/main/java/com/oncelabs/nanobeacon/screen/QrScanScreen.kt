@@ -5,10 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.VerticalAlignTop
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -37,6 +34,7 @@ fun QrScanScreen(qrScanViewModel: QrScanViewModel = hiltViewModel()) {
         showModal = showModal.value,
         configData = currentConfig.value,
         onQrCodeScanned = { qrScanViewModel.submitQrConfig(it) },
+        closeScanner = { qrScanViewModel.closeScanner() },
         buttonClicked = { qrScanViewModel.openScanner() },
         deleteConfig = { qrScanViewModel.deleteConfig() })
 }
@@ -47,6 +45,7 @@ fun QrScanScreenContent(
     showModal: Boolean?,
     configData: ParsedConfigData?,
     onQrCodeScanned: (String) -> Unit,
+    closeScanner : () -> Unit,
     buttonClicked: () -> Unit,
     deleteConfig : () -> Unit
 ) {
@@ -99,8 +98,22 @@ fun QrScanScreenContent(
 
         }
 
-        Column(Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxSize()) {
             QrCodeComponent(showModal = showModal == false, onCodeScanned = { onQrCodeScanned(it) })
+            if (showModal == true) {
+                FloatingActionButton(
+                    onClick = { closeScanner() },
+                    backgroundColor = logModalItemBackgroundColor,
+                    contentColor = Color.White,
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        "Close Scanner",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            }
         }
     }
 }
