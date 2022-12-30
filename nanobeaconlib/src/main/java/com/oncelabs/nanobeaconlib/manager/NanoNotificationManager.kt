@@ -9,13 +9,14 @@ object NanoNotificationManager {
     private var count : Int = 0
     private var timerRunning : Boolean = false
 
-    fun submitNotification() {
+    fun submitNotification(set : Int?) {
 
         if (count < 4) {
+            val num = set?.let { set.toString() } ?: ""
             NanoNotificationService.startService(
                 NanoNotificationManager.appContext,
-                "Advertisement Triggered$count",
-                "Inplay Alert$count",
+                "Inplay Alert",
+                "Advertisement Triggered For Set $num",
                 shouldSound = true,
                 shouldVibrate = true
             ) //Trigger notification

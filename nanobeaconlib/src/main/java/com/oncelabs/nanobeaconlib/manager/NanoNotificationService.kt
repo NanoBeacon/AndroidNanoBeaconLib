@@ -110,7 +110,7 @@ class NanoNotificationService : LifecycleService() {
             NotificationCompat
                 .Builder(this, input)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Advertisement Triggered")
+                .setContentTitle("Inplay Alert")
                 .setContentText(name)
                 .setContentIntent(pendingIntent)
                 .setVibrate(longArrayOf(1000L, 1000L, 1000L))
