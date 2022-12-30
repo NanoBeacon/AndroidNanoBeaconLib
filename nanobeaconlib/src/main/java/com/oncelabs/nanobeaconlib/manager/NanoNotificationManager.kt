@@ -11,7 +11,7 @@ object NanoNotificationManager {
 
     fun submitNotification(set : Int?) {
 
-        if (count < 4) {
+        if (count < 1) {
             val num = set?.let { set.toString() } ?: ""
             NanoNotificationService.startService(
                 NanoNotificationManager.appContext,
@@ -26,7 +26,7 @@ object NanoNotificationManager {
                 Timer().schedule(timerTask {
                     count = 0
                     timerRunning = false
-                }, 3000)
+                }, 1000)
             }
             count += 1
         }
