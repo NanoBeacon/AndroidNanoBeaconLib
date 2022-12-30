@@ -70,6 +70,9 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
         refresh()
     }
 
+    fun deleteConfig() {
+        currentConfig = null
+    }
     fun requestBluetoothEnable() {
         bluetoothAdapter?.let { adapter ->
             if (!adapter.isEnabled) {

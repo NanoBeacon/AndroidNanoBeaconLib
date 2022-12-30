@@ -38,6 +38,7 @@ class ConfigDataManagerImpl
 
     override fun deleteConfig() {
         _parsedConfig.value = null
+        NanoBeaconManager.deleteConfig()
     }
 
     private fun parseConfigData(configData: ConfigData) {
