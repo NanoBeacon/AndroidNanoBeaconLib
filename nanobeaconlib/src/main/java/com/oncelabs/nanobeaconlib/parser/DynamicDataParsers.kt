@@ -37,7 +37,7 @@ class DynamicDataParsers {
                 1 -> base = byteArray[0].toInt()
                 2 -> base = ByteBuffer.wrap(byteArray).order(byteOrder).short.toInt()
             }
-            Log.d("BASED", bigEndian.toString())
+            //Log.d("BASED", bigEndian.toString())
             base?.let {
                 return it * tempUnit
             } ?: run {
