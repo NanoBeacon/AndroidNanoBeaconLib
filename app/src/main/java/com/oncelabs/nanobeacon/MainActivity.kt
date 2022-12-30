@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon
 
 import android.content.ComponentName
+import android.content.ContentValues
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
@@ -12,10 +13,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.app.ActivityCompat
+import com.beust.klaxon.Klaxon
+import com.beust.klaxon.KlaxonException
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.oncelabs.nanobeacon.analyzer.gzipDecompress
+import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.ConfigDataManager
 import com.oncelabs.nanobeacon.manager.FilePickerManager
+import com.oncelabs.nanobeacon.manager.settings.SettingsManager
 import com.oncelabs.nanobeacon.permission.PermissionType
 import com.oncelabs.nanobeacon.permission.RequestAllPermissions
 import com.oncelabs.nanobeacon.screen.MainScreen
@@ -24,6 +30,7 @@ import com.oncelabs.nanobeaconlib.manager.NanoNotificationManager
 import com.oncelabs.nanobeaconlib.manager.NanoNotificationService
 import com.oncelabs.nanobeaconlib.manager.ServiceUnbinder
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 import javax.inject.Inject
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -53,7 +60,21 @@ class MainActivity : ComponentActivity(), ServiceUnbinder {
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        SettingsManager.init(this)
         filePickerManager.createActivity(this)
+        SettingsManager.getSavedConfig()?.let { configString ->
+            if(configString.isNotEmpty()) {
+                try {
+                    val parsedData = Klaxon().parse<ConfigData>(configString)
+                    parsedData?.let {
+                        configDataManager.setConfig(it)
+                        beaconManager.refresh()
+                    }
+                } catch (e: KlaxonException) {
+                    Log.d(ContentValues.TAG, "Not formatted Correctly")
+                }
+            }
+        }
         NanoNotificationManager.appContext = this
         bindService()
         setContent {
@@ -79,7 +100,20 @@ class MainActivity : ComponentActivity(), ServiceUnbinder {
     override fun onResume() {
         super.onResume()
         if (allPermissionsGranted()) {
-            /**TODO: */
+            SettingsManager.init(this)
+            SettingsManager.getSavedConfig()?.let { configString ->
+                if(configString.isNotEmpty()) {
+                    try {
+                        val parsedData = Klaxon().parse<ConfigData>(configString)
+                        parsedData?.let {
+                            configDataManager.setConfig(it)
+                            beaconManager.refresh()
+                        }
+                    } catch (e: KlaxonException) {
+                        Log.d(ContentValues.TAG, "Not formatted Correctly")
+                    }
+                }
+            }
         }
     }
 

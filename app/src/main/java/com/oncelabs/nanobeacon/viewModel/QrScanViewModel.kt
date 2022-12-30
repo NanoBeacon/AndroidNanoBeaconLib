@@ -18,6 +18,7 @@ import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.ConfigDataManager
 import com.oncelabs.nanobeacon.manager.ConfigDataManagerImpl
 import com.oncelabs.nanobeacon.manager.FilePickerManager
+import com.oncelabs.nanobeacon.manager.settings.SettingsManager
 import com.oncelabs.nanobeacon.model.ADXL367Data
 import com.oncelabs.nanobeaconlib.enums.BleState
 import com.oncelabs.nanobeaconlib.enums.ScanState
@@ -73,6 +74,7 @@ class QrScanViewModel @Inject constructor(
                 parsedData?.let {
                     _showQrScanner.value = false
                     pendingQr = null
+                    SettingsManager.setSavedConfig(decoded)
                     configDataManager.setConfig(it)
                     beaconManager.refresh()
                 } ?: run {
@@ -85,8 +87,19 @@ class QrScanViewModel @Inject constructor(
         }
     }
 
+    fun deleteConfig() {
+        SettingsManager.setSavedConfig("")
+        configDataManager.deleteConfig()
+        beaconManager.refresh()
+
+    }
+
     fun openScanner() {
         _showQrScanner.value = true
+    }
+
+    fun closeScanner() {
+        _showQrScanner.value = false
     }
 
 }

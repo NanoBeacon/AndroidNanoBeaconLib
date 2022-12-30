@@ -5,14 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.VerticalAlignTop
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.oncelabs.nanobeacon.codable.ConfigData
@@ -35,7 +34,9 @@ fun QrScanScreen(qrScanViewModel: QrScanViewModel = hiltViewModel()) {
         showModal = showModal.value,
         configData = currentConfig.value,
         onQrCodeScanned = { qrScanViewModel.submitQrConfig(it) },
-        buttonClicked = { qrScanViewModel.openScanner() })
+        closeScanner = { qrScanViewModel.closeScanner() },
+        buttonClicked = { qrScanViewModel.openScanner() },
+        deleteConfig = { qrScanViewModel.deleteConfig() })
 }
 
 
@@ -44,7 +45,9 @@ fun QrScanScreenContent(
     showModal: Boolean?,
     configData: ParsedConfigData?,
     onQrCodeScanned: (String) -> Unit,
-    buttonClicked: () -> Unit
+    closeScanner : () -> Unit,
+    buttonClicked: () -> Unit,
+    deleteConfig : () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         if (showModal == false) {
@@ -68,21 +71,57 @@ fun QrScanScreenContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
-                CameraButton {
-                    buttonClicked()
+                FloatingButton(
+                    {
+                        buttonClicked()
+                    },
+                    Icons.Default.QrCodeScanner
+                )
+            }
+            if(configData != null) {
+                Spacer(Modifier.height(25.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Max),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    FloatingButton(
+                        {
+                            deleteConfig()
+                        },
+                        Icons.Default.Delete
+                    )
                 }
             }
+
         }
 
-        Column(Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxSize()) {
             QrCodeComponent(showModal = showModal == false, onCodeScanned = { onQrCodeScanned(it) })
+            if (showModal == true) {
+                FloatingActionButton(
+                    onClick = { closeScanner() },
+                    backgroundColor = logModalItemBackgroundColor,
+                    contentColor = Color.White,
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        "Close Scanner",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun CameraButton(
-    onClick: () -> Unit
+fun FloatingButton(
+    onClick: () -> Unit,
+    icon: ImageVector
 ) {
     FloatingActionButton(
         onClick = {
@@ -92,7 +131,7 @@ fun CameraButton(
         contentColor = Color.White,
     ) {
         Icon(
-            Icons.Default.QrCodeScanner,
+            icon,
             "Top",
             modifier = Modifier.size(36.dp)
         )

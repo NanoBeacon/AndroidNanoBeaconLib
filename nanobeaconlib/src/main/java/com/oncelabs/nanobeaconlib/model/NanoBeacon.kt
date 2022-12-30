@@ -94,7 +94,7 @@ open class NanoBeacon(
         matchingConfig.value?.let {
             val adv = it.advSetData[0]
             if (adv.advModeTrigEn == AdvMode.TRIGGERED) {
-                NanoNotificationManager.submitNotification()
+                NanoNotificationManager.submitNotification(adv.id)
             }
             adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
                 var currentIndex = 0
