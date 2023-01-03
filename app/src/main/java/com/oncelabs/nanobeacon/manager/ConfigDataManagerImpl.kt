@@ -2,6 +2,7 @@ package com.oncelabs.nanobeacon.manager
 
 import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.Icons
 import androidx.compose.ui.text.toUpperCase
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.codable.GlobalTrigSetting
@@ -39,6 +40,7 @@ class ConfigDataManagerImpl
     override fun deleteConfig() {
         _parsedConfig.value = null
         NanoBeaconManager.deleteConfig()
+
     }
 
     private fun parseConfigData(configData: ConfigData) {
