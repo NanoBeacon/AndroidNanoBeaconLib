@@ -55,8 +55,8 @@ fun DetailedViewCard(beacon: NanoBeaconInterface) {
                         Spacer(modifier = Modifier.weight(1f))
                     }
                     CustomDataLine(title = "Timestamp", data = it.timeStampFormatted, maxLines = 1)
-                    CustomDataLine(title = "RSSI", data = it.rssi.toString(), maxLines = 1)
-                    CustomDataLine(title = "Estimated", data = it.estimatedAdvInterval.toString(), maxLines = 1)
+                    CustomDataLine(title = "RSSI", data = it.rssi.toString() + " dBm", maxLines = 1)
+                    CustomDataLine(title = "Estimated", data = it.estimatedAdvInterval.toString() + " ms", maxLines = 1)
 
 
                     when(beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format ?: ConfigType.NOT_RECOGNIZED) {
