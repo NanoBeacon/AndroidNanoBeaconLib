@@ -198,7 +198,15 @@ class ConfigDataManagerImpl
                             parsedPayload.deviceName = data.decodeHex()
                         }
                     }
-                    else -> {}
+                    ADType.EDDYSTONE_ADDRESS -> { }
+                    ADType.EDDYSTONE_DATA -> {
+                        payload.data?.let { data ->
+                            parseEddystoneData(data)?.let { parsedData ->
+                                parsedPayload.manufacturerData = parsedData
+                            }
+                        }
+                    }
+                    null -> { }
                 }
             }
         }
@@ -284,6 +292,18 @@ class ConfigDataManagerImpl
             )
 
             return result
+        }
+        return null
+    }
+
+    private fun parseEddystoneData(raw : String) : List<ParsedDynamicData>? {
+        if (raw.length >= 44) {
+            val trimmed = raw.drop(8).dropLast(4)
+            val prefix = ParsedDynamicData(1, DynamicDataType.EDDYSTONE_PREFIX, null, null, null)
+            val namespace = ParsedDynamicData(10, DynamicDataType.EDDYSTONE_NAMESPACE, false, false, trimmed.substring(0, 20))
+            val instance = ParsedDynamicData(6, DynamicDataType.EDDYSTONE_INSTANCE, false, false, trimmed.substring(20))
+            val postfix = ParsedDynamicData(1, DynamicDataType.EDDYSTONE_POSTFIX, null, null, null)
+            return listOf(prefix, namespace, instance, postfix)
         }
         return null
     }

@@ -10,24 +10,19 @@
       "interval": 1000,
       "authEn": 0,
       "authKey": 0,
-      "authSaltType": 2,
+      "authSaltType": 0,
       "authSaltValue": 0,
       "authEaxCountType": 0,
       "authEaxCountValue": 0,
-      "ui_format": "custom",
-      "uid2tlm_ratio": 0.0,
-      "eddystoneTxPower": 0,
+      "ui_format": "UID",
+      "uid2tlm_ratio": -1,
+      "eddystoneTxPower": 10,
       "chCtrl": 0,
       "advModeTrigEn": 1,
-      "gpioTrigerSrc": [
-        2,
-        4
-      ],
       "sensorTrigerSrc": [
-        "t1Low",
-        "t2Low"
+        "t1Low"
       ],
-      "postTrigCtrlMode": 3,
+      "postTrigCtrlMode": 2,
       "postTrigNumAdv": 6,
       "trigCheckPeriod": 1000,
       "is1MPhy": 1,
@@ -35,23 +30,18 @@
       "isStandardBle": 1,
       "cte": 0,
       "cteLen": 0,
-      "randomDlyType": 1,
+      "randomDlyType": 0,
       "payloadVer": 3,
       "payload": [
         {
-          "len": 6,
-          "type": 9,
-          "data": "446576696e"
+          "len": 3,
+          "type": 3,
+          "data": "aafe"
         },
         {
-          "len": 2,
-          "type": 10,
-          "data": "1e"
-        },
-        {
-          "len": 12,
-          "type": 255,
-          "data": "0505<VCC 1byte 1 1><RANDOM 4byte 1 0><RANDOM 4byte 1 0>"
+          "len": 23,
+          "type": 22,
+          "data": "aafe000a112233445566778899001122334455660000"
         }
       ]
     }
@@ -90,11 +80,11 @@
     },
     {
       "id": 2,
-      "digital": "ie",
+      "digital": "default",
       "pu-pd": 1,
-      "wakeup": "high",
-      "advTrig": "high",
-      "latch": 1,
+      "wakeup": "disable",
+      "advTrig": "disable",
+      "latch": 0,
       "maskb": 0
     },
     {
@@ -108,11 +98,11 @@
     },
     {
       "id": 4,
-      "digital": "ie",
+      "digital": "default",
       "pu-pd": 1,
-      "wakeup": "low",
-      "advTrig": "high",
-      "latch": 2,
+      "wakeup": "disable",
+      "advTrig": "disable",
+      "latch": 0,
       "maskb": 0
     },
     {
@@ -191,20 +181,20 @@
     "code": []
   },
   "globalTrigSetting": {
-    "trig1Low": 23,
-    "trig2Low": 32,
+    "trig1Low": 1,
+    "trig2Low": 0,
     "trig2High": 0,
     "trig3Low": 0,
     "trig3High": 0,
     "trig4Low": 0,
     "trig4High": 0,
     "trig1Src": "vcc",
-    "trig2Src": "temp",
+    "trig2Src": "15",
     "trig3Src": "15",
     "trig4Src": "15",
     "triggerEn": [
       1,
-      1,
+      0,
       0,
       0
     ]

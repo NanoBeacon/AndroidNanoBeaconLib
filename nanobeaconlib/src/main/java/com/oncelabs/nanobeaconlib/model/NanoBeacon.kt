@@ -5,7 +5,9 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.oncelabs.nanobeaconlib.enums.AdvMode
+import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.enums.DynamicDataType
+import com.oncelabs.nanobeaconlib.extension.toHexString
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import com.oncelabs.nanobeaconlib.manager.NanoNotificationManager
@@ -97,12 +99,22 @@ open class NanoBeacon(
                 NanoNotificationManager.submitNotification(adv.id)
             }
             adv.parsedPayloadItems?.manufacturerData?.let { manufacturerDataFlags ->
+                var serviceDataSize = 0
+                if (data.serviceData?.isNotEmpty() == true) {
+                    serviceDataSize = data.serviceData!!.toList()[0].second.size
+                }
                 var currentIndex = 0
                 for (i in manufacturerDataFlags.toList()) {
                     val endIndex = currentIndex + i.len
                     var dataHolder: String? = null
-                    if (endIndex <= data.manufacturerData.size) {
-                        val trimmedData = data.manufacturerData.copyOfRange(currentIndex, endIndex)
+                    if (endIndex <= data.manufacturerData.size || endIndex <= serviceDataSize) {
+                        var trimmedData : ByteArray = byteArrayOf()
+                        if (adv.ui_format == ConfigType.UID) {
+                            trimmedData = data.serviceData?.toList()?.get(0)?.second?.copyOfRange(currentIndex, endIndex)
+                                ?: byteArrayOf()
+                        } else {
+                            trimmedData = data.manufacturerData.copyOfRange(currentIndex, endIndex)
+                        }
                         when (i.dynamicType) {
                             DynamicDataType.VCC_ITEM -> dataHolder =
                                 DynamicDataParsers.processVcc(
@@ -203,6 +215,18 @@ open class NanoBeacon(
                                     DynamicDataParsers.processIBeaconTxPower(trimmedData).toString()
                             }
                             DynamicDataType.IBEACON_ADDR -> {}
+                            DynamicDataType.EDDYSTONE_NAMESPACE -> {
+                                data.serviceData?.let { dataMaps ->
+                                    dataHolder = DynamicDataParsers.processEddystoneNamespace(trimmedData)
+                                }
+                            }
+                            DynamicDataType.EDDYSTONE_INSTANCE -> {
+                                data.serviceData?.let { dataMaps ->
+                                    dataHolder = DynamicDataParsers.processEddystoneInstance(trimmedData)
+                                }
+                            }
+                            DynamicDataType.EDDYSTONE_PREFIX -> {}
+                            DynamicDataType.EDDYSTONE_POSTFIX -> {}
                         }
                         currentIndex = endIndex
                     } else {
