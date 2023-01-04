@@ -12,10 +12,12 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.ActivityCompat
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.KlaxonException
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.oncelabs.nanobeacon.analyzer.gzipDecompress
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.manager.BeaconManager
@@ -26,6 +28,7 @@ import com.oncelabs.nanobeacon.permission.PermissionType
 import com.oncelabs.nanobeacon.permission.RequestAllPermissions
 import com.oncelabs.nanobeacon.screen.MainScreen
 import com.oncelabs.nanobeacon.ui.theme.InplayTheme
+import com.oncelabs.nanobeacon.ui.theme.topBarBackground
 import com.oncelabs.nanobeaconlib.manager.NanoNotificationManager
 import com.oncelabs.nanobeaconlib.manager.NanoNotificationService
 import com.oncelabs.nanobeaconlib.manager.ServiceUnbinder
@@ -62,6 +65,8 @@ class MainActivity : ComponentActivity(), ServiceUnbinder {
         super.onCreate(savedInstanceState)
         SettingsManager.init(this)
         filePickerManager.createActivity(this)
+
+
         SettingsManager.getSavedConfig()?.let { configString ->
             if(configString.isNotEmpty()) {
                 try {
@@ -78,6 +83,7 @@ class MainActivity : ComponentActivity(), ServiceUnbinder {
         NanoNotificationManager.appContext = this
         bindService()
         setContent {
+            rememberSystemUiController().setSystemBarsColor(topBarBackground)
             InplayTheme {
                 /**TODO: Request needed permissions*/
                 RequestAllPermissions(
