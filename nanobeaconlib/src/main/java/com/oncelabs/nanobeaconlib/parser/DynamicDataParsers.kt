@@ -37,6 +37,7 @@ class DynamicDataParsers {
                 1 -> base = byteArray[0].toInt()
                 2 -> base = ByteBuffer.wrap(byteArray).order(byteOrder).short.toInt()
             }
+
             base?.let {
                 return it * tempUnit
             } ?: run {

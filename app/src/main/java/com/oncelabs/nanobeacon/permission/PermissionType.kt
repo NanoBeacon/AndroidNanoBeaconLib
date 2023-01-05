@@ -35,6 +35,12 @@ enum class PermissionType(
         "This permission is required to scan qr codes for configurations",
         31,
         false),
+    NOTIFICATIONS(
+        Manifest.permission.POST_NOTIFICATIONS,
+        "Notifications",
+        "This permission is required to Notify of triggered BLE events",
+        31,
+        false),
     BLUETOOTH_CONNECT(
         Manifest.permission.BLUETOOTH_CONNECT,
         "Bluetooth Connect",

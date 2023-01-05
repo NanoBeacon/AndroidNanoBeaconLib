@@ -26,7 +26,7 @@ object NanoNotificationManager {
                 Timer().schedule(timerTask {
                     count = 0
                     timerRunning = false
-                }, 1000)
+                }, 2000)
             }
             count += 1
         }

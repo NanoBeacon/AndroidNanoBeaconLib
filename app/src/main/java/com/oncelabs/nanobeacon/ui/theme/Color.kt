@@ -23,3 +23,5 @@ val zLineColor = Color(0xFFE55857)
 val yLineColor = Color(0xFF76C397)
 val xLineColor = Color(0xFFEE7B49)
 val axisColor = Color(0xFFB0B0B1)
+
+val alertYellow = Color(0xFFCCBB1D)
