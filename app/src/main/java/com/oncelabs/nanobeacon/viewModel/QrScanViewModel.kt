@@ -56,7 +56,7 @@ class QrScanViewModel @Inject constructor(
     private val _conflicts : MutableLiveData<List<ConflictItem>>  = MutableLiveData(listOf())
     val conflicts : LiveData<List<ConflictItem>> = _conflicts
 
-    private val _showConflicts : MutableLiveData<Boolean> = MutableLiveData(true)
+    private val _showConflicts : MutableLiveData<Boolean> = MutableLiveData(false)
     val showConflicts : LiveData<Boolean> = _showConflicts
 
     init {
@@ -88,8 +88,8 @@ class QrScanViewModel @Inject constructor(
                     it.advSet?.let { sets ->
                         val holderConflicts = ConfigAdvConflicts.checkAdvs(sets)
                         if (holderConflicts.isNotEmpty()) {
-                            _conflicts.value = holderConflicts
-                            _showConflicts.value = true
+                           // _conflicts.value = holderConflicts
+                           // _showConflicts.value = true
                         }
                     }
                     beaconManager.refresh()
