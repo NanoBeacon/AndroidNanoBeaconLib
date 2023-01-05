@@ -88,8 +88,8 @@ class QrScanViewModel @Inject constructor(
                     it.advSet?.let { sets ->
                         val holderConflicts = ConfigAdvConflicts.checkAdvs(sets)
                         if (holderConflicts.isNotEmpty()) {
-                            _conflicts.value = holderConflicts
-                            _showConflicts.value = true
+                           // _conflicts.value = holderConflicts
+                           // _showConflicts.value = true
                         }
                     }
                     beaconManager.refresh()
@@ -114,6 +114,9 @@ class QrScanViewModel @Inject constructor(
         _showQrScanner.value = true
     }
 
+    fun dismissConflictModal() {
+        _showConflicts.value = false
+    }
     fun closeScanner() {
         _showQrScanner.value = false
     }

@@ -69,6 +69,9 @@ fun DetailedViewCard(beacon: NanoBeaconInterface) {
                         ConfigType.UID -> {
                             UIDTypeView(beacon = beacon)
                         }
+                        ConfigType.TLM -> {
+                            TLMTypeView(beacon = beacon)
+                        }
                     }
 
                 }
@@ -230,7 +233,7 @@ fun IBeaconTypeView(beacon: NanoBeaconInterface) {
                 val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(items = beaconData.toList(), itemContent = { item ->
-                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData.uppercase(), maxLines = 1)
+                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData.uppercase() + item.dynamicDataType.units, maxLines = 1)
                     })
                 }
                 Spacer(Modifier.height(14.dp))
@@ -252,7 +255,7 @@ fun UIDTypeView(beacon: NanoBeaconInterface) {
                 val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(items = beaconData.toList(), itemContent = { item ->
-                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData.uppercase(), maxLines = 1)
+                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData.uppercase() + item.dynamicDataType.units, maxLines = 1)
                     })
                 }
                 Spacer(Modifier.height(14.dp))
@@ -263,9 +266,27 @@ fun UIDTypeView(beacon: NanoBeaconInterface) {
 }
 
 @Composable
-fun EddyStoneTypeView() {
+fun TLMTypeView(beacon: NanoBeaconInterface) {
+    Column(
+        Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row() {
+            beacon.let { nanoBeaconInterface ->
+                val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
+                LazyColumn(Modifier.fillMaxWidth()) {
+                    items(items = beaconData.toList(), itemContent = { item ->
+                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData.uppercase() + item.dynamicDataType.units, maxLines = 1)
+                    })
+                }
+                Spacer(Modifier.height(14.dp))
+            }
+        }
 
+    }
 }
+
 
 @Preview
 @Preview(name = "NEXUS_7", device = Devices.NEXUS_7)

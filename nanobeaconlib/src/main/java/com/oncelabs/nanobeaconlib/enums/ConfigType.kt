@@ -7,6 +7,7 @@ enum class ConfigType(val label : String){
     CUSTOM("Custom"),
     EDDYSTONE("Eddystone"),
     UID("UID"),
+    TLM("TLM"),
     IBEACON("iBeacon"),
     NOT_RECOGNIZED("Not a recognized format");
 
