@@ -201,8 +201,17 @@ class ConfigDataManagerImpl
                     ADType.EDDYSTONE_ADDRESS -> { }
                     ADType.EDDYSTONE_DATA -> {
                         payload.data?.let { data ->
-                            parseEddystoneData(data)?.let { parsedData ->
-                                parsedPayload.manufacturerData = parsedData
+                            if (type == "UID") {
+                                payload.data?.let { data ->
+                                    parseEddystoneUIDData(data)?.let { parsedData ->
+                                        parsedPayload.manufacturerData = parsedData
+                                    }
+                                }
+                            }
+                            if (type == "TLM") {
+                                parseEddystoneTLMData(data)?.let { parsedData ->
+                                    parsedPayload.manufacturerData = parsedData
+                                }
                             }
                         }
                     }
@@ -296,7 +305,7 @@ class ConfigDataManagerImpl
         return null
     }
 
-    private fun parseEddystoneData(raw : String) : List<ParsedDynamicData>? {
+    private fun parseEddystoneUIDData(raw : String) : List<ParsedDynamicData>? {
         if (raw.length >= 44) {
             val trimmed = raw.drop(8).dropLast(4)
             val prefix = ParsedDynamicData(1, DynamicDataType.EDDYSTONE_PREFIX, null, null, null)
@@ -304,6 +313,40 @@ class ConfigDataManagerImpl
             val instance = ParsedDynamicData(6, DynamicDataType.EDDYSTONE_INSTANCE, false, false, trimmed.substring(20))
             val postfix = ParsedDynamicData(1, DynamicDataType.EDDYSTONE_POSTFIX, null, null, null)
             return listOf(prefix, namespace, instance, postfix)
+        }
+        return null
+    }
+
+    private fun parseEddystoneTLMData(raw : String) : List<ParsedDynamicData>? {
+        if (raw.length >= 28) {
+            val prefix = ParsedDynamicData(2, DynamicDataType.EDDYSTONE_PREFIX, null, null, null)
+
+            var splitRaw: List<String> = raw.split("<").toList()
+            splitRaw = splitRaw.drop(1)
+
+            var parsedMap: MutableList<ParsedDynamicData> = mutableListOf()
+            parsedMap.add(prefix)
+
+            for (dynamicRaw in splitRaw) {
+                val droppedEnd = dynamicRaw.dropLast(1)
+                val endOfName = (droppedEnd.indexOf("byte") - 2)
+
+                val name = droppedEnd.substring(startIndex = 0, endIndex = endOfName)
+
+                val splitData = droppedEnd.substring(startIndex = endOfName + 1).split(" ")
+
+                val dynamicDataType: DynamicDataType? = DynamicDataType.fromAbr(name)
+                val len = splitData[0].substring(0, splitData[0].indexOf("byte")).toInt()
+                val bigEndian = splitData[1].toInt() == 1
+                val encrypted = splitData[2].toInt() == 1
+                dynamicDataType?.let {
+                    val data = ParsedDynamicData(len, dynamicDataType, bigEndian, encrypted, null)
+                    parsedMap.add(data)
+                }
+            }
+            if (parsedMap.isNotEmpty()) {
+                return parsedMap
+            }
         }
         return null
     }

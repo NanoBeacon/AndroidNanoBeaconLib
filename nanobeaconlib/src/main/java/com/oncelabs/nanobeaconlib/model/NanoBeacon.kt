@@ -53,7 +53,10 @@ open class NanoBeacon(
         _beaconDataFlow.value = beaconData
         _rssiFlow.value = beaconData.rssi
         updateAdvInterval(beaconData.timeStamp)
-        _manufacturerData.value = processDeviceData(beaconData)
+        val processed = processDeviceData(beaconData)
+        if (processed.isNotEmpty()) {
+            _manufacturerData.value = processed
+        }
     }
 
     fun loadConfig(parsedConfigData: ParsedConfigData?) {
@@ -87,7 +90,6 @@ open class NanoBeacon(
             // Update adv interval estimate flow
             _estimatedAdvIntervalFlow.value = advIntervalAvg.toInt()
 
-            //Log.d(TAG, "Estimated Adv Interval: $advIntervalAvg")
         }
     }
 
@@ -109,124 +111,132 @@ open class NanoBeacon(
                     var dataHolder: String? = null
                     if (endIndex <= data.manufacturerData.size || endIndex <= serviceDataSize) {
                         var trimmedData : ByteArray = byteArrayOf()
-                        if (adv.ui_format == ConfigType.UID) {
+                        if (adv.ui_format == ConfigType.UID || adv.ui_format == ConfigType.TLM) {
                             trimmedData = data.serviceData?.toList()?.get(0)?.second?.copyOfRange(currentIndex, endIndex)
                                 ?: byteArrayOf()
                         } else {
-                            trimmedData = data.manufacturerData.copyOfRange(currentIndex, endIndex)
+                            if (data.manufacturerData.size >= endIndex) {
+                                trimmedData =
+                                    data.manufacturerData.copyOfRange(currentIndex, endIndex)
+                            }
                         }
-                        when (i.dynamicType) {
-                            DynamicDataType.VCC_ITEM -> dataHolder =
-                                DynamicDataParsers.processVcc(
-                                    trimmedData,
-                                    matchingConfig.value?.vccUnit ?: 0.0F,
-                                    i.bigEndian ?: false,
-                                ).toString()
-                            DynamicDataType.TEMP_ITEM -> dataHolder =
-                                DynamicDataParsers.processInternalTemp(
-                                    trimmedData,
-                                    matchingConfig.value?.tempUnit ?: 0.0F,
-                                    i.bigEndian ?: false,
-                                ).toString()
-                            DynamicDataType.PULSE_ITEM -> dataHolder =
-                                DynamicDataParsers.processWireCount(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.GPIO_ITEM -> dataHolder =
-                                DynamicDataParsers.processGpioStatus(trimmedData)
-                            DynamicDataType.AON_GPIO_ITEM -> TODO()
-                            DynamicDataType.EDGE_CNT_ITEM -> dataHolder =
-                                DynamicDataParsers.processGpioEdgeCount(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.ADC_CH0_ITEM -> dataHolder =
-                                DynamicDataParsers.processCh01(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.ADC_CH1_ITEM -> dataHolder =
-                                DynamicDataParsers.processCh01(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.ADC_CH2_ITEM -> TODO()
-                            DynamicDataType.ADC_CH3_ITEM -> TODO()
-                            DynamicDataType.REG1_ITEM -> TODO()
-                            DynamicDataType.REG2_ITEM -> TODO()
-                            DynamicDataType.REG3_ITEM -> TODO()
-                            DynamicDataType.QDEC_ITEM -> TODO()
-                            DynamicDataType.TS0_ITEM -> dataHolder =
-                                DynamicDataParsers.processTimeStamp(
-                                    trimmedData,
-                                    i.bigEndian ?: false,
-                                    multiplier = 100
-                                ).toString()
-                            DynamicDataType.TS1_ITEM -> dataHolder =
-                                DynamicDataParsers.processTimeStamp(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.ADVCNT_ITEM -> dataHolder =
-                                DynamicDataParsers.processAdv(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.REG_ITEM -> TODO()
-                            DynamicDataType.RANDOM_ITEM -> dataHolder =
-                                DynamicDataParsers.processRandomNumber(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.STATIC_RANDOM_ITEM -> dataHolder =
-                                DynamicDataParsers.processRandomNumber(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.ENCRYPT_ITEM -> TODO()
-                            DynamicDataType.SALT_ITEM -> TODO()
-                            DynamicDataType.TAG_ITEM -> TODO()
-                            DynamicDataType.CUSTOM_PRODUCT_ID_ITEM -> dataHolder =
-                                DynamicDataParsers.processCustomerProductID(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.BLUETOOTH_DEVICE_ADDRESS_ITEM -> dataHolder =
-                                DynamicDataParsers.processBluetoothDeviceAddress(
-                                    trimmedData,
-                                    i.bigEndian ?: false
-                                ).toString()
-                            DynamicDataType.UTF8_ITEM -> TODO()
-                            DynamicDataType.UUID -> {
-                                dataHolder =
-                                    DynamicDataParsers.processIBeaconUUID(trimmedData)
-                            }
-                            DynamicDataType.MAJOR -> {
-                                dataHolder =
-                                    DynamicDataParsers.processMajor(trimmedData)
-                            }
-                            DynamicDataType.MINOR -> {
-                                dataHolder =
-                                    DynamicDataParsers.processMinor(trimmedData)
-                            }
-                            DynamicDataType.TX_POWER -> {
-                                dataHolder =
-                                    DynamicDataParsers.processIBeaconTxPower(trimmedData).toString()
-                            }
-                            DynamicDataType.IBEACON_ADDR -> {}
-                            DynamicDataType.EDDYSTONE_NAMESPACE -> {
-                                data.serviceData?.let { dataMaps ->
-                                    dataHolder = DynamicDataParsers.processEddystoneNamespace(trimmedData)
+                        if (trimmedData.isNotEmpty()) {
+                            when (i.dynamicType) {
+                                DynamicDataType.VCC_ITEM -> dataHolder =
+                                    DynamicDataParsers.processVcc(
+                                        trimmedData,
+                                        matchingConfig.value?.vccUnit ?: 0.0F,
+                                        i.bigEndian ?: false,
+                                    ).toString()
+                                DynamicDataType.TEMP_ITEM -> dataHolder =
+                                    DynamicDataParsers.processInternalTemp(
+                                        trimmedData,
+                                        matchingConfig.value?.tempUnit ?: 0.0F,
+                                        i.bigEndian ?: false,
+                                    ).toString()
+                                DynamicDataType.PULSE_ITEM -> dataHolder =
+                                    DynamicDataParsers.processWireCount(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.GPIO_ITEM -> dataHolder =
+                                    DynamicDataParsers.processGpioStatus(trimmedData)
+                                DynamicDataType.AON_GPIO_ITEM -> TODO()
+                                DynamicDataType.EDGE_CNT_ITEM -> dataHolder =
+                                    DynamicDataParsers.processGpioEdgeCount(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.ADC_CH0_ITEM -> dataHolder =
+                                    DynamicDataParsers.processCh01(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.ADC_CH1_ITEM -> dataHolder =
+                                    DynamicDataParsers.processCh01(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.ADC_CH2_ITEM -> TODO()
+                                DynamicDataType.ADC_CH3_ITEM -> TODO()
+                                DynamicDataType.REG1_ITEM -> TODO()
+                                DynamicDataType.REG2_ITEM -> TODO()
+                                DynamicDataType.REG3_ITEM -> TODO()
+                                DynamicDataType.QDEC_ITEM -> TODO()
+                                DynamicDataType.TS0_ITEM -> dataHolder =
+                                    DynamicDataParsers.processTimeStamp(
+                                        trimmedData,
+                                        i.bigEndian ?: false,
+                                        multiplier = 100
+                                    ).toString()
+                                DynamicDataType.TS1_ITEM -> dataHolder =
+                                    DynamicDataParsers.processTimeStamp(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.ADVCNT_ITEM -> dataHolder =
+                                    DynamicDataParsers.processAdv(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.REG_ITEM -> TODO()
+                                DynamicDataType.RANDOM_ITEM -> dataHolder =
+                                    DynamicDataParsers.processRandomNumber(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.STATIC_RANDOM_ITEM -> dataHolder =
+                                    DynamicDataParsers.processRandomNumber(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.ENCRYPT_ITEM -> TODO()
+                                DynamicDataType.SALT_ITEM -> TODO()
+                                DynamicDataType.TAG_ITEM -> TODO()
+                                DynamicDataType.CUSTOM_PRODUCT_ID_ITEM -> dataHolder =
+                                    DynamicDataParsers.processCustomerProductID(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.BLUETOOTH_DEVICE_ADDRESS_ITEM -> dataHolder =
+                                    DynamicDataParsers.processBluetoothDeviceAddress(
+                                        trimmedData,
+                                        i.bigEndian ?: false
+                                    ).toString()
+                                DynamicDataType.UTF8_ITEM -> TODO()
+                                DynamicDataType.UUID -> {
+                                    dataHolder =
+                                        DynamicDataParsers.processIBeaconUUID(trimmedData)
                                 }
-                            }
-                            DynamicDataType.EDDYSTONE_INSTANCE -> {
-                                data.serviceData?.let { dataMaps ->
-                                    dataHolder = DynamicDataParsers.processEddystoneInstance(trimmedData)
+                                DynamicDataType.MAJOR -> {
+                                    dataHolder =
+                                        DynamicDataParsers.processMajor(trimmedData)
                                 }
+                                DynamicDataType.MINOR -> {
+                                    dataHolder =
+                                        DynamicDataParsers.processMinor(trimmedData)
+                                }
+                                DynamicDataType.TX_POWER -> {
+                                    dataHolder =
+                                        DynamicDataParsers.processIBeaconTxPower(trimmedData)
+                                            .toString()
+                                }
+                                DynamicDataType.IBEACON_ADDR -> {}
+                                DynamicDataType.EDDYSTONE_NAMESPACE -> {
+                                    data.serviceData?.let { dataMaps ->
+                                        dataHolder =
+                                            DynamicDataParsers.processEddystoneNamespace(trimmedData)
+                                    }
+                                }
+                                DynamicDataType.EDDYSTONE_INSTANCE -> {
+                                    data.serviceData?.let { dataMaps ->
+                                        dataHolder =
+                                            DynamicDataParsers.processEddystoneInstance(trimmedData)
+                                    }
+                                }
+                                DynamicDataType.EDDYSTONE_PREFIX -> {}
+                                DynamicDataType.EDDYSTONE_POSTFIX -> {}
                             }
-                            DynamicDataType.EDDYSTONE_PREFIX -> {}
-                            DynamicDataType.EDDYSTONE_POSTFIX -> {}
                         }
                         currentIndex = endIndex
                     } else {
