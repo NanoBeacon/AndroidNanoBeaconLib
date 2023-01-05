@@ -56,7 +56,7 @@ class QrScanViewModel @Inject constructor(
     private val _conflicts : MutableLiveData<List<ConflictItem>>  = MutableLiveData(listOf())
     val conflicts : LiveData<List<ConflictItem>> = _conflicts
 
-    private val _showConflicts : MutableLiveData<Boolean> = MutableLiveData(false)
+    private val _showConflicts : MutableLiveData<Boolean> = MutableLiveData(true)
     val showConflicts : LiveData<Boolean> = _showConflicts
 
     init {
@@ -114,6 +114,9 @@ class QrScanViewModel @Inject constructor(
         _showQrScanner.value = true
     }
 
+    fun dismissConflictModal() {
+        _showConflicts.value = false
+    }
     fun closeScanner() {
         _showQrScanner.value = false
     }

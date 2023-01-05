@@ -1,5 +1,6 @@
 package com.oncelabs.nanobeacon.enums
 
+import android.util.Log
 import com.oncelabs.nanobeacon.codable.AdvSetData
 import com.oncelabs.nanobeaconlib.model.ParsedAdvertisementData
 
@@ -7,7 +8,7 @@ enum class ConfigAdvConflicts(val clearIssue: (p1: AdvSetData, p2: AdvSetData) -
     //Comparison
     BDADDR_CONFLICT(clearIssue = { p1, p2 ->
         if (p1.bdAddr != null && p2.bdAddr != null) {
-            (p1.bdAddr == p2.bdAddr)
+            (p1.bdAddr != p2.bdAddr)
         } else {
             true
         }
@@ -21,6 +22,7 @@ enum class ConfigAdvConflicts(val clearIssue: (p1: AdvSetData, p2: AdvSetData) -
                 var checkIndex = index + 1
                 while (checkIndex < parsedAdvs.size) {
                     for (conflict in values()) {
+
                         if (!conflict.clearIssue(currentAdv, parsedAdvs[checkIndex])) {
                             conflicts.add(ConflictItem(currentAdv, parsedAdvs[checkIndex], conflict))
                         }

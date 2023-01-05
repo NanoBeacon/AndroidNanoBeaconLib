@@ -19,6 +19,9 @@ import com.oncelabs.nanobeacon.components.ConfigView
 import com.oncelabs.nanobeacon.components.InplayTopBar
 import com.oncelabs.nanobeacon.components.QrCodeComponent
 import com.oncelabs.nanobeacon.components.dialog.AddConfigModal
+import com.oncelabs.nanobeacon.components.dialog.ConfigConflictModal
+import com.oncelabs.nanobeacon.enums.ConfigAdvConflicts
+import com.oncelabs.nanobeacon.enums.ConflictItem
 import com.oncelabs.nanobeacon.ui.theme.logFloatingButtonColor
 import com.oncelabs.nanobeacon.ui.theme.logModalItemBackgroundColor
 import com.oncelabs.nanobeacon.viewModel.LiveDataViewModel
@@ -30,13 +33,18 @@ import com.oncelabs.nanobeaconlib.model.ParsedConfigData
 fun QrScanScreen(qrScanViewModel: QrScanViewModel = hiltViewModel()) {
     val showModal = qrScanViewModel.showQrScanner.observeAsState()
     val currentConfig = qrScanViewModel.currentConfig.observeAsState()
+    val showConflictModal = qrScanViewModel.showConflicts.observeAsState()
     QrScanScreenContent(
         showModal = showModal.value,
         configData = currentConfig.value,
         onQrCodeScanned = { qrScanViewModel.submitQrConfig(it) },
         closeScanner = { qrScanViewModel.closeScanner() },
         buttonClicked = { qrScanViewModel.openScanner() },
-        deleteConfig = { qrScanViewModel.deleteConfig() })
+        deleteConfig = { qrScanViewModel.deleteConfig() },
+        showConflictModal = showConflictModal.value ?: false,
+        dismissConflictModal = { qrScanViewModel.dismissConflictModal() },
+        conflicts = qrScanViewModel.conflicts.observeAsState().value ?: listOf<ConflictItem>()
+    )
 }
 
 
@@ -47,7 +55,10 @@ fun QrScanScreenContent(
     onQrCodeScanned: (String) -> Unit,
     closeScanner : () -> Unit,
     buttonClicked: () -> Unit,
-    deleteConfig : () -> Unit
+    deleteConfig : () -> Unit,
+    showConflictModal : Boolean,
+    dismissConflictModal : () -> Unit,
+    conflicts: List<ConflictItem>
 ) {
     Box(Modifier.fillMaxSize()) {
         if (showModal == false) {
@@ -56,6 +67,7 @@ fun QrScanScreenContent(
                 Spacer(Modifier.height(7.dp))
                 ConfigView(parsedConfigData = configData)
             }
+            ConfigConflictModal(shouldShow = showConflictModal, conflicts = conflicts, onDismiss = { dismissConflictModal() })
         }
         Column(
             Modifier
