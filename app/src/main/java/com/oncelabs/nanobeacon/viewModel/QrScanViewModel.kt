@@ -12,8 +12,11 @@ import androidx.lifecycle.viewModelScope
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.KlaxonException
 import com.oncelabs.nanobeacon.analyzer.gzipDecompress
+import com.oncelabs.nanobeacon.codable.AdvSetData
 import com.oncelabs.nanobeacon.codable.ConfigData
 import com.oncelabs.nanobeacon.device.ADXL367
+import com.oncelabs.nanobeacon.enums.ConfigAdvConflicts
+import com.oncelabs.nanobeacon.enums.ConflictItem
 import com.oncelabs.nanobeacon.manager.BeaconManager
 import com.oncelabs.nanobeacon.manager.ConfigDataManager
 import com.oncelabs.nanobeacon.manager.ConfigDataManagerImpl
@@ -50,6 +53,12 @@ class QrScanViewModel @Inject constructor(
     private val _currentConfig : MutableLiveData<ParsedConfigData?> = MutableLiveData(configDataManager.parsedConfig.value)
     val currentConfig : LiveData<ParsedConfigData?> = _currentConfig
 
+    private val _conflicts : MutableLiveData<List<ConflictItem>>  = MutableLiveData(listOf())
+    val conflicts : LiveData<List<ConflictItem>> = _conflicts
+
+    private val _showConflicts : MutableLiveData<Boolean> = MutableLiveData(false)
+    val showConflicts : LiveData<Boolean> = _showConflicts
+
     init {
         observeFields()
     }
@@ -76,6 +85,13 @@ class QrScanViewModel @Inject constructor(
                     pendingQr = null
                     SettingsManager.setSavedConfig(decoded)
                     configDataManager.setConfig(it)
+                    it.advSet?.let { sets ->
+                        val holderConflicts = ConfigAdvConflicts.checkAdvs(sets)
+                        if (holderConflicts.isNotEmpty()) {
+                            _conflicts.value = holderConflicts
+                            _showConflicts.value = true
+                        }
+                    }
                     beaconManager.refresh()
                 } ?: run {
                     pendingQr = null

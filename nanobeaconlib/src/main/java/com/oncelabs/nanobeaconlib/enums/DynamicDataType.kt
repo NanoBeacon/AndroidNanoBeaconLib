@@ -36,8 +36,11 @@ enum class DynamicDataType(
     MAJOR("Major", "Major"),
     MINOR("Minor", "Minor"),
     TX_POWER("TX Power", "TX Power", units = "dBm"),
-    IBEACON_ADDR("IBeacon Address", "IBeacon Addr");
-
+    IBEACON_ADDR("IBeacon Address", "IBeacon Addr"),
+    EDDYSTONE_NAMESPACE("Namespace", "Eddystone Namespace"),
+    EDDYSTONE_INSTANCE("Instance", "Eddystone Instance"),
+    EDDYSTONE_PREFIX("Prefix", "Eddystone Prefix"),
+    EDDYSTONE_POSTFIX("Postfix", "Eddystone Postfix");
     companion object {
         fun fromAbr(abr: String): DynamicDataType? {
             return values().firstOrNull { it.abrName == abr }

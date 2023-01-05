@@ -173,5 +173,13 @@ class DynamicDataParsers {
             return byteArray[0].toInt()
         }
 
+        fun processEddystoneNamespace(byteArray: ByteArray) : String {
+            return byteArray.toHexString("")
+        }
+
+        fun processEddystoneInstance(byteArray: ByteArray) : String {
+            return byteArray.toHexString("")
+        }
+
     }
 }

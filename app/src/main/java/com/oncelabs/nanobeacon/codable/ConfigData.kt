@@ -25,7 +25,8 @@ data class AdvSetData (
     val trigCheckPeriod : Int? = null,
     val ui_format : String,
     val chCtrl: Int,
-    val randomDlyType : Int
+    val randomDlyType : Int,
+    val eddystoneTxPower : Int?
 )
 
 data class TxPower (

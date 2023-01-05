@@ -12,4 +12,5 @@ interface ConfigDataManager {
     fun init()
     fun setConfig(configData: ConfigData)
     fun deleteConfig()
+
 }
