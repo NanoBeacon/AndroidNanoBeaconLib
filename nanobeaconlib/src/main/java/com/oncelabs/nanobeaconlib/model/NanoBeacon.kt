@@ -104,6 +104,7 @@ open class NanoBeacon(
                 var serviceDataSize = 0
                 if (data.serviceData?.isNotEmpty() == true) {
                     serviceDataSize = data.serviceData!!.toList()[0].second.size
+
                 }
                 var currentIndex = 0
                 for (i in manufacturerDataFlags.toList()) {
