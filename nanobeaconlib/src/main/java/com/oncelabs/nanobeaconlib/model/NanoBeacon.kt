@@ -110,10 +110,14 @@ open class NanoBeacon(
                     val endIndex = currentIndex + i.len
                     var dataHolder: String? = null
                     if (endIndex <= data.manufacturerData.size || endIndex <= serviceDataSize) {
-                        var trimmedData : ByteArray = byteArrayOf()
-                        if (adv.ui_format == ConfigType.UID || adv.ui_format == ConfigType.TLM) {
-                            trimmedData = data.serviceData?.toList()?.get(0)?.second?.copyOfRange(currentIndex, endIndex)
-                                ?: byteArrayOf()
+                        var trimmedData: ByteArray = byteArrayOf()
+                        if ((adv.ui_format == ConfigType.UID || adv.ui_format == ConfigType.TLM) && serviceDataSize > 0) {
+                            trimmedData =
+                                data.serviceData?.toList()?.get(0)?.second?.copyOfRange(
+                                    currentIndex,
+                                    endIndex
+                                )
+                                    ?: byteArrayOf()
                         } else {
                             if (data.manufacturerData.size >= endIndex) {
                                 trimmedData =

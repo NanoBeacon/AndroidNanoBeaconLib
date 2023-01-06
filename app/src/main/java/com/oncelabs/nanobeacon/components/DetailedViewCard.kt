@@ -50,18 +50,29 @@ fun DetailedViewCard(beacon: NanoBeaconInterface) {
                         )
                         Spacer(modifier = Modifier.weight(.05f))
                         Row {
-                            Text(text = beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format?.label ?: ConfigType.NOT_RECOGNIZED.label, style = logCardTitleAccentFont)
+                            Text(
+                                text = beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format?.title
+                                    ?: ConfigType.NOT_RECOGNIZED.title,
+                                style = logCardTitleAccentFont
+                            )
                         }
                         Spacer(modifier = Modifier.weight(1f))
                     }
                     CustomDataLine(title = "Timestamp", data = it.timeStampFormatted, maxLines = 1)
-                    CustomDataLine(title = "RSSI", data = it.rssi.toString() + " dBm", maxLines = 1)
-                    CustomDataLine(title = "Estimated", data = it.estimatedAdvInterval.toString() + " ms", maxLines = 1)
+                    CustomDataLine(title = "RSSI", data = it.rssi.toString(), maxLines = 1)
+                    CustomDataLine(
+                        title = "Estimated",
+                        data = it.estimatedAdvInterval.toString(),
+                        maxLines = 1
+                    )
 
 
-                    when(beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format ?: ConfigType.NOT_RECOGNIZED) {
-                        ConfigType.CUSTOM -> { CustomTypeView(beacon = beacon, data = data) }
-                        ConfigType.EDDYSTONE -> { }
+                    when (beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format
+                        ?: ConfigType.NOT_RECOGNIZED) {
+                        ConfigType.CUSTOM -> {
+                            CustomTypeView(beacon = beacon, data = data)
+                        }
+                        ConfigType.EDDYSTONE -> {}
                         ConfigType.IBEACON -> {
                             IBeaconTypeView(beacon = beacon)
                         }
@@ -90,14 +101,15 @@ fun CustomDataLine(
     separateData: Boolean = false
 ) {
     // Hide unset properties
-    if(data.isNullOrEmpty()) {
+    if (data.isNullOrEmpty()) {
         return
     }
 
-    if (!separateData || data.isEmpty()){
-        Row(modifier =
-        Modifier
-            .padding(bottom = 2.dp, top = 1.dp)
+    if (!separateData || data.isEmpty()) {
+        Row(
+            modifier =
+            Modifier
+                .padding(bottom = 2.dp, top = 1.dp)
         ) {
             Text(
                 if (title.isNotEmpty()) "$title:  " else "",
@@ -113,8 +125,9 @@ fun CustomDataLine(
             )
         }
     } else {
-        Column(modifier =
-        Modifier
+        Column(
+            modifier =
+            Modifier
             //.padding(bottom = 1.dp, top = 1.dp)
         ) {
             Text(
@@ -179,7 +192,7 @@ fun CustomDataItem(
 }
 
 @Composable
-fun CustomTypeView(beacon: NanoBeaconInterface, data : BeaconDataEntry) {
+fun CustomTypeView(beacon: NanoBeaconInterface, data: BeaconDataEntry) {
 
     val matchingConfig by beacon.matchingConfig.collectAsState()
     CustomDataLine(title = "Device Name", data = data.localName, maxLines = 1)
@@ -208,7 +221,7 @@ fun CustomTypeView(beacon: NanoBeaconInterface, data : BeaconDataEntry) {
                         Spacer(modifier = Modifier.height(14.dp))
                         CustomDataItem(
                             title = item.dynamicDataType.fullName,
-                            data = item.processedData + item.dynamicDataType.units,
+                            data = item.processedData + " ${item.dynamicDataType.units}",
                             bigEndian = item.bigEndian,
                             encrypted = item.encrypted
                         )
@@ -217,7 +230,6 @@ fun CustomTypeView(beacon: NanoBeaconInterface, data : BeaconDataEntry) {
                 Spacer(Modifier.height(14.dp))
             }
         }
-
     }
 }
 
@@ -233,7 +245,13 @@ fun IBeaconTypeView(beacon: NanoBeaconInterface) {
                 val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(items = beaconData.toList(), itemContent = { item ->
-                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData.uppercase() + item.dynamicDataType.units, maxLines = 1)
+                        if (item.dynamicDataType.displayToUser) {
+                            CustomDataLine(
+                                title = item.dynamicDataType.fullName,
+                                data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
+                                maxLines = 1
+                            )
+                        }
                     })
                 }
                 Spacer(Modifier.height(14.dp))
@@ -245,6 +263,17 @@ fun IBeaconTypeView(beacon: NanoBeaconInterface) {
 
 @Composable
 fun UIDTypeView(beacon: NanoBeaconInterface) {
+    Spacer(modifier = Modifier.height(2.dp))
+    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
+    Spacer(modifier = Modifier.height(2.dp))
+    Row(
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = "Service Data", style = logCardTitleAccentFont)
+    }
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
@@ -255,7 +284,11 @@ fun UIDTypeView(beacon: NanoBeaconInterface) {
                 val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(items = beaconData.toList(), itemContent = { item ->
-                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData.uppercase() + item.dynamicDataType.units, maxLines = 1)
+                        CustomDataLine(
+                            title = item.dynamicDataType.fullName,
+                            data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
+                            maxLines = 1
+                        )
                     })
                 }
                 Spacer(Modifier.height(14.dp))
@@ -267,6 +300,17 @@ fun UIDTypeView(beacon: NanoBeaconInterface) {
 
 @Composable
 fun TLMTypeView(beacon: NanoBeaconInterface) {
+    Spacer(modifier = Modifier.height(2.dp))
+    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
+    Spacer(modifier = Modifier.height(2.dp))
+    Row(
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = "Service Data", style = logCardTitleAccentFont)
+    }
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
@@ -277,7 +321,11 @@ fun TLMTypeView(beacon: NanoBeaconInterface) {
                 val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(items = beaconData.toList(), itemContent = { item ->
-                        CustomDataLine(title = item.dynamicDataType.fullName, data = item.processedData.uppercase() + item.dynamicDataType.units, maxLines = 1)
+                        CustomDataLine(
+                            title = item.dynamicDataType.fullName,
+                            data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
+                            maxLines = 1
+                        )
                     })
                 }
                 Spacer(Modifier.height(14.dp))

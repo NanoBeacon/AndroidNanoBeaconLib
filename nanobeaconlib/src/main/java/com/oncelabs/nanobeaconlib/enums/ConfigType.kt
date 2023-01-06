@@ -2,14 +2,14 @@ package com.oncelabs.nanobeaconlib.enums
 
 import java.util.*
 
-enum class ConfigType(val label : String){
+enum class ConfigType(val label : String, val title : String){
 
-    CUSTOM("Custom"),
-    EDDYSTONE("Eddystone"),
-    UID("UID"),
-    TLM("TLM"),
-    IBEACON("iBeacon"),
-    NOT_RECOGNIZED("Not a recognized format");
+    CUSTOM("Custom", "Custom"),
+    EDDYSTONE("Eddystone", "Eddystone"),
+    UID("UID", "Eddystone UID"),
+    TLM("TLM", "Eddystone TLM"),
+    IBEACON("iBeacon", "iBeacon"),
+    NOT_RECOGNIZED("Not a recognized format", "Not a recognized format");
 
     companion object {
         fun fromLabel(label : String): ConfigType {

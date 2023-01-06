@@ -180,8 +180,22 @@ class ScannerViewModel @Inject constructor(
                                                 }
                                             } ?: false
                                         }
-                                    } else if (type.first == "Eddystone") {
-
+                                    }
+                                    if (type.first == "Eddystone") {
+                                        filteredList = filteredList.filter {
+                                            it.beaconDataFlow.value?.serviceData?.let { rawMap ->
+                                                if (rawMap.isNotEmpty()) {
+                                                    when(rawMap.toList()[0].second[0]) {
+                                                        (0x00).toByte() -> true
+                                                        (0x20).toByte() -> true
+                                                        (0x30).toByte() -> true
+                                                        else -> false
+                                                    }
+                                                } else {
+                                                    false
+                                                }
+                                            } ?: false
+                                        }
                                     }
                                 }
                             }
