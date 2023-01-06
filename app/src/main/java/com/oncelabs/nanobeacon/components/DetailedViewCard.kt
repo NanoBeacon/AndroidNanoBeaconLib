@@ -221,7 +221,7 @@ fun CustomTypeView(beacon: NanoBeaconInterface, data: BeaconDataEntry) {
                         Spacer(modifier = Modifier.height(14.dp))
                         CustomDataItem(
                             title = item.dynamicDataType.fullName,
-                            data = item.processedData + item.dynamicDataType.units,
+                            data = item.processedData + " ${item.dynamicDataType.units}",
                             bigEndian = item.bigEndian,
                             encrypted = item.encrypted
                         )
@@ -248,7 +248,7 @@ fun IBeaconTypeView(beacon: NanoBeaconInterface) {
                         if (item.dynamicDataType.displayToUser) {
                             CustomDataLine(
                                 title = item.dynamicDataType.fullName,
-                                data = item.processedData.uppercase() + item.dynamicDataType.units,
+                                data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
                                 maxLines = 1
                             )
                         }
@@ -286,7 +286,7 @@ fun UIDTypeView(beacon: NanoBeaconInterface) {
                     items(items = beaconData.toList(), itemContent = { item ->
                         CustomDataLine(
                             title = item.dynamicDataType.fullName,
-                            data = item.processedData.uppercase() + item.dynamicDataType.units,
+                            data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
                             maxLines = 1
                         )
                     })
