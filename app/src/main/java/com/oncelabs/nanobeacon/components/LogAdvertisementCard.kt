@@ -3,19 +3,22 @@ package com.oncelabs.nanobeacon.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material.icons.rounded.Error
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,6 +27,9 @@ import com.oncelabs.nanobeacon.ui.theme.*
 import com.oncelabs.nanobeaconlib.extension.toHexString
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
+import com.oncelabs.nanobeaconlib.model.ParsedConfigData
+import com.oncelabs.nanobeaconlib.model.ProcessedData
+import kotlinx.coroutines.flow.StateFlow
 import java.util.*
 import kotlin.random.Random
 
@@ -71,22 +77,22 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface, onDetailPressed : (NanoBea
                     isExpanded = !isExpanded
                 }
         ) {
-            if (configData != null) {
-                Row(
-                    modifier = Modifier
-                        .padding(top = 0.dp, bottom = if (isExpanded) 10.dp else 0.dp)
-                        .wrapContentHeight()
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Button({ onDetailPressed(beacon) }) {
-                        Text("Configuration Match", color = topBarBackground, modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp)))
-                    }
-                }
-            }
+//            if (configData != null) {
+//                Row(
+//                    modifier = Modifier
+//                        .padding(top = 0.dp, bottom = if (isExpanded) 10.dp else 0.dp)
+//                        .wrapContentHeight()
+//                        .fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                ) {
+//                    Button({ onDetailPressed(beacon) }) {
+//                        Text("Configuration Match", color = topBarBackground, modifier = Modifier.background(Color.White, RoundedCornerShape(10.dp)))
+//                    }
+//                }
+//            }
             Row(
                 modifier = Modifier
-                    .padding(top = 0.dp, bottom = if (isExpanded) 10.dp else 0.dp)
+                    .padding(top = 0.dp, bottom = if (isExpanded && configData == null) 10.dp else 0.dp)
                     .wrapContentHeight()
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -108,10 +114,15 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface, onDetailPressed : (NanoBea
                         }
                 )
             }
+            if (configData != null) {
+                Row(Modifier.padding(top = 5.dp, bottom = 5.dp)) {
+                    ConfigMatchButton { onDetailPressed(beacon) }
+                }
+            }
             DataLine(title = "Local Name", data = data.localName, maxLines = 1)
             DataLine(title = "Timestamp", data = data.timestamp, maxLines = 1)
-            DataLine(title = "RSSI", data = data.rssi, maxLines = 1)
-            DataLine(title = "Estimated Adv Interval", data = "${data.advInterval}ms", maxLines = 1)
+            DataLine(title = "RSSI", data = "${data.rssi} dBm", maxLines = 1)
+            DataLine(title = "Estimated Adv Interval", data = "${data.advInterval} ms", maxLines = 1)
             AnimatedVisibility(visible = isExpanded) {
                 Column() {
                     DataLine(title = "Transmit Power Level", data = data.txPower, maxLines = 1)
@@ -134,14 +145,49 @@ fun LogAdvertisementCard(beacon: NanoBeaconInterface, onDetailPressed : (NanoBea
 
                 }
             }
-            // TODO: Not used?
-//            Text("Sensor Trigger Source: ${advertisement.sensorTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-//            Text("GPIO Trigger Source: ${advertisement.gpioTriggerSource}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
-//            Text("Data Encryption: ${advertisement.dataEncryption}", style = logTextFont, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ConfigMatchButton(onViewDataPress: () -> Unit){
+    val interactionSource = remember { MutableInteractionSource() }
+    Card(
+        backgroundColor = logModalItemBackgroundColor,
+        elevation = 5.dp,
+        onClick = onViewDataPress,
+        modifier = Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = rememberRipple(bounded = true),
+            onClick = {})
+    ) {
+        Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                modifier = Modifier.padding(start = 3.dp, end = 8.dp),
+                imageVector = Icons.Default.ErrorOutline,
+                contentDescription = "info button",
+                tint = alertYellow
+            )
+            Text(
+                text = "Configuration Match",
+                Modifier.padding(start = 3.dp),
+                textAlign = TextAlign.Start,
+                style = logCardTitleAccentFont)
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    modifier = Modifier.padding(end = 3.dp),
+                    style = logTextFont,
+                    text = "Tap to View Data",
+                    textAlign = TextAlign.End
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun DataLine(
@@ -253,8 +299,6 @@ data class BeaconDataEntry(
 @Composable
 fun LogAdvertisementCardPreview() {
     Column {
-//        LogAdvertisementCard(
-//            beacon =
-//        )
+        //LogAdvertisementCard(beacon = )
     }
 }
