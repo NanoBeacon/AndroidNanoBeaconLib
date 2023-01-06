@@ -51,8 +51,8 @@ fun DetailedViewCard(beacon: NanoBeaconInterface) {
                         Spacer(modifier = Modifier.weight(.05f))
                         Row {
                             Text(
-                                text = beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format?.label
-                                    ?: ConfigType.NOT_RECOGNIZED.label,
+                                text = beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format?.title
+                                    ?: ConfigType.NOT_RECOGNIZED.title,
                                 style = logCardTitleAccentFont
                             )
                         }
@@ -230,7 +230,6 @@ fun CustomTypeView(beacon: NanoBeaconInterface, data: BeaconDataEntry) {
                 Spacer(Modifier.height(14.dp))
             }
         }
-
     }
 }
 
@@ -264,6 +263,17 @@ fun IBeaconTypeView(beacon: NanoBeaconInterface) {
 
 @Composable
 fun UIDTypeView(beacon: NanoBeaconInterface) {
+    Spacer(modifier = Modifier.height(2.dp))
+    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
+    Spacer(modifier = Modifier.height(2.dp))
+    Row(
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = "Service Data", style = logCardTitleAccentFont)
+    }
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
@@ -290,6 +300,17 @@ fun UIDTypeView(beacon: NanoBeaconInterface) {
 
 @Composable
 fun TLMTypeView(beacon: NanoBeaconInterface) {
+    Spacer(modifier = Modifier.height(2.dp))
+    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
+    Spacer(modifier = Modifier.height(2.dp))
+    Row(
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = "Service Data", style = logCardTitleAccentFont)
+    }
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,

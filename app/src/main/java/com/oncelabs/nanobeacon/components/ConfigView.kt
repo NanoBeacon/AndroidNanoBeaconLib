@@ -88,7 +88,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
 
                 AdvDataItem(
                     title = "Advertising Data Format",
-                    data = adv.ui_format.label
+                    data = adv.ui_format.title
                 )
 
                 adv.interval?.let {
