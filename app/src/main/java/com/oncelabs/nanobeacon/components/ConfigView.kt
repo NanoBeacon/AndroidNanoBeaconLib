@@ -143,34 +143,36 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                 .padding(start = 12.dp)
                         ) {
                             for (dataItem in manufacturerData.toList()) {
-                                when (adv.ui_format) {
-                                    ConfigType.IBEACON -> {
-                                        AdvDataItem(
-                                            title = dataItem.dynamicType.fullName,
-                                            data = dataItem.rawData,
-                                            prefix = "0x"
-                                        )
-                                    }
-                                    ConfigType.UID -> {
-                                        AdvDataItem(
-                                            title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
-                                            data = dataItem.rawData,
-                                            bigEndian = dataItem.bigEndian
-                                                ?: false,
-                                            encrypted = dataItem.encrypted
-                                                ?: false,
-                                            showFlags = true
-                                        )
-                                    }
-                                    else -> {
-                                        AdvDataItem(
-                                            title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
-                                            bigEndian = dataItem.bigEndian
-                                                ?: false,
-                                            encrypted = dataItem.encrypted
-                                                ?: false,
-                                            showFlags = true
-                                        )
+                                if (dataItem.dynamicType.displayToUser) {
+                                    when (adv.ui_format) {
+                                        ConfigType.IBEACON -> {
+                                            AdvDataItem(
+                                                title = dataItem.dynamicType.fullName,
+                                                data = dataItem.rawData,
+                                                prefix = "0x"
+                                            )
+                                        }
+                                        ConfigType.UID -> {
+                                            AdvDataItem(
+                                                title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
+                                                data = dataItem.rawData,
+                                                bigEndian = dataItem.bigEndian
+                                                    ?: false,
+                                                encrypted = dataItem.encrypted
+                                                    ?: false,
+                                                showFlags = true
+                                            )
+                                        }
+                                        else -> {
+                                            AdvDataItem(
+                                                title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
+                                                bigEndian = dataItem.bigEndian
+                                                    ?: false,
+                                                encrypted = dataItem.encrypted
+                                                    ?: false,
+                                                showFlags = true
+                                            )
+                                        }
                                     }
                                 }
                             }

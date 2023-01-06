@@ -3,7 +3,8 @@ package com.oncelabs.nanobeaconlib.enums
 enum class DynamicDataType(
     val fullName: String,
     val abrName: String,
-    val units: String = ""
+    val units: String = "",
+    val displayToUser : Boolean = true
 ) {
 
     VCC_ITEM("VCC", "VCC", units = " V"),
@@ -36,11 +37,11 @@ enum class DynamicDataType(
     MAJOR("Major", "Major"),
     MINOR("Minor", "Minor"),
     TX_POWER("TX Power", "TX Power", units = "dBm"),
-    IBEACON_ADDR("IBeacon Address", "IBeacon Addr"),
+    IBEACON_ADDR("IBeacon Address", "IBeacon Addr", displayToUser = false),
     EDDYSTONE_NAMESPACE("Namespace", "Eddystone Namespace"),
     EDDYSTONE_INSTANCE("Instance", "Eddystone Instance"),
-    EDDYSTONE_PREFIX("Prefix", "Eddystone Prefix"),
-    EDDYSTONE_POSTFIX("Postfix", "Eddystone Postfix");
+    EDDYSTONE_PREFIX("Prefix", "Eddystone Prefix", displayToUser = false),
+    EDDYSTONE_POSTFIX("Postfix", "Eddystone Postfix", displayToUser = false);
     companion object {
         fun fromAbr(abr: String): DynamicDataType? {
             return values().firstOrNull { it.abrName == abr }
