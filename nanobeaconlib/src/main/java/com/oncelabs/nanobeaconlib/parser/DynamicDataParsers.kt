@@ -9,6 +9,7 @@ class DynamicDataParsers {
     companion object {
         fun processVcc(byteArray: ByteArray, vccUnit : Float, bigEndian : Boolean) : Float? {
             var base : Int? = null
+
             val byteOrder = if (bigEndian) {
                 ByteOrder.BIG_ENDIAN
             } else {
@@ -16,7 +17,7 @@ class DynamicDataParsers {
             }
             when(byteArray.size) {
                 1 -> base = byteArray[0].toInt()
-                2 -> base = ByteBuffer.wrap(byteArray).order(byteOrder).short.toInt()
+                2 -> base = ByteBuffer.wrap(byteArray).short.toInt()
             }
             base?.let {
                 return it * vccUnit
@@ -169,7 +170,8 @@ class DynamicDataParsers {
             return byteArray.toHexString("")
         }
 
-        fun processIBeaconTxPower(byteArray: ByteArray) : Int {
+        fun processIBeaconTxPower(byteArray: ByteArray) : Int? {
+
             return byteArray[0].toInt()
         }
 

@@ -41,11 +41,13 @@ import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.math.roundToInt
 
 @ExperimentalMaterialApi
 @Composable
 fun ScannerScreen(
-    viewModel: ScannerViewModel = hiltViewModel()
+    viewModel: ScannerViewModel = hiltViewModel(),
+
 ) {
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
@@ -56,6 +58,10 @@ fun ScannerScreen(
     var refreshing by remember { mutableStateOf(false) }
     val currentDetailBeacon by viewModel.currentDetailBeacon.observeAsState()
     val showDetailModal by viewModel.showDetailModal.observeAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.setShowDetailModal(false)
+    }
 
     fun refresh() = scope.launch {
         refreshing = true
@@ -435,7 +441,7 @@ private fun SliderFilterCard(
         )
         Spacer(modifier = Modifier.weight(.25f))
         Slider(
-            value = filter.value as? Float ?: 0f,
+            value = (filter.value as? Float)?.roundToInt()?.toFloat() ?: 0F,
             onValueChange = {
                 onChange(it)
             },

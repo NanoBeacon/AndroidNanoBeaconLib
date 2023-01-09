@@ -3,6 +3,7 @@ package com.oncelabs.nanobeaconlib.enums
 enum class DynamicDataType(
     val fullName: String,
     val abrName: String,
+    val prefix : String = "",
     val units: String = "",
     val displayToUser : Boolean = true
 ) {
@@ -33,9 +34,9 @@ enum class DynamicDataType(
     CUSTOM_PRODUCT_ID_ITEM("Customer Product ID", "CustID"),
     BLUETOOTH_DEVICE_ADDRESS_ITEM("Bluetooth Device Address", "BDADDR"),
     UTF8_ITEM("Characters UTF-8", "utf8"),
-    UUID("UUID", "UUID"),
-    MAJOR("Major", "Major"),
-    MINOR("Minor", "Minor"),
+    UUID("UUID", "UUID", prefix = "0x"),
+    MAJOR("Major", "Major", prefix = "0x"),
+    MINOR("Minor", "Minor", prefix = "0x"),
     TX_POWER("TX Power", "TX Power", units = "dBm"),
     IBEACON_ADDR("IBeacon Address", "IBeacon Addr", displayToUser = false),
     EDDYSTONE_NAMESPACE("Namespace", "Eddystone Namespace"),

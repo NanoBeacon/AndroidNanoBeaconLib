@@ -2,6 +2,7 @@ package com.oncelabs.nanobeacon.model
 
 import com.oncelabs.nanobeacon.enums.FilterInputType
 import com.oncelabs.nanobeacon.enums.FilterType
+import kotlin.math.roundToInt
 
 data class FilterOption(
     val filterType: FilterType,
@@ -21,7 +22,7 @@ data class FilterOption(
                 ((value as? String)?.isNotEmpty() == true)
             }
             FilterType.RSSI -> {
-                ((value as? Float) ?: -127.0f) > -127.0f
+                ((value as? Float)?.roundToInt() ?: -127) > -127
             }
             FilterType.HIDE_UNNAMED -> {
                 enabled
@@ -42,7 +43,7 @@ data class FilterOption(
         return if (isActive) {
             when(filterType.getInputType()) {
                 FilterInputType.BINARY -> filterType.getDescription()
-                FilterInputType.SLIDER, FilterInputType.OPTIONS -> "$value ${filterType.getDescription()}"
+                FilterInputType.SLIDER, FilterInputType.OPTIONS -> "${(value as? Float)?.roundToInt()} ${filterType.getDescription()}"
                 FilterInputType.SEARCH -> "$value"
             }
         } else {

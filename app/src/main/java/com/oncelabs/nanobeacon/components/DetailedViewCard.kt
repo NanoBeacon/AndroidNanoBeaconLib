@@ -4,7 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -17,78 +19,103 @@ import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.ui.theme.*
 import com.oncelabs.nanobeaconlib.enums.ConfigType
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
+import com.oncelabs.nanobeaconlib.model.ProcessedData
 import java.util.*
 
 
 @Composable
 fun DetailedViewCard(beacon: NanoBeaconInterface) {
-
+    val processedDataAdv by beacon.parsedData.collectAsState()
     val beaconData by beacon.beaconDataFlow.collectAsState()
     beaconData?.let {
 
         val data = formatToEntry(it)
-        Row(Modifier.fillMaxWidth()) {
-            Spacer(Modifier.weight(0.025f))
-            Column(Modifier.weight(0.95f)) {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .background(topBarBackground, RoundedCornerShape(10.dp))
-                        .padding(8.dp)
-                ) {
+        LazyColumn {
+            for (dataAdv in processedDataAdv) {
+                item {
+                    Row(Modifier.fillMaxWidth()) {
+                        Spacer(Modifier.weight(0.025f))
+                        Column(Modifier.weight(0.95f)) {
+                            Column(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .background(topBarBackground, RoundedCornerShape(10.dp))
+                                    .padding(8.dp)
+                            ) {
 
-                    Row(
-                        modifier = Modifier
-                            .wrapContentHeight()
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        SignalStrength(
-                            modifier = Modifier.size(32.dp),
-                            rawSignal = data.rssi.toIntOrNull() ?: -127
-                        )
-                        Spacer(modifier = Modifier.weight(.05f))
-                        Row {
-                            Text(
-                                text = beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format?.title
-                                    ?: ConfigType.NOT_RECOGNIZED.title,
-                                style = logCardTitleAccentFont
-                            )
+                                Row(
+                                    modifier = Modifier
+                                        .wrapContentHeight()
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    SignalStrength(
+                                        modifier = Modifier.size(32.dp),
+                                        rawSignal = data.rssi.toIntOrNull() ?: -127
+                                    )
+                                    Spacer(modifier = Modifier.weight(.05f))
+                                    Row {
+                                        Text(
+                                            text = dataAdv.uiFormat.title
+                                                ?: ConfigType.NOT_RECOGNIZED.title,
+                                            style = logCardTitleAccentFont
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                                CustomDataLine(
+                                    title = "Bluetooth Address",
+                                    data = it.bluetoothAddress,
+                                    maxLines = 1
+                                )
+                                CustomDataLine(
+                                    title = "Timestamp",
+                                    data = it.timeStampFormatted,
+                                    maxLines = 1
+                                )
+                                CustomDataLine(
+                                    title = "RSSI",
+                                    data = it.rssi.toString(),
+                                    maxLines = 1
+                                )
+                                CustomDataLine(
+                                    title = "Estimated",
+                                    data = it.estimatedAdvInterval.toString(),
+                                    maxLines = 1
+                                )
+
+
+                                when (dataAdv.uiFormat) {
+                                    ConfigType.CUSTOM -> {
+                                        CustomTypeView(
+                                            processedList = dataAdv.processedData,
+                                            data = data
+                                        )
+                                    }
+                                    ConfigType.EDDYSTONE -> {}
+                                    ConfigType.IBEACON -> {
+                                        IBeaconTypeView(processedList = dataAdv.processedData)
+                                    }
+                                    ConfigType.NOT_RECOGNIZED -> {}
+                                    ConfigType.UID -> {
+                                        UIDTypeView(processedList = dataAdv.processedData)
+                                    }
+                                    ConfigType.TLM -> {
+                                        TLMTypeView(processedList = dataAdv.processedData)
+                                    }
+                                }
+
+                            }
+
                         }
-                        Spacer(modifier = Modifier.weight(1f))
+                        Spacer(Modifier.weight(0.025f))
                     }
-                    CustomDataLine(title = "Timestamp", data = it.timeStampFormatted, maxLines = 1)
-                    CustomDataLine(title = "RSSI", data = it.rssi.toString(), maxLines = 1)
-                    CustomDataLine(
-                        title = "Estimated",
-                        data = it.estimatedAdvInterval.toString(),
-                        maxLines = 1
-                    )
-
-
-                    when (beacon.matchingConfig.value?.advSetData?.get(0)?.ui_format
-                        ?: ConfigType.NOT_RECOGNIZED) {
-                        ConfigType.CUSTOM -> {
-                            CustomTypeView(beacon = beacon, data = data)
-                        }
-                        ConfigType.EDDYSTONE -> {}
-                        ConfigType.IBEACON -> {
-                            IBeaconTypeView(beacon = beacon)
-                        }
-                        ConfigType.NOT_RECOGNIZED -> {}
-                        ConfigType.UID -> {
-                            UIDTypeView(beacon = beacon)
-                        }
-                        ConfigType.TLM -> {
-                            TLMTypeView(beacon = beacon)
-                        }
-                    }
-
                 }
-
+                item {
+                    Spacer(Modifier.height(8.dp))
+                }
             }
-            Spacer(Modifier.weight(0.025f))
         }
     }
 }
@@ -192,9 +219,8 @@ fun CustomDataItem(
 }
 
 @Composable
-fun CustomTypeView(beacon: NanoBeaconInterface, data: BeaconDataEntry) {
+fun CustomTypeView(data: BeaconDataEntry, processedList: List<ProcessedData>) {
 
-    val matchingConfig by beacon.matchingConfig.collectAsState()
     CustomDataLine(title = "Device Name", data = data.localName, maxLines = 1)
     CustomDataLine(title = "TX Power", data = data.txPower, maxLines = 1)
     Spacer(modifier = Modifier.height(2.dp))
@@ -214,55 +240,50 @@ fun CustomTypeView(beacon: NanoBeaconInterface, data: BeaconDataEntry) {
         verticalArrangement = Arrangement.Center
     ) {
         Row() {
-            beacon?.let { nanoBeaconInterface ->
-                val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
-                LazyColumn(Modifier.fillMaxWidth()) {
-                    items(items = beaconData.toList(), itemContent = { item ->
-                        Spacer(modifier = Modifier.height(14.dp))
-                        CustomDataItem(
-                            title = item.dynamicDataType.fullName,
-                            data = item.processedData + " ${item.dynamicDataType.units}",
-                            bigEndian = item.bigEndian,
-                            encrypted = item.encrypted
-                        )
-                    })
+            Column(Modifier.fillMaxWidth()) {
+                for (item in processedList) {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    CustomDataItem(
+                        title = item.dynamicDataType.fullName,
+                        data = item.processedData + " ${item.dynamicDataType.units}",
+                        bigEndian = item.bigEndian,
+                        encrypted = item.encrypted
+                    )
                 }
-                Spacer(Modifier.height(14.dp))
             }
+            Spacer(Modifier.height(14.dp))
         }
     }
 }
 
 @Composable
-fun IBeaconTypeView(beacon: NanoBeaconInterface) {
+fun IBeaconTypeView(processedList: List<ProcessedData>) {
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
     ) {
         Row() {
-            beacon.let { nanoBeaconInterface ->
-                val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
-                LazyColumn(Modifier.fillMaxWidth()) {
-                    items(items = beaconData.toList(), itemContent = { item ->
-                        if (item.dynamicDataType.displayToUser) {
-                            CustomDataLine(
-                                title = item.dynamicDataType.fullName,
-                                data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
-                                maxLines = 1
-                            )
-                        }
-                    })
+            Column(Modifier.fillMaxWidth()) {
+                for (item in processedList) {
+                    if (item.dynamicDataType.displayToUser) {
+                        CustomDataLine(
+                            title = item.dynamicDataType.fullName,
+                            data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
+                            maxLines = 1
+                        )
+                    }
                 }
-                Spacer(Modifier.height(14.dp))
             }
+            Spacer(Modifier.height(14.dp))
+
         }
 
     }
 }
 
 @Composable
-fun UIDTypeView(beacon: NanoBeaconInterface) {
+fun UIDTypeView(processedList: List<ProcessedData>) {
     Spacer(modifier = Modifier.height(2.dp))
     Divider(thickness = 1.dp, color = logModalDoneButtonColor)
     Spacer(modifier = Modifier.height(2.dp))
@@ -280,26 +301,24 @@ fun UIDTypeView(beacon: NanoBeaconInterface) {
         verticalArrangement = Arrangement.Center
     ) {
         Row() {
-            beacon.let { nanoBeaconInterface ->
-                val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
-                LazyColumn(Modifier.fillMaxWidth()) {
-                    items(items = beaconData.toList(), itemContent = { item ->
-                        CustomDataLine(
-                            title = item.dynamicDataType.fullName,
-                            data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
-                            maxLines = 1
-                        )
-                    })
+            Column(Modifier.fillMaxWidth()) {
+                for (item in processedList) {
+                    CustomDataLine(
+                        title = item.dynamicDataType.fullName,
+                        data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
+                        maxLines = 1
+                    )
                 }
-                Spacer(Modifier.height(14.dp))
             }
+            Spacer(Modifier.height(14.dp))
         }
-
     }
+
 }
 
+
 @Composable
-fun TLMTypeView(beacon: NanoBeaconInterface) {
+fun TLMTypeView(processedList: List<ProcessedData>) {
     Spacer(modifier = Modifier.height(2.dp))
     Divider(thickness = 1.dp, color = logModalDoneButtonColor)
     Spacer(modifier = Modifier.height(2.dp))
@@ -317,22 +336,19 @@ fun TLMTypeView(beacon: NanoBeaconInterface) {
         verticalArrangement = Arrangement.Center
     ) {
         Row() {
-            beacon.let { nanoBeaconInterface ->
-                val beaconData by nanoBeaconInterface.manufacturerData.collectAsState()
-                LazyColumn(Modifier.fillMaxWidth()) {
-                    items(items = beaconData.toList(), itemContent = { item ->
-                        CustomDataLine(
-                            title = item.dynamicDataType.fullName,
-                            data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
-                            maxLines = 1
-                        )
-                    })
+            Column(Modifier.fillMaxWidth()) {
+                for (item in processedList) {
+                    CustomDataLine(
+                        title = item.dynamicDataType.fullName,
+                        data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
+                        maxLines = 1
+                    )
                 }
-                Spacer(Modifier.height(14.dp))
             }
+            Spacer(Modifier.height(14.dp))
         }
-
     }
+
 }
 
 

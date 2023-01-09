@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.enum.*
@@ -111,7 +112,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                 adv.bdAddr?.let {
                     AdvDataItem(
                         title = "Bluetooth Address",
-                        data = it,
+                        data = rawBdParse(it),
                         prefix = ""
                     )
                 }
@@ -122,7 +123,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                     }
 
                     parsedPayload.txPower?.let {
-                        AdvDataItem(title = "Tx Power", data = it)
+                        AdvDataItem(title = "Tx Power", data = it, unit = "dBm")
                     }
 
                     AdvRandomDelayType.fromCode(adv.randDlyType)?.let {
@@ -149,12 +150,13 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                             AdvDataItem(
                                                 title = dataItem.dynamicType.fullName,
                                                 data = dataItem.rawData,
-                                                prefix = "0x"
+                                                prefix = dataItem.dynamicType.prefix,
+                                                unit = dataItem.dynamicType.units,
                                             )
                                         }
                                         ConfigType.UID -> {
                                             AdvDataItem(
-                                                title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
+                                                title = dataItem.dynamicType.fullName + " ${dataItem.len} Byte(s)",
                                                 data = dataItem.rawData,
                                                 bigEndian = dataItem.bigEndian
                                                     ?: false,
@@ -165,7 +167,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                         }
                                         else -> {
                                             AdvDataItem(
-                                                title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
+                                                title = dataItem.dynamicType.fullName + " ${dataItem.len} Byte(s)",
                                                 bigEndian = dataItem.bigEndian
                                                     ?: false,
                                                 encrypted = dataItem.encrypted
@@ -266,7 +268,7 @@ fun GlobalView(clearedConfigData: ParsedConfigData) {
             clearedConfigData.sleepAftTx?.let {
                 GlobalDataItem(
                     title = "Sleep After Tx",
-                    data = it.toString(),
+                    data = it.toString().replaceFirstChar(Char::titlecase),
                     unit = ""
                 )
             }
@@ -500,4 +502,15 @@ fun SectionTitle(title: String) {
 fun SubSectionTitle(title: String) {
     Text(text = title, style = configurationSubSectionTitle)
     Spacer(modifier = Modifier.height(10.dp))
+}
+
+fun rawBdParse(raw : String?) : String {
+    var result : String = ""
+    raw?.let {
+        for (i in 0..4) {
+            result += raw.substring(i * 2, (i + 1) * 2) + ":"
+        }
+        result += raw.substring(10, 12)
+    }
+    return result
 }

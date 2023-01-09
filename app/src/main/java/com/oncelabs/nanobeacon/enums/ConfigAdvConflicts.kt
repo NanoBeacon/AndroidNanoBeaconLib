@@ -8,11 +8,13 @@ enum class ConfigAdvConflicts(val clearIssue: (p1: AdvSetData, p2: AdvSetData) -
     //Comparison
     BDADDR_CONFLICT(clearIssue = { p1, p2 ->
         if (p1.bdAddr != null && p2.bdAddr != null) {
+            //Todo length of payload check if different
             (p1.bdAddr != p2.bdAddr)
         } else {
             true
         }
-    });
+    }),
+    ;
 
     companion object {
         fun checkAdvs(parsedAdvs : Array<AdvSetData>) : List<ConflictItem> {
