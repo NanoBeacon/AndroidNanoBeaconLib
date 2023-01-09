@@ -154,7 +154,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                         }
                                         ConfigType.UID -> {
                                             AdvDataItem(
-                                                title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
+                                                title = dataItem.dynamicType.fullName + " ${dataItem.len} Byte(s)",
                                                 data = dataItem.rawData,
                                                 bigEndian = dataItem.bigEndian
                                                     ?: false,
@@ -165,7 +165,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                         }
                                         else -> {
                                             AdvDataItem(
-                                                title = dataItem.dynamicType.fullName + " (${dataItem.len} Byte)",
+                                                title = dataItem.dynamicType.fullName + " ${dataItem.len} Byte(s)",
                                                 bigEndian = dataItem.bigEndian
                                                     ?: false,
                                                 encrypted = dataItem.encrypted
