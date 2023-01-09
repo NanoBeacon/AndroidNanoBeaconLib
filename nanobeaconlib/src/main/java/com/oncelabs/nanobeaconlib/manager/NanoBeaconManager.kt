@@ -271,10 +271,12 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     private fun checkAdvMatch(bdAddr : String) : ParsedConfigData? {
         val cleanedbdAddr = bdAddr.replace(":", "").lowercase()
 
-        currentConfig?.advSetData?.firstOrNull { it.bdAddr?.lowercase() == cleanedbdAddr.lowercase() }?.also {
+        currentConfig?.advSetData?.filter { it.bdAddr?.lowercase() == cleanedbdAddr.lowercase() }?.also {
             val parsedConfigData = currentConfig!!.copy()
-            parsedConfigData.advSetData = arrayOf(it)
-            return parsedConfigData
+            if (it.isNotEmpty()) {
+                parsedConfigData.advSetData = it.toTypedArray()
+                return parsedConfigData
+            }
         }
         return null
     }

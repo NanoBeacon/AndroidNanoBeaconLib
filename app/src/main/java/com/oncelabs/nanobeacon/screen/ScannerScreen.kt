@@ -41,6 +41,7 @@ import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.math.roundToInt
 
 @ExperimentalMaterialApi
 @Composable
@@ -440,7 +441,7 @@ private fun SliderFilterCard(
         )
         Spacer(modifier = Modifier.weight(.25f))
         Slider(
-            value = filter.value as? Float ?: 0f,
+            value = (filter.value as? Float)?.roundToInt()?.toFloat() ?: 0F,
             onValueChange = {
                 onChange(it)
             },
