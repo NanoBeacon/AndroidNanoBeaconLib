@@ -150,7 +150,8 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                             AdvDataItem(
                                                 title = dataItem.dynamicType.fullName,
                                                 data = dataItem.rawData,
-                                                prefix = "0x"
+                                                prefix = dataItem.dynamicType.prefix,
+                                                unit = dataItem.dynamicType.units,
                                             )
                                         }
                                         ConfigType.UID -> {

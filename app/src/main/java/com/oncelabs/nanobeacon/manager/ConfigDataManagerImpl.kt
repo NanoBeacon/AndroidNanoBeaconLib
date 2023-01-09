@@ -190,7 +190,6 @@ class ConfigDataManagerImpl
                     ADType.TX_POWER -> {
                         payload.data?.let { data ->
                             val dbm: String = data
-                            Log.d("VEGAS", dbm)
                             parsedPayload.txPower = "${dbm.toUByte(16).toByte()}"
                         }
                     }
@@ -297,7 +296,7 @@ class ConfigDataManagerImpl
                     dynamicType = DynamicDataType.TX_POWER,
                     bigEndian = false,
                     encrypted = false,
-                    rawData = raw.substring(48, 50)
+                    rawData = raw.substring(48, 50).toUByte(16).toByte().toString()
                 )
             )
 
