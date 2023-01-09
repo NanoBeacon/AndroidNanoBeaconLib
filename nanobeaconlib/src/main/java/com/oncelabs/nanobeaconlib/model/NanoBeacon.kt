@@ -129,12 +129,14 @@ open class NanoBeacon(
                             }
                             if (trimmedData.isNotEmpty()) {
                                 when (i.dynamicType) {
-                                    DynamicDataType.VCC_ITEM -> dataHolder =
+                                    DynamicDataType.VCC_ITEM -> dataHolder = if (adv.ui_format != ConfigType.TLM) {
                                         DynamicDataParsers.processVcc(
                                             trimmedData,
                                             matchingConfig.value?.vccUnit ?: 0.0F,
                                             i.bigEndian ?: false,
-                                        ).toString()
+                                        ).toString() } else {
+                                        (DynamicDataParsers.processTLMVcc(trimmedData, i.bigEndian ?: false)).toString()
+                                        }
                                     DynamicDataType.TEMP_ITEM -> dataHolder =
                                         DynamicDataParsers.processInternalTemp(
                                             trimmedData,
