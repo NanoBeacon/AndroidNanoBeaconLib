@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oncelabs.nanobeacon.enum.*
@@ -266,7 +267,7 @@ fun GlobalView(clearedConfigData: ParsedConfigData) {
             clearedConfigData.sleepAftTx?.let {
                 GlobalDataItem(
                     title = "Sleep After Tx",
-                    data = it.toString(),
+                    data = it.toString().replaceFirstChar(Char::titlecase),
                     unit = ""
                 )
             }
