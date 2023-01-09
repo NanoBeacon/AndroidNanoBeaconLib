@@ -58,6 +58,7 @@ fun DetailedViewCard(beacon: NanoBeaconInterface) {
                         }
                         Spacer(modifier = Modifier.weight(1f))
                     }
+                    CustomDataLine(title = "Bluetooth Address", data = rawBdParse(it.bluetoothAddress) , maxLines = 1)
                     CustomDataLine(title = "Timestamp", data = it.timeStampFormatted, maxLines = 1)
                     CustomDataLine(title = "RSSI", data = it.rssi.toString(), maxLines = 1)
                     CustomDataLine(
