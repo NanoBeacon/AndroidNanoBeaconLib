@@ -504,11 +504,13 @@ fun SubSectionTitle(title: String) {
     Spacer(modifier = Modifier.height(10.dp))
 }
 
-fun rawBdParse(raw : String) : String {
+fun rawBdParse(raw : String?) : String {
     var result : String = ""
-    for (i in 0..4) {
-        result += raw.substring(i * 2, (i + 1) * 2) + ":"
+    raw?.let {
+        for (i in 0..4) {
+            result += raw.substring(i * 2, (i + 1) * 2) + ":"
+        }
+        result += raw.substring(10, 12)
     }
-    result += raw.substring(10, 12)
     return result
 }

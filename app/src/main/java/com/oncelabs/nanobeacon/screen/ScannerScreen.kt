@@ -45,7 +45,8 @@ import java.util.*
 @ExperimentalMaterialApi
 @Composable
 fun ScannerScreen(
-    viewModel: ScannerViewModel = hiltViewModel()
+    viewModel: ScannerViewModel = hiltViewModel(),
+
 ) {
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
@@ -56,6 +57,10 @@ fun ScannerScreen(
     var refreshing by remember { mutableStateOf(false) }
     val currentDetailBeacon by viewModel.currentDetailBeacon.observeAsState()
     val showDetailModal by viewModel.showDetailModal.observeAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.setShowDetailModal(false)
+    }
 
     fun refresh() = scope.launch {
         refreshing = true
