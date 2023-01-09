@@ -122,7 +122,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                     }
 
                     parsedPayload.txPower?.let {
-                        AdvDataItem(title = "Tx Power", data = it)
+                        AdvDataItem(title = "Tx Power", data = it, unit = "dBm")
                     }
 
                     AdvRandomDelayType.fromCode(adv.randDlyType)?.let {

@@ -190,7 +190,8 @@ class ConfigDataManagerImpl
                     ADType.TX_POWER -> {
                         payload.data?.let { data ->
                             val dbm: String = data
-                            parsedPayload.txPower = "${Integer.parseInt(dbm, 16)}"
+                            Log.d("VEGAS", dbm)
+                            parsedPayload.txPower = "${dbm.toUByte(16).toByte()}"
                         }
                     }
                     ADType.DEVICE_NAME -> {
