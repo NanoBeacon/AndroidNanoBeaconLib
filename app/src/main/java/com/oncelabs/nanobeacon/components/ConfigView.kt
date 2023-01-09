@@ -111,7 +111,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                 adv.bdAddr?.let {
                     AdvDataItem(
                         title = "Bluetooth Address",
-                        data = it,
+                        data = rawBdParse(it),
                         prefix = ""
                     )
                 }
@@ -500,4 +500,13 @@ fun SectionTitle(title: String) {
 fun SubSectionTitle(title: String) {
     Text(text = title, style = configurationSubSectionTitle)
     Spacer(modifier = Modifier.height(10.dp))
+}
+
+fun rawBdParse(raw : String) : String {
+    var result : String = ""
+    for (i in 0..4) {
+        result += raw.substring(i * 2, (i + 1) * 2) + ":"
+    }
+    result += raw.substring(10, 12)
+    return result
 }

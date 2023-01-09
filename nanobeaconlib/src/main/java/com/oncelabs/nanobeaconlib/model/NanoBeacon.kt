@@ -112,6 +112,8 @@ open class NanoBeacon(
                     if (endIndex <= data.manufacturerData.size || endIndex <= serviceDataSize) {
                         var trimmedData: ByteArray = byteArrayOf()
                         if ((adv.ui_format == ConfigType.UID || adv.ui_format == ConfigType.TLM) && serviceDataSize > 0) {
+                            Log.d("DOGGER", data.raw ?: " no raw")
+
                             trimmedData =
                                 data.serviceData?.toList()?.get(0)?.second?.copyOfRange(
                                     currentIndex,
