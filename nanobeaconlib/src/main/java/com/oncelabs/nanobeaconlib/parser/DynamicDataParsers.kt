@@ -26,6 +26,25 @@ class DynamicDataParsers {
             }
         }
 
+        fun processTLMVcc(byteArray: ByteArray, bigEndian : Boolean) : Float? {
+            var base : Int? = null
+
+            val byteOrder = if (bigEndian) {
+                ByteOrder.BIG_ENDIAN
+            } else {
+                ByteOrder.LITTLE_ENDIAN
+            }
+            when(byteArray.size) {
+                1 -> base = byteArray[0].toInt()
+                2 -> base = ByteBuffer.wrap(byteArray).short.toInt()
+            }
+            base?.let {
+                return it.toFloat()
+            } ?: run {
+                return null
+            }
+        }
+
         fun processInternalTemp(byteArray: ByteArray, tempUnit : Float, bigEndian : Boolean) : Float? {
             var base : Int? = null
             val byteOrder = if (bigEndian) {
