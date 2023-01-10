@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface NanoBeaconInterface {
     fun newBeaconData(beaconData: NanoBeaconData)
+    fun setTimeoutInterval(seconds : Float)
     val beaconDataFlow: StateFlow<NanoBeaconData?>
     val rssiFlow: StateFlow<Int?>
     val estimatedAdvIntervalFlow: StateFlow<Int?>

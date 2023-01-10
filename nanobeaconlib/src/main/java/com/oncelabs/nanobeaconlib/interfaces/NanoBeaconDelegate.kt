@@ -1,3 +1,8 @@
 package com.oncelabs.nanobeaconlib.interfaces
 
-interface NanoBeaconDelegate
+import com.oncelabs.nanobeaconlib.model.NanoBeacon
+
+interface NanoBeaconDelegate {
+    fun nanoBeaconDidTimeOut(nanoBeacon : NanoBeacon)
+
+}

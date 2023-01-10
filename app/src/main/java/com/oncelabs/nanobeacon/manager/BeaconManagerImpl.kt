@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.manager
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
 import com.oncelabs.nanobeacon.device.ADXL367
 import com.oncelabs.nanobeaconlib.enums.BleState
@@ -105,12 +106,17 @@ class BeaconManagerImpl @Inject constructor(
             }
         }
 
-        scope.launch {
-            beaconTimeoutFlow.collect {
-
+        /*scope.launch {
+            beaconTimeoutFlow.collect { beacon ->
+                if (_discoveredBeacons.value.contains(beacon)) {
+                }
             }
-        }
 
+        }*/
+
+        NanoBeaconManager.onTimeout = {
+            _discoveredBeacons.value -= listOf(it)
+        }
 
 
 
