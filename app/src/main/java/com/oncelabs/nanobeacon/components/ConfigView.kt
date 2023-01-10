@@ -168,6 +168,7 @@ fun AdvView(clearedConfigData: ParsedConfigData) {
                                         else -> {
                                             AdvDataItem(
                                                 title = dataItem.dynamicType.fullName + " ${dataItem.len} Byte(s)",
+                                                data = dataItem.rawData,
                                                 bigEndian = dataItem.bigEndian
                                                     ?: false,
                                                 encrypted = dataItem.encrypted
