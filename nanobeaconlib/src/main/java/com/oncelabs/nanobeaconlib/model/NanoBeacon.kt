@@ -97,7 +97,13 @@ open class NanoBeacon(
         val list: MutableList<ProcessedDataAdv> = mutableListOf()
         matchingConfig.value?.let {
 
-            for (adv in it.advSetData) {
+            for (index in it.advSetData.indices) {
+                val manufacturerData = data.manufacturerData
+                var serviceData : ByteArray? = null
+                if (data.serviceData?.isNotEmpty() == true) {
+                    serviceData = data.serviceData!!.toList()[0].second
+                }
+                val adv = it.advSetData[index]
                 val stagedList : MutableList<ProcessedData> = mutableListOf()
                 if (adv.advModeTrigEn == AdvMode.TRIGGERED) {
                     NanoNotificationManager.submitNotification(adv.id)
@@ -111,7 +117,7 @@ open class NanoBeacon(
                     for (i in manufacturerDataFlags.toList()) {
                         val endIndex = currentIndex + i.len
                         var dataHolder: String? = null
-                        if (endIndex <= data.manufacturerData.size || endIndex <= serviceDataSize) {
+                        if (endIndex <= manufacturerData.size || endIndex <= serviceDataSize) {
                             var trimmedData: ByteArray = byteArrayOf()
                             if ((adv.ui_format == ConfigType.UID || adv.ui_format == ConfigType.TLM) && serviceDataSize > 0) {
 
@@ -122,9 +128,9 @@ open class NanoBeacon(
                                     )
                                         ?: byteArrayOf()
                             } else {
-                                if (data.manufacturerData.size >= endIndex) {
+                                if (manufacturerData.size >= endIndex) {
                                     trimmedData =
-                                        data.manufacturerData.copyOfRange(currentIndex, endIndex)
+                                        manufacturerData.copyOfRange(currentIndex, endIndex)
                                 }
                             }
                             if (trimmedData.isNotEmpty()) {
@@ -135,7 +141,8 @@ open class NanoBeacon(
                                             matchingConfig.value?.vccUnit ?: 0.0F,
                                             i.bigEndian ?: false,
                                         ).toString() } else {
-                                        (DynamicDataParsers.processTLMVcc(trimmedData, i.bigEndian ?: false)).toString()
+                                            (DynamicDataParsers.processTLMVcc(trimmedData, i.bigEndian ?: false)
+                                                ?.div(1000)).toString()
                                         }
                                     DynamicDataType.TEMP_ITEM -> dataHolder =
                                         DynamicDataParsers.processInternalTemp(
@@ -267,9 +274,44 @@ open class NanoBeacon(
                         }
                     }
                 }
-                list.add(ProcessedDataAdv(adv.ui_format,stagedList))
+
+                if (stagedList.isNotEmpty() && getPayloadLength(adv.parsedPayloadItems?.manufacturerData) == manufacturerData.size) {
+                    list.add(ProcessedDataAdv(adv.ui_format,stagedList, data))
+                } else if (stagedList.isNotEmpty() && getPayloadLength(adv.parsedPayloadItems?.manufacturerData) == serviceData?.size) {
+                    list.add(ProcessedDataAdv(adv.ui_format, stagedList, data))
+                } else {
+                    if (parsedData.value.size > index) {
+                        list.add(
+                            ProcessedDataAdv(
+                                adv.ui_format,
+                                parsedData.value[index].processedData,
+                                parsedData.value[index].beaconData
+                            )
+                        )
+                    } else {
+                        list.add(
+                            ProcessedDataAdv(
+                                adv.ui_format,
+                                listOf(),
+                                null
+                            )
+                        )
+                    }
+                }
             }
         }
         return list.toList()
+    }
+
+    private fun getPayloadLength(list : List<ParsedDynamicData>?) : Int {
+        list?.let {
+            var length = 0
+            for (item in it) {
+                length += item.len
+            }
+            return length
+        } ?: run {
+            return 0
+        }
     }
 }

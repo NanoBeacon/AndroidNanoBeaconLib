@@ -27,246 +27,282 @@ import java.util.*
 fun DetailedViewCard(beacon: NanoBeaconInterface) {
     val processedDataAdv by beacon.parsedData.collectAsState()
     val beaconData by beacon.beaconDataFlow.collectAsState()
-    beaconData?.let {
+    LazyColumn {
+        for (dataAdv in processedDataAdv) {
+            val data = dataAdv.beaconData?.let { formatToEntry(it) }
+            item {
+                Row(Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.weight(0.025f))
+                    Column(Modifier.weight(0.95f)) {
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .background(topBarBackground, RoundedCornerShape(10.dp))
+                                .padding(8.dp)
+                        ) {
 
-        val data = formatToEntry(it)
-        LazyColumn {
-            for (dataAdv in processedDataAdv) {
-                item {
-                    Row(Modifier.fillMaxWidth()) {
-                        Spacer(Modifier.weight(0.025f))
-                        Column(Modifier.weight(0.95f)) {
-                            Column(
-                                Modifier
-                                    .fillMaxWidth()
+                            Row(
+                                modifier = Modifier
                                     .wrapContentHeight()
-                                    .background(topBarBackground, RoundedCornerShape(10.dp))
-                                    .padding(8.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-
-                                Row(
-                                    modifier = Modifier
-                                        .wrapContentHeight()
-                                        .fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    SignalStrength(
-                                        modifier = Modifier.size(32.dp),
-                                        rawSignal = data.rssi.toIntOrNull() ?: -127
+                                SignalStrength(
+                                    modifier = Modifier.size(32.dp),
+                                    rawSignal = data?.rssi?.toIntOrNull() ?: -127
+                                )
+                                Spacer(modifier = Modifier.weight(.05f))
+                                Row {
+                                    Text(
+                                        text = dataAdv.uiFormat.title
+                                            ?: ConfigType.NOT_RECOGNIZED.title,
+                                        style = logCardTitleAccentFont
                                     )
-                                    Spacer(modifier = Modifier.weight(.05f))
-                                    Row {
-                                        Text(
-                                            text = dataAdv.uiFormat.title
-                                                ?: ConfigType.NOT_RECOGNIZED.title,
-                                            style = logCardTitleAccentFont
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.weight(1f))
                                 }
-                                CustomDataLine(
-                                    title = "Bluetooth Address",
-                                    data = it.bluetoothAddress,
-                                    maxLines = 1
-                                )
-                                CustomDataLine(
-                                    title = "Timestamp",
-                                    data = it.timeStampFormatted,
-                                    maxLines = 1
-                                )
-                                CustomDataLine(
-                                    title = "RSSI",
-                                    data = it.rssi.toString(),
-                                    maxLines = 1
-                                )
-                                CustomDataLine(
-                                    title = "Estimated",
-                                    data = it.estimatedAdvInterval.toString(),
-                                    maxLines = 1
-                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                            CustomDataLine(
+                                title = "Bluetooth Address",
+                                data = dataAdv.beaconData?.bluetoothAddress,
+                                maxLines = 1
+                            )
+                            CustomDataLine(
+                                title = "Timestamp",
+                                data = dataAdv.beaconData?.timeStampFormatted,
+                                maxLines = 1
+                            )
+                            CustomDataLine(
+                                title = "RSSI",
+                                data = dataAdv.beaconData?.rssi.toString(),
+                                maxLines = 1
+                            )
+                            CustomDataLine(
+                                title = "Estimated",
+                                data = dataAdv.beaconData?.estimatedAdvInterval.toString(),
+                                maxLines = 1
+                            )
 
 
-                                when (dataAdv.uiFormat) {
-                                    ConfigType.CUSTOM -> {
+                            when (dataAdv.uiFormat) {
+                                ConfigType.CUSTOM -> {
+                                    data?.let {
                                         CustomTypeView(
                                             processedList = dataAdv.processedData,
-                                            data = data
+                                            data = it
                                         )
                                     }
-                                    ConfigType.EDDYSTONE -> {}
-                                    ConfigType.IBEACON -> {
-                                        IBeaconTypeView(processedList = dataAdv.processedData)
-                                    }
-                                    ConfigType.NOT_RECOGNIZED -> {}
-                                    ConfigType.UID -> {
-                                        UIDTypeView(processedList = dataAdv.processedData)
-                                    }
-                                    ConfigType.TLM -> {
-                                        TLMTypeView(processedList = dataAdv.processedData)
-                                    }
                                 }
-
+                                ConfigType.EDDYSTONE -> {}
+                                ConfigType.IBEACON -> {
+                                    IBeaconTypeView(processedList = dataAdv.processedData)
+                                }
+                                ConfigType.NOT_RECOGNIZED -> {}
+                                ConfigType.UID -> {
+                                    UIDTypeView(processedList = dataAdv.processedData)
+                                }
+                                ConfigType.TLM -> {
+                                    TLMTypeView(processedList = dataAdv.processedData)
+                                }
                             }
 
                         }
-                        Spacer(Modifier.weight(0.025f))
+
                     }
-                }
-                item {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.weight(0.025f))
                 }
             }
+            item {
+                Spacer(Modifier.height(8.dp))
+            }
         }
+
     }
 }
 
-@Composable
-fun CustomDataLine(
-    title: String,
-    data: String?,
-    maxLines: Int,
-    separateData: Boolean = false
-) {
-    // Hide unset properties
-    if (data.isNullOrEmpty()) {
-        return
-    }
-
-    if (!separateData || data.isEmpty()) {
-        Row(
-            modifier =
-            Modifier
-                .padding(bottom = 2.dp, top = 1.dp)
-        ) {
-            Text(
-                if (title.isNotEmpty()) "$title:  " else "",
-                style = logItemTitleFont,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                data.ifEmpty { "Not Set" },
-                style = logTextFont,
-                maxLines = maxLines,
-                overflow = TextOverflow.Ellipsis
-            )
+    @Composable
+    fun CustomDataLine(
+        title: String,
+        data: String?,
+        maxLines: Int,
+        separateData: Boolean = false
+    ) {
+        // Hide unset properties
+        if (data.isNullOrEmpty()) {
+            return
         }
-    } else {
-        Column(
-            modifier =
-            Modifier
-            //.padding(bottom = 1.dp, top = 1.dp)
-        ) {
-            Text(
-                if (title.isNotEmpty()) "$title:  " else "",
-                style = logItemTitleFont,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            if (data.isNotEmpty()) {
+
+        if (!separateData || data.isEmpty()) {
+            Row(
+                modifier =
+                Modifier
+                    .padding(bottom = 2.dp, top = 1.dp)
+            ) {
                 Text(
-                    modifier = Modifier.padding(bottom = 2.dp),
-                    text = data,
-                    style = logTextFont,
-                    maxLines = maxLines,
+                    if (title.isNotEmpty()) "$title:  " else "",
+                    style = logItemTitleFont,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-            } else {
                 Text(
-                    "Not Set",
+                    data.ifEmpty { "Not Set" },
                     style = logTextFont,
                     maxLines = maxLines,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun CustomDataItem(
-    title: String?,
-    data: String?,
-    bigEndian: Boolean?,
-    encrypted: Boolean?
-) {
-
-    Column(modifier = Modifier) {
-        Text(
-            modifier = Modifier.padding(bottom = 2.dp),
-            text = title ?: "",
-            style = logItemTitleFont,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            modifier = Modifier.padding(bottom = 2.dp),
-            text = data ?: "Not yet implemented",
-            style = logTextFont,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Row(Modifier.fillMaxWidth()) {
-            if (bigEndian == true) {
-                Text("big-endian", style = CustomItemSubFont)
-                Spacer(Modifier.width(5.dp))
-            }
-            if (encrypted == true) {
-                Text("encrypted", style = CustomItemSubFont)
-            }
-        }
-    }
-}
-
-@Composable
-fun CustomTypeView(data: BeaconDataEntry, processedList: List<ProcessedData>) {
-
-    CustomDataLine(title = "Device Name", data = data.localName, maxLines = 1)
-    CustomDataLine(title = "TX Power", data = data.txPower, maxLines = 1)
-    Spacer(modifier = Modifier.height(2.dp))
-    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
-    Spacer(modifier = Modifier.height(2.dp))
-    Row(
-        modifier = Modifier
-            .wrapContentHeight()
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = "Manufacturer Data", style = logCardTitleAccentFont)
-    }
-    Column(
-        Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Row() {
-            Column(Modifier.fillMaxWidth()) {
-                for (item in processedList) {
-                    Spacer(modifier = Modifier.height(14.dp))
-                    CustomDataItem(
-                        title = item.dynamicDataType.fullName,
-                        data = item.processedData + " ${item.dynamicDataType.units}",
-                        bigEndian = item.bigEndian,
-                        encrypted = item.encrypted
+        } else {
+            Column(
+                modifier =
+                Modifier
+                //.padding(bottom = 1.dp, top = 1.dp)
+            ) {
+                Text(
+                    if (title.isNotEmpty()) "$title:  " else "",
+                    style = logItemTitleFont,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (data.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 2.dp),
+                        text = data,
+                        style = logTextFont,
+                        maxLines = maxLines,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                } else {
+                    Text(
+                        "Not Set",
+                        style = logTextFont,
+                        maxLines = maxLines,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-            Spacer(Modifier.height(14.dp))
         }
     }
-}
 
-@Composable
-fun IBeaconTypeView(processedList: List<ProcessedData>) {
-    Column(
-        Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Center
+    @Composable
+    fun CustomDataItem(
+        title: String?,
+        data: String?,
+        bigEndian: Boolean?,
+        encrypted: Boolean?
     ) {
-        Row() {
-            Column(Modifier.fillMaxWidth()) {
-                for (item in processedList) {
-                    if (item.dynamicDataType.displayToUser) {
+
+        Column(modifier = Modifier) {
+            Text(
+                modifier = Modifier.padding(bottom = 2.dp),
+                text = title ?: "",
+                style = logItemTitleFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                modifier = Modifier.padding(bottom = 2.dp),
+                text = data ?: "Not yet implemented",
+                style = logTextFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Row(Modifier.fillMaxWidth()) {
+                if (bigEndian == true) {
+                    Text("big-endian", style = CustomItemSubFont)
+                    Spacer(Modifier.width(5.dp))
+                }
+                if (encrypted == true) {
+                    Text("encrypted", style = CustomItemSubFont)
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun CustomTypeView(data: BeaconDataEntry, processedList: List<ProcessedData>) {
+
+        CustomDataLine(title = "Device Name", data = data.localName, maxLines = 1)
+        CustomDataLine(title = "TX Power", data = data.txPower, maxLines = 1)
+        Spacer(modifier = Modifier.height(2.dp))
+        Divider(thickness = 1.dp, color = logModalDoneButtonColor)
+        Spacer(modifier = Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .wrapContentHeight()
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Manufacturer Data", style = logCardTitleAccentFont)
+        }
+        Column(
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row() {
+                Column(Modifier.fillMaxWidth()) {
+                    for (item in processedList) {
+                        Spacer(modifier = Modifier.height(14.dp))
+                        CustomDataItem(
+                            title = item.dynamicDataType.fullName,
+                            data = item.processedData + " ${item.dynamicDataType.units}",
+                            bigEndian = item.bigEndian,
+                            encrypted = item.encrypted
+                        )
+                    }
+                }
+                Spacer(Modifier.height(14.dp))
+            }
+        }
+    }
+
+    @Composable
+    fun IBeaconTypeView(processedList: List<ProcessedData>) {
+        Column(
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row() {
+                Column(Modifier.fillMaxWidth()) {
+                    for (item in processedList) {
+                        if (item.dynamicDataType.displayToUser) {
+                            CustomDataLine(
+                                title = item.dynamicDataType.fullName,
+                                data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
+                                maxLines = 1
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(14.dp))
+
+            }
+
+        }
+    }
+
+    @Composable
+    fun UIDTypeView(processedList: List<ProcessedData>) {
+        Spacer(modifier = Modifier.height(2.dp))
+        Divider(thickness = 1.dp, color = logModalDoneButtonColor)
+        Spacer(modifier = Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .wrapContentHeight()
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Service Data", style = logCardTitleAccentFont)
+        }
+        Column(
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row() {
+                Column(Modifier.fillMaxWidth()) {
+                    for (item in processedList) {
                         CustomDataLine(
                             title = item.dynamicDataType.fullName,
                             data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
@@ -274,96 +310,60 @@ fun IBeaconTypeView(processedList: List<ProcessedData>) {
                         )
                     }
                 }
+                Spacer(Modifier.height(14.dp))
             }
-            Spacer(Modifier.height(14.dp))
-
         }
 
     }
-}
 
-@Composable
-fun UIDTypeView(processedList: List<ProcessedData>) {
-    Spacer(modifier = Modifier.height(2.dp))
-    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
-    Spacer(modifier = Modifier.height(2.dp))
-    Row(
-        modifier = Modifier
-            .wrapContentHeight()
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = "Service Data", style = logCardTitleAccentFont)
-    }
-    Column(
-        Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Row() {
-            Column(Modifier.fillMaxWidth()) {
-                for (item in processedList) {
-                    CustomDataLine(
-                        title = item.dynamicDataType.fullName,
-                        data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
-                        maxLines = 1
-                    )
+
+    @Composable
+    fun TLMTypeView(processedList: List<ProcessedData>) {
+        Spacer(modifier = Modifier.height(2.dp))
+        Divider(thickness = 1.dp, color = logModalDoneButtonColor)
+        Spacer(modifier = Modifier.height(2.dp))
+        Row(
+            modifier = Modifier
+                .wrapContentHeight()
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Service Data", style = logCardTitleAccentFont)
+        }
+        Column(
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row() {
+                Column(Modifier.fillMaxWidth()) {
+                    for (item in processedList) {
+                        CustomDataLine(
+                            title = item.dynamicDataType.fullName,
+                            data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
+                            maxLines = 1
+                        )
+                    }
                 }
+                Spacer(Modifier.height(14.dp))
             }
-            Spacer(Modifier.height(14.dp))
         }
+
     }
 
-}
 
-
-@Composable
-fun TLMTypeView(processedList: List<ProcessedData>) {
-    Spacer(modifier = Modifier.height(2.dp))
-    Divider(thickness = 1.dp, color = logModalDoneButtonColor)
-    Spacer(modifier = Modifier.height(2.dp))
-    Row(
-        modifier = Modifier
-            .wrapContentHeight()
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = "Service Data", style = logCardTitleAccentFont)
-    }
-    Column(
-        Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Row() {
-            Column(Modifier.fillMaxWidth()) {
-                for (item in processedList) {
-                    CustomDataLine(
-                        title = item.dynamicDataType.fullName,
-                        data = item.processedData.uppercase() + " ${item.dynamicDataType.units}",
-                        maxLines = 1
-                    )
-                }
-            }
-            Spacer(Modifier.height(14.dp))
-        }
-    }
-
-}
-
-
-@Preview
-@Preview(name = "NEXUS_7", device = Devices.NEXUS_7)
-@Preview(name = "NEXUS_5", device = Devices.NEXUS_5)
-@Preview(name = "PIXEL_C", device = Devices.PIXEL_C)
-@Preview(name = "PIXEL_2", device = Devices.PIXEL_2)
-@Preview(name = "PIXEL_4", device = Devices.PIXEL_4)
-@Preview(name = "PIXEL_4_XL", device = Devices.PIXEL_4_XL)
-@Composable
-fun DetailViewCardPreview() {
-    Column {
+    @Preview
+    @Preview(name = "NEXUS_7", device = Devices.NEXUS_7)
+    @Preview(name = "NEXUS_5", device = Devices.NEXUS_5)
+    @Preview(name = "PIXEL_C", device = Devices.PIXEL_C)
+    @Preview(name = "PIXEL_2", device = Devices.PIXEL_2)
+    @Preview(name = "PIXEL_4", device = Devices.PIXEL_4)
+    @Preview(name = "PIXEL_4_XL", device = Devices.PIXEL_4_XL)
+    @Composable
+    fun DetailViewCardPreview() {
+        Column {
 //        LogAdvertisementCard(
 //            beacon =
 //        )
+        }
     }
-}

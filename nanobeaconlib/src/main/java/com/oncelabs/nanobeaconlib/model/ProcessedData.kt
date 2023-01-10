@@ -12,5 +12,6 @@ data class ProcessedData (
 
 data class ProcessedDataAdv (
     val uiFormat : ConfigType,
-    val processedData: List<ProcessedData>
+    val processedData: List<ProcessedData>,
+    val beaconData: NanoBeaconData?
 )
