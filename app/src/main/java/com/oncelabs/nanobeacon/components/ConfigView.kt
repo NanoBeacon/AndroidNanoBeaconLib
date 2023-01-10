@@ -56,9 +56,9 @@ fun ConfigView(parsedConfigData: ParsedConfigData?) {
 
 @Composable
 fun EmptyConfigCard() {
-    Row(Modifier.fillMaxWidth()) {
+    Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
         Spacer(Modifier.weight(0.025f))
-        Column(Modifier.weight(0.95f)) {
+        Column(Modifier.weight(0.95f), verticalArrangement = Arrangement.Center) {
             //Config Card
             Column(
                 Modifier

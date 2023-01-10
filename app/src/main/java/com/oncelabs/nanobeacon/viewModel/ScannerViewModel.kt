@@ -103,7 +103,6 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch {
             beaconManager.discoveredBeacons.collect {
                 _discoveredBeacons.postValue(it)
-                Log.d(TAG, "Updated Beacon Count ${it.count()}")
             }
         }
 
