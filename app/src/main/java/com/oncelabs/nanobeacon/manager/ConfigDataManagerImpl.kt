@@ -312,7 +312,7 @@ class ConfigDataManagerImpl
             val txPower = ParsedDynamicData(1, DynamicDataType.TX_POWER, null, null, null)
             val namespace = ParsedDynamicData(10, DynamicDataType.EDDYSTONE_NAMESPACE, false, false, trimmed.substring(0, 20))
             val instance = ParsedDynamicData(6, DynamicDataType.EDDYSTONE_INSTANCE, false, false, trimmed.substring(20))
-            val postfix = ParsedDynamicData(1, DynamicDataType.EDDYSTONE_POSTFIX, null, null, null)
+            val postfix = ParsedDynamicData(2, DynamicDataType.EDDYSTONE_POSTFIX, null, null, null)
             return listOf(prefix, txPower, namespace, instance, postfix)
         }
         return null
@@ -321,7 +321,7 @@ class ConfigDataManagerImpl
     private fun parseEddystoneTLMData(raw : String) : List<ParsedDynamicData>? {
         if (raw.length >= 28) {
             val prefix = ParsedDynamicData(2, DynamicDataType.EDDYSTONE_PREFIX, null, null, null)
-            val txPower = ParsedDynamicData(1, DynamicDataType.TX_POWER, null, null, null)
+           // val txPower = ParsedDynamicData(1, DynamicDataType.TX_POWER, null, null, null)
 
             var splitRaw: List<String> = raw.split("<").toList()
             splitRaw = splitRaw.drop(1)
@@ -329,6 +329,7 @@ class ConfigDataManagerImpl
             var parsedMap: MutableList<ParsedDynamicData> = mutableListOf()
             parsedMap.add(prefix)
             //parsedMap.add(txPower)
+
             for (dynamicRaw in splitRaw) {
                 val droppedEnd = dynamicRaw.dropLast(1)
                 val endOfName = (droppedEnd.indexOf("byte") - 2)
