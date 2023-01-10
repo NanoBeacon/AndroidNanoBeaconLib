@@ -48,12 +48,13 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     private val leDeviceMap: ConcurrentMap<String, NanoBeacon> = ConcurrentHashMap()
     private var registeredBeaconTypes: MutableList<CustomBeaconInterface> = mutableListOf()
 
-
     private var context: WeakReference<Context>? = null
     private var bluetoothManager: BluetoothManager? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var bluetoothLeScanner: BluetoothLeScanner? = null
     private var currentConfig: ParsedConfigData? = null
+
+    var onTimeout : ((NanoBeacon) -> Unit)? = null
 
     fun init(getContext: WeakReference<Context>) {
         context = getContext
@@ -358,6 +359,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
                                 it.newBeaconData(beaconData = beaconData)
                                 beaconScope.launch {
                                     newBeaconDataFlow.emit(beaconData)
+
                                 }
                             }
                         }
@@ -372,5 +374,13 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
             }
         }
     }
+
+    override fun nanoBeaconDidTimeOut(nanoBeacon: NanoBeacon) {
+        onTimeout?.let { it(nanoBeacon) }
+        if (leDeviceMap.containsKey(nanoBeacon.address)) {
+            leDeviceMap.remove(nanoBeacon.address)
+        }
+    }
+
 
 }

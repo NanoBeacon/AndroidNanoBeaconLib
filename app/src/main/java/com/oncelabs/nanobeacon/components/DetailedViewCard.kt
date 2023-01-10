@@ -209,10 +209,14 @@ fun DetailedViewCard(beacon: NanoBeaconInterface) {
             Row(Modifier.fillMaxWidth()) {
                 if (bigEndian == true) {
                     Text("big-endian", style = CustomItemSubFont)
-                    Spacer(Modifier.width(5.dp))
+                } else {
+                    Text("little-endian", style = CustomItemSubFont)
                 }
+                Spacer(Modifier.width(5.dp))
                 if (encrypted == true) {
                     Text("encrypted", style = CustomItemSubFont)
+                } else {
+                    Text("unencrypted", style = CustomItemSubFont)
                 }
             }
         }

@@ -13,18 +13,23 @@ import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconInterface
 import com.oncelabs.nanobeaconlib.manager.NanoNotificationManager
 import com.oncelabs.nanobeaconlib.manager.NanoNotificationService
 import com.oncelabs.nanobeaconlib.parser.DynamicDataParsers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.lang.ref.WeakReference
 
 open class NanoBeacon(
     var beaconData: NanoBeaconData? = null,
     context: Context? = null,
-    delegate: NanoBeaconDelegate? = null,
+    private val delegate: NanoBeaconDelegate? = null,
     private var timeoutInterval: Float = 60f,
-    override val address: String? = beaconData?.bluetoothAddress
+    override val address: String? = beaconData?.bluetoothAddress,
+
 ) : NanoBeaconInterface {
 
     private val TAG = NanoBeacon::class.simpleName
+
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     /* Expose flow for observing real-time advertisement data */
     private val _beaconDataFlow = MutableStateFlow<NanoBeaconData?>(null)
@@ -47,7 +52,10 @@ open class NanoBeacon(
     private val _parsedData = MutableStateFlow<List<ProcessedDataAdv>>(listOf())
     override var parsedData = _parsedData.asStateFlow()
 
-    private var check = false
+    private var timeOutIntervalInSeconds: Float = 10f
+    private var timeOutJob: Job? = null
+    private var timeStamp: Long? = null
+
 
     override fun newBeaconData(beaconData: NanoBeaconData) {
         _beaconDataFlow.value = beaconData
@@ -57,6 +65,31 @@ open class NanoBeacon(
         if (processed.isNotEmpty()) {
             _parsedData.value = processed
         }
+        launchTimeoutTimer()
+    }
+
+    private fun launchTimeoutTimer(){
+        val weakThis = WeakReference(this)
+        val timeIntervalInMil = timeOutIntervalInSeconds.toLong() * 1000
+
+        timeStamp = System.currentTimeMillis()
+        timeOutJob?.cancel()
+        timeOutJob = scope.launch {
+            while (isActive){
+                val deltaT = System.currentTimeMillis() - timeStamp!!
+                if((deltaT) > (timeIntervalInMil)) {
+                    weakThis.get()?.let { device ->
+                        delegate?.nanoBeaconDidTimeOut(device)
+                        timeOutJob?.cancel()
+                    }
+                }
+                delay(1000)
+            }
+        }
+    }
+
+    override fun setTimeoutInterval(seconds : Float) {
+        timeOutIntervalInSeconds = seconds
     }
 
     fun loadConfig(parsedConfigData: ParsedConfigData?) {
