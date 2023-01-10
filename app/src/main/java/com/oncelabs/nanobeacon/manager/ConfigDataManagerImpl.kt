@@ -328,7 +328,7 @@ class ConfigDataManagerImpl
 
             var parsedMap: MutableList<ParsedDynamicData> = mutableListOf()
             parsedMap.add(prefix)
-            parsedMap.add(txPower)
+            //parsedMap.add(txPower)
             for (dynamicRaw in splitRaw) {
                 val droppedEnd = dynamicRaw.dropLast(1)
                 val endOfName = (droppedEnd.indexOf("byte") - 2)
