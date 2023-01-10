@@ -219,7 +219,9 @@ open class NanoBeacon(
                                             trimmedData,
                                             i.bigEndian ?: false
                                         ).toString()
-                                    DynamicDataType.UTF8_ITEM -> TODO()
+                                    DynamicDataType.UTF8_ITEM -> {
+                                        dataHolder = trimmedData.decodeToString()
+                                    }
                                     DynamicDataType.UUID -> {
                                         dataHolder =
                                             DynamicDataParsers.processIBeaconUUID(trimmedData)

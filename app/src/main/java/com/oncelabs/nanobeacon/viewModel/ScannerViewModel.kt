@@ -228,13 +228,28 @@ class ScannerViewModel @Inject constructor(
      */
     fun onFilterChanged(type: FilterType, value: Any?, enabled: Boolean) {
         val index = _filters.value?.indexOfFirst { it.filterType == type }
+
         if (index != -1 && index != null) {
             val filterCopy = _filters.value?.toMutableList()
             filterCopy?.get(index)?.value = value
             filterCopy?.get(index)?.enabled = enabled
+
+            if (configurationOnlyActive(filterCopy?.toList() ?: listOf())) {
+                filterCopy?.let { copy ->
+                    for (indc in copy.indices) {
+                        if (filterCopy.get(indc).filterType != FilterType.ONLY_SHOW_CONFIGURATION) {
+                            filterCopy.get(indc).enabled = false
+                            filterCopy.get(indc).value = filterCopy.get(indc).filterType.getDefaultValue()
+
+                        }
+                    }
+                }
+            }
+
             _filters.value = listOf()
             _filters.value = filterCopy
         }
+
 
         _filters.value?.mapNotNull { it.getDescription() }?.let { filterDescriptions ->
             if (filterDescriptions.isEmpty()) {
@@ -248,4 +263,14 @@ class ScannerViewModel @Inject constructor(
     fun openFilePickerManager() {
         filePickerManager.openFilePicker()
     }
+
+    fun configurationOnlyActive(list : List<FilterOption>) : Boolean {
+        for (item in list) {
+            if (item.filterType == FilterType.ONLY_SHOW_CONFIGURATION) {
+                return item.enabled
+            }
+        }
+        return false
+    }
+
 }
