@@ -155,7 +155,8 @@ private fun ScannerContent(
                     .clickable {
                         filterMenuExpanded = !filterMenuExpanded
                     }
-                    .padding(8.dp)
+                    .padding(8.dp),
+                color = Color.White
             )
 
             /**Filter results drop down*/
@@ -239,55 +240,56 @@ private fun ScannerContent(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {
+        if (!filterMenuExpanded) {
+            if (!scanningEnabled) {
+                FloatingActionButton(
+                    onClick = {
+                        onRefreshButtonClick()
+                    },
+                    backgroundColor = logFloatingButtonColor,
+                    contentColor = Color.White,
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        "Refresh Button",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+                Spacer(Modifier.height(25.dp))
+            }
 
-        if (!scanningEnabled) {
+            /**Scroll to top*/
             FloatingActionButton(
                 onClick = {
-                    onRefreshButtonClick()
+                    // Scroll to top
+                    scrollToTopAndPause()
                 },
                 backgroundColor = logFloatingButtonColor,
                 contentColor = Color.White,
             ) {
                 Icon(
-                    Icons.Default.Refresh,
-                    "Refresh Button",
+                    Icons.Filled.VerticalAlignTop,
+                    "Top",
                     modifier = Modifier.size(36.dp)
                 )
             }
             Spacer(Modifier.height(25.dp))
-        }
-
-        /**Scroll to top*/
-        FloatingActionButton(
-            onClick = {
-                // Scroll to top
-                scrollToTopAndPause()
-            },
-            backgroundColor = logFloatingButtonColor,
-            contentColor = Color.White,
-        ) {
-            Icon(
-                Icons.Filled.VerticalAlignTop,
-                "Top",
-                modifier = Modifier.size(36.dp)
-            )
-        }
-        Spacer(Modifier.height(25.dp))
 
 
-        /**Start/stop scanning*/
-        FloatingActionButton(
-            onClick = {
-                onScanButtonClick()
-            },
-            backgroundColor = logFloatingButtonColor,
-            contentColor = Color.White,
-        ) {
-            Icon(
-                if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
-                "Start Stop",
-                modifier = Modifier.size(36.dp)
-            )
+            /**Start/stop scanning*/
+            FloatingActionButton(
+                onClick = {
+                    onScanButtonClick()
+                },
+                backgroundColor = logFloatingButtonColor,
+                contentColor = Color.White,
+            ) {
+                Icon(
+                    if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
+                    "Start Stop",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
         }
     }
 
@@ -507,7 +509,8 @@ private fun GroupedOptionsFilterCard(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = itemValue,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                color = Color.Black
                             )
                             Checkbox(
                                 checked = optionMap[itemValue] ?: false,
