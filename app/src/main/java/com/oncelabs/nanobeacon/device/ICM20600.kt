@@ -5,6 +5,7 @@ import com.oncelabs.nanobeaconlib.interfaces.CustomBeaconInterface
 import com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate
 import com.oncelabs.nanobeaconlib.model.NanoBeacon
 import com.oncelabs.nanobeaconlib.model.NanoBeaconData
+import java.lang.ref.WeakReference
 
 class ICM20600(
     data: NanoBeaconData? = null,
@@ -13,7 +14,7 @@ class ICM20600(
 ): NanoBeacon(
     beaconData = data,
     context = context,
-    delegate = delegate
+    delegate = WeakReference(delegate)
 ), CustomBeaconInterface {
 
     override fun isTypeMatchFor(

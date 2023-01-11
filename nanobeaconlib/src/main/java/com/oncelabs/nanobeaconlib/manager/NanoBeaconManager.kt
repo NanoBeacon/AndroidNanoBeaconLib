@@ -107,6 +107,9 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
 
     fun refresh() {
         stopScanning()
+        for (device in leDeviceMap.values) {
+            device.shouldTimeout = false
+        }
         leDeviceMap.clear()
         startScanning()
     }
@@ -327,7 +330,7 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
                                 nanoBeacon = NanoBeacon(
                                     beaconData,
                                     context,
-                                    this@NanoBeaconManager
+                                    WeakReference (this@NanoBeaconManager)
                                 )
 
                                 //Check for advertisement match and drop irrelevant advertisements
@@ -376,10 +379,11 @@ object NanoBeaconManager : NanoBeaconManagerInterface, NanoBeaconDelegate {
     }
 
     override fun nanoBeaconDidTimeOut(nanoBeacon: NanoBeacon) {
-        onTimeout?.let { it(nanoBeacon) }
         if (leDeviceMap.containsKey(nanoBeacon.address)) {
             leDeviceMap.remove(nanoBeacon.address)
         }
+        onTimeout?.let { it(nanoBeacon) }
+
     }
 
 

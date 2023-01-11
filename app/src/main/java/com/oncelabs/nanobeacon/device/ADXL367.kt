@@ -17,13 +17,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 import kotlin.experimental.and
 
 @ExperimentalMaterialApi
 class ADXL367(
     data: NanoBeaconData? = null,
     val context: Context? = null,
-    delegate: NanoBeaconDelegate? = null
+    delegate: WeakReference<NanoBeaconDelegate?>? = null
 ): NanoBeacon(
     beaconData = data,
     context = context,
@@ -46,9 +47,9 @@ class ADXL367(
 
     private var localHistoricalADXL367Data: MutableList<Pair<Long, ADXL367Data>> = mutableListOf()
 
-    override fun isTypeMatchFor(beaconData: NanoBeaconData, context: Context, delegate: com.oncelabs.nanobeaconlib.interfaces.NanoBeaconDelegate): NanoBeacon? {
+    override fun isTypeMatchFor(beaconData: NanoBeaconData, context: Context, delegate: NanoBeaconDelegate): NanoBeacon? {
         if (beaconData.name == "ADXL367_Temp"){
-            return ADXL367(beaconData, context, delegate)
+            return ADXL367(beaconData, context, WeakReference(delegate))
         }
         return null
     }
