@@ -39,7 +39,7 @@ enum class PermissionType(
         Manifest.permission.POST_NOTIFICATIONS,
         "Notifications",
         "This permission is required to Notify of triggered BLE events",
-        31,
+        33,
         false),
     BLUETOOTH_CONNECT(
         Manifest.permission.BLUETOOTH_CONNECT,
