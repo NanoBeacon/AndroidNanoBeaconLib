@@ -240,55 +240,56 @@ private fun ScannerContent(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {
+        if (!filterMenuExpanded) {
+            if (!scanningEnabled) {
+                FloatingActionButton(
+                    onClick = {
+                        onRefreshButtonClick()
+                    },
+                    backgroundColor = logFloatingButtonColor,
+                    contentColor = Color.White,
+                ) {
+                    Icon(
+                        Icons.Default.Refresh,
+                        "Refresh Button",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+                Spacer(Modifier.height(25.dp))
+            }
 
-        if (!scanningEnabled) {
+            /**Scroll to top*/
             FloatingActionButton(
                 onClick = {
-                    onRefreshButtonClick()
+                    // Scroll to top
+                    scrollToTopAndPause()
                 },
                 backgroundColor = logFloatingButtonColor,
                 contentColor = Color.White,
             ) {
                 Icon(
-                    Icons.Default.Refresh,
-                    "Refresh Button",
+                    Icons.Filled.VerticalAlignTop,
+                    "Top",
                     modifier = Modifier.size(36.dp)
                 )
             }
             Spacer(Modifier.height(25.dp))
-        }
-
-        /**Scroll to top*/
-        FloatingActionButton(
-            onClick = {
-                // Scroll to top
-                scrollToTopAndPause()
-            },
-            backgroundColor = logFloatingButtonColor,
-            contentColor = Color.White,
-        ) {
-            Icon(
-                Icons.Filled.VerticalAlignTop,
-                "Top",
-                modifier = Modifier.size(36.dp)
-            )
-        }
-        Spacer(Modifier.height(25.dp))
 
 
-        /**Start/stop scanning*/
-        FloatingActionButton(
-            onClick = {
-                onScanButtonClick()
-            },
-            backgroundColor = logFloatingButtonColor,
-            contentColor = Color.White,
-        ) {
-            Icon(
-                if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
-                "Start Stop",
-                modifier = Modifier.size(36.dp)
-            )
+            /**Start/stop scanning*/
+            FloatingActionButton(
+                onClick = {
+                    onScanButtonClick()
+                },
+                backgroundColor = logFloatingButtonColor,
+                contentColor = Color.White,
+            ) {
+                Icon(
+                    if (scanningEnabled) Icons.Default.Stop else Icons.Default.PlayArrow,
+                    "Start Stop",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
         }
     }
 
