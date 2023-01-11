@@ -155,7 +155,8 @@ private fun ScannerContent(
                     .clickable {
                         filterMenuExpanded = !filterMenuExpanded
                     }
-                    .padding(8.dp)
+                    .padding(8.dp),
+                color = Color.White
             )
 
             /**Filter results drop down*/
