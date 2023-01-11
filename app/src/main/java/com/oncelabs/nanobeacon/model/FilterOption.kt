@@ -43,8 +43,17 @@ data class FilterOption(
         return if (isActive) {
             when(filterType.getInputType()) {
                 FilterInputType.BINARY -> filterType.getDescription()
-                FilterInputType.SLIDER, FilterInputType.OPTIONS -> "${(value as? Float)?.roundToInt()} ${filterType.getDescription()}"
+                FilterInputType.SLIDER -> "${(value as? Float)?.roundToInt()} ${filterType.getDescription()}"
                 FilterInputType.SEARCH -> "$value"
+                FilterInputType.OPTIONS -> {
+                    var holder = ""
+                    for (i in (value as? MutableMap<String, Boolean>)?.toList()!!) {
+                        if (i.second) {
+                            holder += i.first + " "
+                        }
+                    }
+                    holder
+                }
             }
         } else {
             null
