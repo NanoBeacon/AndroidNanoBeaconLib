@@ -509,7 +509,8 @@ private fun GroupedOptionsFilterCard(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = itemValue,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                color = Color.Black
                             )
                             Checkbox(
                                 checked = optionMap[itemValue] ?: false,

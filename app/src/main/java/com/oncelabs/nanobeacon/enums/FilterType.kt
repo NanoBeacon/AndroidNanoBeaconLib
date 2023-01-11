@@ -66,7 +66,8 @@ enum class FilterType {
             ONLY_SHOW_CONFIGURATION -> false
             BY_TYPE -> mutableMapOf(
                 BeaconType.BEACON.description to false,
-                BeaconType.EDDYSTONE.description to false,
+                BeaconType.UID.description to false,
+                BeaconType.TLM.description to false
             )
             NAME -> ""
             SORT_RSSI -> false

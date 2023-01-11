@@ -181,17 +181,23 @@ class ScannerViewModel @Inject constructor(
                                             } ?: false
                                         }
                                     }
-                                    if (type.first == "Eddystone") {
+                                    if (type.first == "UID") {
                                         filteredList = filteredList.filter {
 
                                             it.beaconDataFlow.value?.serviceData?.let { rawMap ->
                                                 if (rawMap.isNotEmpty()) {
-                                                    when(rawMap.toList()[0].second[0]) {
-                                                        (0x00).toByte() -> true
-                                                        (0x20).toByte() -> true
-                                                        (0x30).toByte() -> true
-                                                        else -> false
-                                                    }
+                                                    rawMap.toList()[0].second[0] == (0x00).toByte()
+                                                } else {
+                                                    false
+                                                }
+                                            } ?: false
+                                        }
+                                    }
+                                    if (type.first == "TLM") {
+                                        filteredList = filteredList.filter {
+                                            it.beaconDataFlow.value?.serviceData?.let { rawMap ->
+                                                if (rawMap.isNotEmpty()) {
+                                                    rawMap.toList()[0].second[0] == (0x20).toByte()
                                                 } else {
                                                     false
                                                 }
