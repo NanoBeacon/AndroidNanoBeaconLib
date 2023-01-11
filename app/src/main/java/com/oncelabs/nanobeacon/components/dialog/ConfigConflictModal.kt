@@ -1,6 +1,7 @@
 package com.oncelabs.nanobeacon.components.dialog
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,43 +38,40 @@ fun ConfigConflictModal(
                     .height(200.dp)
                     .background(cardBackground, shape = RoundedCornerShape(12.dp))
             ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(45.dp)
-                ) {
-                    Column(Modifier.fillMaxWidth()) {
 
-                        Row(
-                            Modifier
+                Column(Modifier.fillMaxWidth().padding(15.dp)) {
+
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier
                                 .fillMaxWidth()
-                        ) {
+                                .weight(0.15f)
+                                .padding(3.dp),
+                            text = "Configuration Conflicts",
+                            style = MaterialTheme.typography.h6,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+
+
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(0.1f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        for (conflict in conflicts) {
                             Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(0.15f)
-                                    .padding(3.dp),
-                                text = "Configuration Conflicts",
-                                style = MaterialTheme.typography.h6,
+                                conflict.getMsg(),
                                 color = Color.White,
                                 textAlign = TextAlign.Center
                             )
                         }
-
-                    }
-                }
-
-
-                Column(
-                    modifier = Modifier
-                        .padding(15.dp)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Spacer(modifier = Modifier.weight(0.1f))
-                    for (conflict in conflicts) {
-                        Text("${conflict.configAdvConflict}", color = Color.White)
                     }
                     Row() {
                         Text(
@@ -86,6 +84,7 @@ fun ConfigConflictModal(
                             textAlign = TextAlign.Center
                         )
                     }
+
                 }
 
             }

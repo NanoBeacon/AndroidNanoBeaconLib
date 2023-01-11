@@ -184,6 +184,7 @@ class ScannerViewModel @Inject constructor(
                                     }
                                     if (type.first == "Eddystone") {
                                         filteredList = filteredList.filter {
+
                                             it.beaconDataFlow.value?.serviceData?.let { rawMap ->
                                                 if (rawMap.isNotEmpty()) {
                                                     when(rawMap.toList()[0].second[0]) {
