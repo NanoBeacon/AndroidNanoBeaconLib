@@ -71,10 +71,10 @@ class BeaconManagerImpl @Inject constructor(
     }
 
     override fun refresh() {
-        NanoBeaconManager.refresh()
+        NanoBeaconManager.stopScanning()
         _discoveredBeacons.value = listOf()
         _discoveredAdxlBeacons.value = listOf()
-        startScanning()
+        NanoBeaconManager.refresh()
     }
 
     private fun addObservers(){

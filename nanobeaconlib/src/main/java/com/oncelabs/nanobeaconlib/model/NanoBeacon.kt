@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference
 open class NanoBeacon(
     var beaconData: NanoBeaconData? = null,
     context: Context? = null,
-    private val delegate: NanoBeaconDelegate? = null,
+    private val delegate: WeakReference<NanoBeaconDelegate?>? = null,
     private var timeoutInterval: Float = 60f,
     override val address: String? = beaconData?.bluetoothAddress,
 
@@ -56,6 +56,11 @@ open class NanoBeacon(
     private var timeOutJob: Job? = null
     private var timeStamp: Long? = null
 
+    var shouldTimeout : Boolean = true
+
+    init {
+        launchTimeoutTimer()
+    }
 
     override fun newBeaconData(beaconData: NanoBeaconData) {
         _beaconDataFlow.value = beaconData
@@ -65,7 +70,7 @@ open class NanoBeacon(
         if (processed.isNotEmpty()) {
             _parsedData.value = processed
         }
-        launchTimeoutTimer()
+        timeStamp = System.currentTimeMillis()
     }
 
     private fun launchTimeoutTimer(){
@@ -76,10 +81,10 @@ open class NanoBeacon(
         timeOutJob?.cancel()
         timeOutJob = scope.launch {
             while (isActive){
-                val deltaT = System.currentTimeMillis() - timeStamp!!
-                if((deltaT) > (timeIntervalInMil)) {
+                val deltaT = System.currentTimeMillis() - WeakReference(timeStamp!!).get()!!
+                if((deltaT) > (timeIntervalInMil) && shouldTimeout) {
                     weakThis.get()?.let { device ->
-                        delegate?.nanoBeaconDidTimeOut(device)
+                        delegate?.get()?.nanoBeaconDidTimeOut(device)
                         timeOutJob?.cancel()
                     }
                 }
