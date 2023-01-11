@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface ConfigDataManager {
     val parsedConfig : StateFlow<ParsedConfigData?>
     fun init()
-    fun setConfig(configData: ConfigData)
+    fun setConfig(configData: ConfigData) : ParsedConfigData?
     fun deleteConfig()
 
 }

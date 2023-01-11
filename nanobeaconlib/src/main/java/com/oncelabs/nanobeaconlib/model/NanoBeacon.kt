@@ -52,7 +52,7 @@ open class NanoBeacon(
     private val _parsedData = MutableStateFlow<List<ProcessedDataAdv>>(listOf())
     override var parsedData = _parsedData.asStateFlow()
 
-    private var timeOutIntervalInSeconds: Float = 10f
+    private var timeOutIntervalInSeconds: Float = 30f
     private var timeOutJob: Job? = null
     private var timeStamp: Long? = null
 

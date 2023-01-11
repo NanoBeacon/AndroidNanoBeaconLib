@@ -33,8 +33,8 @@ class ConfigDataManagerImpl
     }
 
 
-    override fun setConfig(configData: ConfigData) {
-        parseConfigData(configData)
+    override fun setConfig(configData: ConfigData) : ParsedConfigData? {
+        return parseConfigData(configData)
     }
 
     override fun deleteConfig() {
@@ -43,7 +43,7 @@ class ConfigDataManagerImpl
 
     }
 
-    private fun parseConfigData(configData: ConfigData) {
+    private fun parseConfigData(configData: ConfigData) : ParsedConfigData? {
 
         configData.advSet?.let {
             val parsedAdvertisements = mutableListOf<ParsedAdvertisementData>()
@@ -86,8 +86,10 @@ class ConfigDataManagerImpl
                 )
                 NanoBeaconManager.loadConfiguration(configData)
                 _parsedConfig.value = configData
+                return configData
             }
         }
+        return null
     }
 
     fun parseGlobalTriggerSettings(globalTrigSettings: GlobalTrigSetting?): Map<SensorTriggerSource, GlobalTriggerSettings>? {

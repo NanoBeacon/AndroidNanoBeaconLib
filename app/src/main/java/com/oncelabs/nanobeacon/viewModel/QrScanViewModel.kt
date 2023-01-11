@@ -84,12 +84,16 @@ class QrScanViewModel @Inject constructor(
                     _showQrScanner.value = false
                     pendingQr = null
                     SettingsManager.setSavedConfig(decoded)
-                    configDataManager.setConfig(it)
+                    val parsedConfigData = configDataManager.setConfig(it)
                     it.advSet?.let { sets ->
-                        val holderConflicts = ConfigAdvConflicts.checkAdvs(sets)
-                        if (holderConflicts.isNotEmpty()) {
-                           // _conflicts.value = holderConflicts
-                           // _showConflicts.value = true
+                        parsedConfigData?.let { data ->
+                            if (data.advSetData.isNotEmpty()) {
+                                val holderConflicts = ConfigAdvConflicts.checkAdvs(data.advSetData)
+                                if (holderConflicts.isNotEmpty()) {
+                                    _conflicts.value = holderConflicts
+                                    _showConflicts.value = true
+                                }
+                            }
                         }
                     }
                     beaconManager.refresh()
