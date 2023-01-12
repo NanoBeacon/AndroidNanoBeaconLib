@@ -408,9 +408,9 @@ fun AdvDataItem(
             if (showFlags) {
                 var endianess = if (bigEndian) "big-endian" else "little-endian"
                 var encryptedness = if (encrypted) "encrypted" else "unencrypted"
-                Text(endianess, style = CustomItemSubFont)
+                Text(endianess, style = CustomItemSubFont, color = subLabelColor)
                 Spacer(Modifier.width(5.dp))
-                Text(encryptedness, style = CustomItemSubFont)
+                Text(encryptedness, style = CustomItemSubFont, color = subLabelColor)
             }
         }
     }
@@ -481,11 +481,11 @@ fun AdvDataEntryItem(
         }
         Row(Modifier.fillMaxWidth()) {
             if (bigEndian) {
-                Text("big-endian", style = CustomItemSubFont)
+                Text("big-endian", style = CustomItemSubFont, color = subLabelColor)
                 Spacer(Modifier.width(5.dp))
             }
             if (encrypted) {
-                Text("encrypted", style = CustomItemSubFont)
+                Text("encrypted", style = CustomItemSubFont, color = subLabelColor)
             }
         }
     }

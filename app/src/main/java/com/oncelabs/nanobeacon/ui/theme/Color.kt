@@ -18,6 +18,7 @@ val okButtonColor = Color(0xFF72BAF5)
 val logFloatingButtonColor = Color(0xFF72BAF5)
 val logModalItemBackgroundColor = Color(0xFF393939)
 val logModalDoneButtonColor = Color(0xFF5E646D)
+val subLabelColor = Color(0xBAFFFFFF)
 
 val chartColor = Color(0xFF8DCEE8)
 val zLineColor = Color(0xFFE55857)
