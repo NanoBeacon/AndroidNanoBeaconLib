@@ -58,6 +58,9 @@ class ScannerViewModel @Inject constructor(
     private val _currentDetailBeacon = MutableLiveData<NanoBeaconInterface?>(null)
     val currentDetailBeacon = _currentDetailBeacon
 
+    private val _onlyConfigActive = MutableLiveData<Boolean>(false)
+    val onlyConfigActive = _onlyConfigActive
+
     init {
         addObservers()
         startFilterTimer()
@@ -244,10 +247,9 @@ class ScannerViewModel @Inject constructor(
             if (configurationOnlyActive(filterCopy?.toList() ?: listOf())) {
                 filterCopy?.let { copy ->
                     for (indc in copy.indices) {
-                        if (filterCopy.get(indc).filterType != FilterType.ONLY_SHOW_CONFIGURATION) {
+                        if (filterCopy.get(indc).filterType == FilterType.ADVANCED_SEARCH || filterCopy.get(indc).filterType == FilterType.HIDE_UNNAMED) {
                             filterCopy.get(indc).enabled = false
                             filterCopy.get(indc).value = filterCopy.get(indc).filterType.getDefaultValue()
-
                         }
                     }
                 }
@@ -255,6 +257,10 @@ class ScannerViewModel @Inject constructor(
 
             _filters.value = listOf()
             _filters.value = filterCopy
+        }
+
+        if (type == FilterType.ONLY_SHOW_CONFIGURATION) {
+            _onlyConfigActive.value = enabled
         }
 
 

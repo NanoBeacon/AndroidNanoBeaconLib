@@ -58,6 +58,7 @@ fun ScannerScreen(
     var refreshing by remember { mutableStateOf(false) }
     val currentDetailBeacon by viewModel.currentDetailBeacon.observeAsState()
     val showDetailModal by viewModel.showDetailModal.observeAsState()
+    val onlyConfigActive by viewModel.onlyConfigActive.observeAsState()
 
     LaunchedEffect(Unit) {
         viewModel.setShowDetailModal(false)
@@ -87,6 +88,7 @@ fun ScannerScreen(
                 viewModel.setCurrentDetailData(it)
                 viewModel.setShowDetailModal(true)
             },
+            onlyConfigActive
         )
         PullRefreshIndicator(refreshing, state, Modifier.align(Alignment.TopCenter))
         DetailViewModal(shouldShow = showDetailModal ?: false, beacon = currentDetailBeacon, onDismiss = {
@@ -108,7 +110,8 @@ private fun ScannerContent(
     onScanButtonClick: () -> Unit,
     onRefreshButtonClick: () -> Unit,
     openFilePickerManager: () -> Unit,
-    setCurrentDetail : (NanoBeaconInterface) -> Unit
+    setCurrentDetail : (NanoBeaconInterface) -> Unit,
+    onlyConfigActive : Boolean?
 ) {
     val scope = rememberCoroutineScope()
     val modalIsOpen = remember { mutableStateOf(true) }
@@ -169,7 +172,8 @@ private fun ScannerContent(
         ExpandableCard(expanded = filterMenuExpanded) {
             FilterView(
                 filters = filters,
-                onFilterChange = onFilterChange
+                onFilterChange = onFilterChange,
+                onlyConfigActive = onlyConfigActive ?: false
             )
         }
 
@@ -326,11 +330,12 @@ fun FilterButton(
 @Composable
 private fun FilterView(
     filters: List<FilterOption>,
-    onFilterChange: (FilterType, Any?, Boolean) -> Unit
+    onFilterChange: (FilterType, Any?, Boolean) -> Unit,
+    onlyConfigActive : Boolean,
 ) {
     Column(Modifier.padding(8.dp)) {
         filters.forEach {
-            FilterCard(filter = it, onFilterChange = onFilterChange)
+            FilterCard(filter = it, onFilterChange = onFilterChange, onlyConfigActive)
         }
     }
 }
@@ -338,14 +343,16 @@ private fun FilterView(
 @Composable
 private fun FilterCard(
     filter: FilterOption,
-    onFilterChange: (FilterType, Any?, Boolean) -> Unit
+    onFilterChange: (FilterType, Any?, Boolean) -> Unit,
+    onlyConfigActive: Boolean
 ) {
     when (filter.filterType.getInputType()) {
         FilterInputType.BINARY -> BinaryFilterCard(
             filter = filter,
             onChange = {
                 onFilterChange(filter.filterType, it, it)
-            }
+            },
+            onlyConfigActive = onlyConfigActive
         )
         FilterInputType.SLIDER -> SliderFilterCard(
             filter = filter,
@@ -357,7 +364,8 @@ private fun FilterCard(
             filter = filter,
             onChange = {
                 onFilterChange(filter.filterType, it, true)
-            }
+            },
+            onlyConfigActive = onlyConfigActive
         )
         FilterInputType.OPTIONS -> GroupedOptionsFilterCard(
             filter = filter,
@@ -371,18 +379,23 @@ private fun FilterCard(
 @Composable
 private fun BinaryFilterCard(
     filter: FilterOption,
-    onChange: (Boolean) -> Unit
+    onChange: (Boolean) -> Unit,
+    onlyConfigActive: Boolean
 ) {
     val checkedState =
         filter.value as? Boolean ?: filter.filterType.getDefaultValue() as? Boolean ?: false
-
+    var labelColor = Color.White
+    if (filter.filterType == FilterType.HIDE_UNNAMED && onlyConfigActive) {
+        labelColor = Color.Gray
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             filter.filterType.getName(),
             modifier = Modifier
-                .weight(1f)
+                .weight(1f),
+            color = labelColor
         )
         Checkbox(
             checked = checkedState,
@@ -401,22 +414,34 @@ private fun BinaryFilterCard(
 @Composable
 private fun SearchFilterCard(
     filter: FilterOption,
-    onChange: (String) -> Unit
+    onChange: (String) -> Unit,
+    onlyConfigActive: Boolean
 ) {
     val value = rememberSaveable { mutableStateOf(filter.value as? String ?: "") }
+    LaunchedEffect(onlyConfigActive) {
+        if (onlyConfigActive) {
+            value.value = ""
+        }
+    }
+    var labelColor = Color.White
+    if (onlyConfigActive) {
+        labelColor = Color.Gray
+    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(filter.filterType.getName()
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            color = labelColor
         )
         FilterTextField(
             modifier = Modifier.weight(3f),
             state = value,
             placeholder = filter.filterType.getPlaceholderName(),
-            onValueChange = onChange
+            onValueChange = { if (!onlyConfigActive) { onChange(it) } else { value.value = ""} },
+            onlyConfigActive = onlyConfigActive
         )
     }
 }
@@ -569,7 +594,8 @@ fun PreviewLogScreen() {
             openFilePickerManager = {
 
             },
-            {}
+            {},
+            false
         )
     }
 }

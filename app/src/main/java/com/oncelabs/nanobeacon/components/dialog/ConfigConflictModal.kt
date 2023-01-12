@@ -6,8 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +22,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.oncelabs.nanobeacon.enums.ConflictItem
 import com.oncelabs.nanobeacon.ui.theme.cardBackground
 import com.oncelabs.nanobeacon.ui.theme.cardTextFont
+import com.oncelabs.nanobeacon.ui.theme.okButtonColor
 
 @Composable
 fun ConfigConflictModal(
@@ -50,7 +54,7 @@ fun ConfigConflictModal(
                                 .fillMaxWidth()
                                 .weight(0.15f)
                                 .padding(3.dp),
-                            text = "Configuration Conflicts",
+                            text = "Configuration Conflict",
                             style = MaterialTheme.typography.h6,
                             color = Color.White,
                             textAlign = TextAlign.Center
@@ -66,11 +70,14 @@ fun ConfigConflictModal(
                         verticalArrangement = Arrangement.Center
                     ) {
                         for (conflict in conflicts) {
-                            Text(
-                                conflict.getMsg(),
-                                color = Color.White,
-                                textAlign = TextAlign.Center
-                            )
+                            Row(Modifier.fillMaxWidth()) {
+                                Icon(Icons.Default.Close, contentDescription = "Conflict Error", tint = Color.Red)
+                                Text(
+                                    conflict.getMsg(),
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
                     Row() {
@@ -79,8 +86,8 @@ fun ConfigConflictModal(
                                 .weight(0.5f)
                                 .clickable { onDismiss() },
                             style = cardTextFont,
-                            color = Color.White,
-                            text = "Cancel",
+                            color = okButtonColor,
+                            text = "Ok",
                             textAlign = TextAlign.Center
                         )
                     }

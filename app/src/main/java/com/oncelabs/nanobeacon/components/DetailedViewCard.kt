@@ -208,15 +208,15 @@ fun DetailedViewCard(beacon: NanoBeaconInterface) {
             )
             Row(Modifier.fillMaxWidth()) {
                 if (bigEndian == true) {
-                    Text("big-endian", style = CustomItemSubFont)
+                    Text("big-endian", style = CustomItemSubFont, color = subLabelColor)
                 } else {
-                    Text("little-endian", style = CustomItemSubFont)
+                    Text("little-endian", style = CustomItemSubFont, color = subLabelColor)
                 }
                 Spacer(Modifier.width(5.dp))
                 if (encrypted == true) {
-                    Text("encrypted", style = CustomItemSubFont)
+                    Text("encrypted", style = CustomItemSubFont, color = subLabelColor)
                 } else {
-                    Text("unencrypted", style = CustomItemSubFont)
+                    Text("unencrypted", style = CustomItemSubFont, color = subLabelColor)
                 }
             }
         }
