@@ -31,7 +31,8 @@ fun FilterTextField(
     state: MutableState<String>,
     placeholder: String,
     trailingIcon: ImageVector = Icons.Default.Close,
-    onValueChange: (String) -> Unit = {}
+    onValueChange: (String) -> Unit = {},
+    onlyConfigActive : Boolean
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -82,7 +83,7 @@ fun FilterTextField(
             backgroundColor = Color.Transparent,
             focusedIndicatorColor =  Color.White,
             unfocusedIndicatorColor = Color.White,
-            disabledIndicatorColor = Color.Transparent
+            disabledIndicatorColor = Color.Transparent,
         )
     )
 }
@@ -94,5 +95,6 @@ fun FilterTextFieldPreviews() {
     FilterTextField(
         state = textState,
         placeholder = "placeholder",
+        onlyConfigActive = false
     )
 }
