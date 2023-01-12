@@ -29,7 +29,7 @@ enum class ConfigAdvConflicts(
         }
     },
         getMsg = { id1, id2 ->
-            "Advertisement sets ${id1} and ${id2} have the same bluetooth address and data set length"
+            "Advertisement sets ${id1.toInt() + 1} and ${id2.toInt() + 1} have the same bluetooth address and data set length"
         }
     ),
     ;
